@@ -1,0 +1,17 @@
+{
+  "name": "RYAZHA AI",
+  "title_id": "0x0100000000001000",
+  "title_id_range_min": "0x0100000000001000",
+  "title_id_range_max": "0x0100000000001FFF",
+  "main_thread_stack_size": "0x100000",
+  "main_thread_priority": 44,
+  "default_cpu_id": 3,
+  "process_category": 0,
+  "is_retail": true,
+  "pool_partition": 2,
+  "is_64_bit": true,
+  "address_space_type": 3,
+  "version": "2.0.0",
+  "author": "Dimasick-git & Ryazha-Helper-01",
+  "description": "Умный AI помощник для Nintendo Switch CFW. Создан командой Ryazhenka специально для Switch комьюнити! Помогает с взломом, настройкой CFW, и отвечает на вопросы о Switch!"
+}
