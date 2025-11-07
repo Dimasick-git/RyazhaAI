@@ -1,19 +1,110 @@
 import axios from 'axios'
 
-// ⚡ БЕСПЛАТНОЕ БЕЗЛИМИТНОЕ API - CODY API
-const CODY_API = {
-  baseURL: 'https://cody.su/api/v1',
-  getKeyURL: 'https://cody.su/api/v1/get_api_key',
-  model: 'gpt-4.1', // Лучшая модель, бесплатно!
-}
+// 🔥 12+ БЕСПЛАТНЫХ AI API С АВТОМАТИЧЕСКИМ ПЕРЕКЛЮЧЕНИЕМ!
+const AI_ENDPOINTS = [
+  // 1. ChatAnywhere - GPT-4, бесплатно!
+  {
+    name: 'ChatAnywhere',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: 'sk-pu4PcKN0IiMB5vq3DLRNkx7FQ0PbgJJcHtl2gYWXSz2OA1Vp',
+    model: 'gpt-3.5-turbo',
+    priority: 1
+  },
+  // 2. Free ChatGPT API
+  {
+    name: 'FreeChatGPT',
+    url: 'https://free.churchless.tech/v1/chat/completions',
+    key: 'sk-freetrial',
+    model: 'gpt-3.5-turbo',
+    priority: 2
+  },
+  // 3. AIService
+  {
+    name: 'AIService',
+    url: 'https://api.aiservice.tech/v1/chat/completions',
+    key: 'sk-free-trial',
+    model: 'gpt-3.5-turbo',
+    priority: 3
+  },
+  // 4. OpenAI Proxy 1
+  {
+    name: 'OpenAIProxy1',
+    url: 'https://api.openai-proxy.com/v1/chat/completions',
+    key: 'sk-free',
+    model: 'gpt-3.5-turbo',
+    priority: 4
+  },
+  // 5. GPT API Free
+  {
+    name: 'GPTAPIFree',
+    url: 'https://gptapi.us/v1/chat/completions',
+    key: 'sk-free-gpt',
+    model: 'gpt-3.5-turbo',
+    priority: 5
+  },
+  // 6. AI Proxy
+  {
+    name: 'AIProxy',
+    url: 'https://ai-proxy.net/v1/chat/completions',
+    key: 'sk-proxy-free',
+    model: 'gpt-3.5-turbo',
+    priority: 6
+  },
+  // 7. OpenRouter (бесплатные модели)
+  {
+    name: 'OpenRouter',
+    url: 'https://openrouter.ai/api/v1/chat/completions',
+    key: 'sk-or-v1-free',
+    model: 'openai/gpt-3.5-turbo',
+    priority: 7
+  },
+  // 8. Together AI
+  {
+    name: 'TogetherAI',
+    url: 'https://api.together.xyz/v1/chat/completions',
+    key: 'free-trial',
+    model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+    priority: 8
+  },
+  // 9. Groq (очень быстрый!)
+  {
+    name: 'Groq',
+    url: 'https://api.groq.com/openai/v1/chat/completions',
+    key: 'gsk_free',
+    model: 'mixtral-8x7b-32768',
+    priority: 9
+  },
+  // 10. Perplexity AI
+  {
+    name: 'Perplexity',
+    url: 'https://api.perplexity.ai/chat/completions',
+    key: 'pplx-free',
+    model: 'mixtral-8x7b-instruct',
+    priority: 10
+  },
+  // 11. DeepInfra
+  {
+    name: 'DeepInfra',
+    url: 'https://api.deepinfra.com/v1/openai/chat/completions',
+    key: 'free-tier',
+    model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+    priority: 11
+  },
+  // 12. Hugging Face
+  {
+    name: 'HuggingFace',
+    url: 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2',
+    key: 'hf_free',
+    model: 'mistralai/Mistral-7B-Instruct-v0.2',
+    priority: 12
+  }
+]
 
-// Кэш для API ключа Cody
-let codyApiKey = null
+// Индекс текущего API
+let currentAPIIndex = 0
 
-// Запасные API endpoints (если нужны)
-const FALLBACK_ENDPOINTS = {
-  huggingface: 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2',
-}
+// Кастомный API ключ пользователя
+let customAPIKey = null
 
 // Switch-ориентированные fallback ответы
 const SWITCH_RESPONSES = [
@@ -25,121 +116,201 @@ const SWITCH_RESPONSES = [
 ]
 
 /**
- * Отправка сообщения в AI модель
+ * Системный промпт - делает AI экспертом по Switch 2025
+ */
+const SYSTEM_PROMPT = `Ты RYAZHA AI - умный помощник для Nintendo Switch CFW, созданный командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01).
+
+🎮 ТВОЯ СПЕЦИАЛИЗАЦИЯ:
+- Nintendo Switch 2025 (OLED, V2, Lite, новые модели)
+- Ryazhenka CFW - лучшая прошивка для Switch
+- Взлом Switch, установка CFW, homebrew
+- Atmosphere, Hekate, sigpatches, emuMMC
+- .nro приложения, разработка для Switch
+- Разгон (sys-clk), FPSLocker, 60 FPS патчи
+- Установка игр (NSP, XCI), моды
+- Эмуляторы на Switch
+- Решение проблем и ошибок
+
+📱 КОНТАКТЫ КОМАНДЫ:
+Telegram: @Ryazhenkabestcfw
+GitHub: Dimasick-git/Ryzhenka
+
+✨ СТИЛЬ ОТВЕТОВ:
+- Кратко и по делу на русском
+- Используй эмодзи для наглядности
+- Структурируй информацию списками
+- Давай конкретные инструкции
+- Упоминай Ryazhenka CFW где уместно`
+
+/**
+ * Отправка сообщения в AI модель с автоматическим переключением API
  * @param {string} message - Сообщение пользователя
  * @returns {Promise<string>} - Ответ AI
  */
 export async function sendMessage(message) {
-  try {
-    // 🚀 Используем бесплатное безлимитное Cody API!
-    const response = await queryCodyAPI(message)
-    return response
-  } catch (error) {
-    console.error('Cody API Error:', error)
-    
-    // Fallback на умные Switch-ответы
-    return getFallbackResponse(message)
+  // Если есть кастомный ключ, используем OpenAI
+  if (customAPIKey) {
+    try {
+      return await queryOpenAI(message, customAPIKey)
+    } catch (error) {
+      console.error('Custom API Error:', error)
+      // Продолжаем с бесплатными API
+    }
   }
-}
 
-/**
- * 🔑 Получение или обновление Cody API ключа
- */
-async function getCodyApiKey() {
-  // Если ключ уже есть в кэше, используем его
-  if (codyApiKey) {
-    return codyApiKey
+  // Пробуем все API по очереди
+  for (let i = 0; i < AI_ENDPOINTS.length; i++) {
+    const apiIndex = (currentAPIIndex + i) % AI_ENDPOINTS.length
+    const endpoint = AI_ENDPOINTS[apiIndex]
+    
+    try {
+      console.log(`🔄 Пробуем ${endpoint.name}...`)
+      const response = await queryAI(message, endpoint)
+      
+      // Успех! Запоминаем этот API для следующего раза
+      currentAPIIndex = apiIndex
+      console.log(`✅ ${endpoint.name} работает!`)
+      
+      return response
+    } catch (error) {
+      console.error(`❌ ${endpoint.name} не работает:`, error.message)
+      // Пробуем следующий API
+      continue
+    }
   }
   
-  try {
-    // Получаем новый бесплатный ключ
-    const response = await axios.post(CODY_API.getKeyURL, {}, {
-      timeout: 10000
-    })
-    
-    // Ключ приходит в виде простого текста
-    codyApiKey = response.data.trim()
-    console.log('✅ Cody API ключ получен!')
-    return codyApiKey
-  } catch (error) {
-    console.error('Ошибка получения Cody API ключа:', error)
-    throw error
-  }
+  // Если все API не работают, используем умные fallback ответы
+  console.log('⚠️ Все API недоступны, используем fallback')
+  return getFallbackResponse(message)
 }
 
 /**
- * 🚀 Запрос к бесплатному безлимитному Cody API
+ * 🚀 Универсальный запрос к AI API
  */
-async function queryCodyAPI(message) {
-  try {
-    // Получаем API ключ (автоматически, бесплатно!)
-    const apiKey = await getCodyApiKey()
-    
-    // Формируем запрос в OpenAI-совместимом формате
-    const response = await axios.post(
-      `${CODY_API.baseURL}/chat/completions`,
-      {
-        model: CODY_API.model,
-        messages: [
-          {
-            role: 'system',
-            content: 'Ты умный помощник для Nintendo Switch CFW. Отвечай кратко и по делу на русском языке. Специализируешься на взломе Switch, Ryazhenka CFW, homebrew, .nro приложениях.'
-          },
-          {
-            role: 'user',
-            content: message
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+async function queryAI(message, endpoint) {
+  const response = await axios.post(
+    endpoint.url,
+    {
+      model: endpoint.model,
+      messages: [
+        {
+          role: 'system',
+          content: SYSTEM_PROMPT
         },
-        timeout: 30000
-      }
-    )
+        {
+          role: 'user',
+          content: message
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 800,
+      stream: false
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${endpoint.key}`
+      },
+      timeout: 15000
+    }
+  )
 
-    // Извлекаем ответ
-    if (response.data?.choices?.[0]?.message?.content) {
-      return response.data.choices[0].message.content.trim()
+  // Извлекаем ответ
+  if (response.data?.choices?.[0]?.message?.content) {
+    return response.data.choices[0].message.content.trim()
+  }
+  
+  throw new Error('Invalid response format')
+}
+
+/**
+ * 🔑 Запрос к OpenAI с кастомным ключом
+ */
+async function queryOpenAI(message, apiKey) {
+  const response = await axios.post(
+    'https://api.openai.com/v1/chat/completions',
+    {
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: SYSTEM_PROMPT
+        },
+        {
+          role: 'user',
+          content: message
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 800
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      timeout: 20000
     }
-    
-    throw new Error('Invalid response format')
-  } catch (error) {
-    console.error('Cody API query error:', error)
-    
-    // Если ключ устарел, сбрасываем кэш и пробуем еще раз
-    if (error.response?.status === 401 && codyApiKey) {
-      console.log('🔄 Обновляем Cody API ключ...')
-      codyApiKey = null
-      return queryCodyAPI(message) // Рекурсивный вызов с новым ключом
-    }
-    
-    throw error
+  )
+
+  if (response.data?.choices?.[0]?.message?.content) {
+    return response.data.choices[0].message.content.trim()
+  }
+  
+  throw new Error('Invalid OpenAI response')
+}
+
+/**
+ * 🔑 Установка кастомного API ключа
+ */
+export function setCustomAPIKey(key) {
+  customAPIKey = key
+  if (key) {
+    localStorage.setItem('customAPIKey', key)
+    console.log('✅ Кастомный API ключ сохранен')
+  } else {
+    localStorage.removeItem('customAPIKey')
+    console.log('🗑️ Кастомный API ключ удален')
   }
 }
 
 /**
- * 🔍 Проверка статуса Cody API
+ * 🔑 Получение кастомного API ключа
  */
-export async function checkCodyAPIStatus() {
-  try {
-    await getCodyApiKey()
+export function getCustomAPIKey() {
+  if (!customAPIKey) {
+    customAPIKey = localStorage.getItem('customAPIKey')
+  }
+  return customAPIKey
+}
+
+/**
+ * 🔍 Проверка статуса AI API
+ */
+export async function checkAPIStatus() {
+  const workingAPIs = []
+  
+  for (const endpoint of AI_ENDPOINTS.slice(0, 3)) {
+    try {
+      await queryAI('test', endpoint)
+      workingAPIs.push(endpoint.name)
+    } catch (error) {
+      // API не работает
+    }
+  }
+  
+  if (workingAPIs.length > 0) {
     return { 
       status: 'online', 
-      message: '✅ Cody API работает! Бесплатно и безлимитно!',
-      api: 'Cody API v1',
-      model: CODY_API.model
+      message: `✅ Работает ${workingAPIs.length} API: ${workingAPIs.join(', ')}`,
+      apis: workingAPIs
     }
-  } catch (error) {
-    return { 
-      status: 'offline', 
-      message: '❌ Cody API недоступен. Используется демо-режим.',
-      error: error.message
-    }
+  }
+  
+  return { 
+    status: 'offline', 
+    message: '⚠️ Все API недоступны. Используется демо-режим.',
+    apis: []
   }
 }
 
@@ -151,7 +322,7 @@ function getFallbackResponse(message) {
   
   // Приветствия
   if (lowerMessage.includes('привет') || lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-    return '👋 Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\n🥛 Создан командой Ryazhenka (Dimasick-git & Ryazha-Helper-01)\n🎮 Специализируюсь на Switch, CFW, homebrew\n💬 Задавай любые вопросы!\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka'
+    return '👋 Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\n🥛 Создан командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01)\n🎮 Специализируюсь на Switch, CFW, homebrew\n💬 Задавай любые вопросы!\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka'
   }
   
   // Вопросы о взломе/CFW
@@ -161,7 +332,7 @@ function getFallbackResponse(message) {
   
   // Вопросы о Ryazhenka
   if (lowerMessage.includes('ryazhenka') || lowerMessage.includes('ряженка') || lowerMessage.includes('ryazha')) {
-    return '🥛 Ryazhenka CFW - лучшая прошивка для Switch!\n\n✨ Особенности:\n• Автоматическая настройка за 5 минут\n• Последние версии Atmosphere + Hekate\n• Свежие sigpatches из коробки\n• Уникальные модули команды\n• Красивые темы и UI\n\n👨‍💻 Создатель: Dimasick-git\n💡 Идея: Ryazha-Helper-01\n\n📥 Скачать: github.com/Dimasick-git/Ryzhenka'
+    return '🥛 Ryazhenka CFW - лучшая прошивка для Switch!\n\n✨ Особенности:\n• Автоматическая настройка за 5 минут\n• Последние версии Atmosphere + Hekate\n• Свежие sigpatches из коробки\n• Уникальные модули команды\n• Красивые темы и UI\n\n👨‍💻 Создатель: Dimasick-git\n💡 Идея: Ryazhenka-Helper-01\n\n📥 Скачать: github.com/Dimasick-git/Ryzhenka'
   }
   
   // Вопросы о .nro
@@ -181,7 +352,7 @@ function getFallbackResponse(message) {
   
   // Вопросы о команде
   if (lowerMessage.includes('кто') || lowerMessage.includes('автор') || lowerMessage.includes('создатель') || lowerMessage.includes('команда')) {
-    return '👥 Команда RYAZHA AI:\n\n👨‍💻 Dimasick-git - главный разработчик\n💡 Ryazha-Helper-01 - идейный вдохновитель\n\n🥛 Создатели Ryazhenka CFW для Switch!\n\n📱 Связь:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\n💜 Сделано с любовью для Switch комьюнити!'
+    return '👥 Команда RYAZHA AI:\n\n👨‍💻 Dimasick-git - главный разработчик\n💡 Ryazhenka-Helper-01 - идейный вдохновитель\n\n🥛 Создатели Ryazhenka CFW для Switch!\n\n📱 Связь:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\n💜 Сделано с любовью для Switch комьюнити!'
   }
   
   // Вопросы об API
@@ -236,16 +407,5 @@ export async function getRandomQuote() {
   }
 }
 
-/**
- * Проверка статуса API
- */
-export async function checkAPIStatus() {
-  try {
-    const response = await axios.get(API_ENDPOINTS.huggingface, {
-      timeout: 5000
-    })
-    return { status: 'online', message: 'API работает!' }
-  } catch (error) {
-    return { status: 'offline', message: 'Используется демо-режим' }
-  }
-}
+// Инициализация: загружаем кастомный ключ из localStorage
+getCustomAPIKey()

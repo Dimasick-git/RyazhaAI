@@ -1,5 +1,9 @@
 # 🥛 RYAZHA AI v2.0.0 - Умный помощник для Nintendo Switch
 
+[![GitHub stars](https://img.shields.io/github/stars/Dimasick-git?style=social)](https://github.com/Dimasick-git)
+[![GitHub followers](https://img.shields.io/github/followers/Dimasick-git?style=social)](https://github.com/Dimasick-git)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 > Современный AI чат-бот с 12+ бесплатными API, созданный командой [Ryazhenka](https://github.com/Dimasick-git/Ryzhenka) специально для Nintendo Switch CFW комьюнити!
 
 ## 🌐 Демо
@@ -154,7 +158,7 @@ AI RYAHA/
 **Создано командой Ryazhenka CFW:**
 
 - 👨‍💻 **Dimasick-git** - главный разработчик, создатель Ryazhenka CFW
-- 💡 **Ryazha-Helper-01** - идейный вдохновитель, первый реализовал идею
+- 💡 **Ryazhenka-Helper-01** - идейный вдохновитель, первый реализовал идею
 
 📱 **Telegram:** [@Ryazhenkabestcfw](https://t.me/Ryazhenkabestcfw)  
 🐙 **GitHub:** [Dimasick-git/Ryzhenka](https://github.com/Dimasick-git/Ryzhenka)

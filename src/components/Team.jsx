@@ -8,15 +8,15 @@ function Team() {
       description: "Создатель Ryazhenka CFW и RYAZHA AI. Основной мейнтейнер проекта, отвечает за разработку и поддержку.",
       github: "Dimasick-git",
       telegram: "Ryazhenkabestcfw",
-      avatar: "👨‍💻",
+      avatarUrl: "https://github.com/Dimasick-git.png",
       gradient: "from-indigo-500 to-purple-500"
     },
     {
-      name: "Ryazha-Helper-01",
+      name: "Ryazhenka-Helper-01",
       role: "Идейный вдохновитель",
       description: "Первый, кто реализовал идею проекта. Помогает с тестированием, идеями и развитием комьюнити.",
-      github: "Ryazha-Helper-01",
-      avatar: "💡",
+      github: "Ryazhenka-Helper-01",
+      avatarUrl: "https://github.com/Ryazhenka-Helper-01.png",
       gradient: "from-purple-500 to-pink-500"
     }
   ]
@@ -47,8 +47,16 @@ function Team() {
             className="bg-ryaha-card rounded-2xl border border-ryaha-border p-8 hover:border-indigo-500/50 transition-all group"
           >
             <div className="flex items-start gap-6">
-              <div className={`text-6xl p-4 rounded-2xl bg-gradient-to-r ${member.gradient} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                {member.avatar}
+              <div className={`w-24 h-24 rounded-2xl bg-gradient-to-r ${member.gradient} p-1 flex-shrink-0 group-hover:scale-110 transition-transform`}>
+                <img 
+                  src={member.avatarUrl} 
+                  alt={member.name}
+                  className="w-full h-full rounded-xl object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none'
+                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-4xl">👨‍💻</div>'
+                  }}
+                />
               </div>
               
               <div className="flex-1">

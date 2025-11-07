@@ -36,7 +36,7 @@ function Footer() {
         
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>🎮 RYAZHA AI - Умный помощник для Nintendo Switch CFW</p>
-          <p className="mt-2">Создано командой Ryazhenka | Dimasick-git & Ryazha-Helper-01</p>
+          <p className="mt-2">Создано командой Ryazhenka | Dimasick-git & Ryazhenka-Helper-01</p>
         </div>
       </div>
     </footer>

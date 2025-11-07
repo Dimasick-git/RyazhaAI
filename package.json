@@ -3,7 +3,7 @@
   "private": true,
   "version": "2.0.0",
   "description": "RYAZHA AI - Умный помощник для Nintendo Switch с CFW",
-  "author": "Dimasick-git & Ryazha-Helper-01",
+  "author": "Dimasick-git & Ryazhenka-Helper-01",
   "type": "module",
   "scripts": {
     "dev": "vite",

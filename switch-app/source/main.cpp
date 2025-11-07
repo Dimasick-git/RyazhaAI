@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     
     printf("\x1b[90m"); // Серый цвет
     printf("  Создано командой Ryazhenka 💜\n");
-    printf("  Dimasick-git & Ryazha-Helper-01\n");
+    printf("  Dimasick-git & Ryazhenka-Helper-01\n");
     printf("  v2.0.0 | github.com/Dimasick-git/Ryzhenka\n");
     printf("\x1b[0m\n");
     
