@@ -56,9 +56,8 @@ int main(int argc, char* argv[])
     printf("  v2.0.0 | github.com/Dimasick-git/Ryzhenka\n");
     printf("\x1b[0m\n");
     
-    // URL сайта AI RYAHA
-    // В продакшне замени на реальный URL после деплоя
-    const char* websiteUrl = "http://localhost:3000";
+    // URL сайта AI RYAHA на GitHub Pages
+    const char* websiteUrl = "https://dimasick-git.github.io/RyazhaAI";
     
     printf("\n\x1b[37m  Нажми [A] для запуска...\x1b[0m\n");
     
