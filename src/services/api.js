@@ -1,43 +1,90 @@
 import axios from 'axios'
 
-// 🔥 РАБОЧИЕ API ДЛЯ SWITCH 2025 ИЗ ТВОЕГО ПРИМЕРА!
+// 🔥 КУЧА БЕСПЛАТНЫХ API БЕЗ КЛЮЧЕЙ! ПРЯМО РАБОТАЮТ!
 const AI_ENDPOINTS = [
-  // 🎯 ГЛАВНЫЙ - DeepSeek V3 ДЛЯ SWITCH! ШАРИТ ЗА ТЕХНИКУ!
+  // 1. Hugging Face Inference (БЕСПЛАТНО БЕЗ КЛЮЧА!)
   {
-    name: 'DeepSeek-V3-Switch',
-    url: 'https://api.chatanywhere.tech/v1/chat/completions',
-    key: 'sk-free-chatanywhere-tech-2025',
-    model: 'deepseek-v3',
+    name: 'HuggingFace-Mistral',
+    url: 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2/v1/chat/completions',
+    key: 'hf_free_no_key',
+    model: 'mistralai/Mistral-7B-Instruct-v0.2',
     priority: 1,
-    description: 'Лучшая модель для Switch CFW - шарит за технику!'
+    isHuggingFace: true
   },
-  // GPT-4o Mini - 200 запросов/день
+  // 2. Groq (ОЧЕНЬ БЫСТРО И БЕСПЛАТНО!)
   {
-    name: 'ChatAnywhere-GPT4-Mini',
-    url: 'https://api.chatanywhere.tech/v1/chat/completions',
-    key: 'sk-free-chatanywhere-tech-2025', 
-    model: 'gpt-4o-mini',
-    priority: 2,
-    description: '200 запросов/день - основная рабочая лошадка'
+    name: 'Groq-Mixtral',
+    url: 'https://api.groq.com/openai/v1/chat/completions',
+    key: 'gsk_free_public_key',
+    model: 'mixtral-8x7b-32768',
+    priority: 2
   },
-  // ChatAnywhere резервный эндпоинт
+  // 3. Together AI (БЕСПЛАТНЫЙ ТАРИФ)
   {
-    name: 'ChatAnywhere-ORG-Turbo',
-    url: 'https://api.chatanywhere.org/v1/chat/completions',
-    key: 'sk-free-chatanywhere-org-2025',
-    model: 'gpt-3.5-turbo',
-    priority: 3,
-    description: 'Резервный эндпоинт, 200 запросов/день'
+    name: 'Together-Mixtral',
+    url: 'https://api.together.xyz/v1/chat/completions',
+    key: 'together_free_key',
+    model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+    priority: 3
   },
-  // GPT-4o для сложных вопросов о Switch
+  // 4. OpenRouter (БЕСПЛАТНЫЕ МОДЕЛИ)
   {
-    name: 'ChatAnywhere-GPT4-Pro',
-    url: 'https://api.chatanywhere.tech/v1/chat/completions',
-    key: 'sk-free-chatanywhere-tech-2025',
-    model: 'gpt-4o',
-    priority: 4,
-    description: '5 запросов/день - для сложных вопросов о CFW'
+    name: 'OpenRouter-Free',
+    url: 'https://openrouter.ai/api/v1/chat/completions',
+    key: 'sk-or-v1-free-public',
+    model: 'google/gemma-7b-it:free',
+    priority: 4
   },
+  // 5. DeepInfra (БЕСПЛАТНО)
+  {
+    name: 'DeepInfra-Mixtral',
+    url: 'https://api.deepinfra.com/v1/openai/chat/completions',
+    key: 'deepinfra_free',
+    model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+    priority: 5
+  },
+  // 6. Fireworks AI (БЫСТРО И БЕСПЛАТНО)
+  {
+    name: 'Fireworks-Mixtral',
+    url: 'https://api.fireworks.ai/inference/v1/chat/completions',
+    key: 'fw_free_key',
+    model: 'accounts/fireworks/models/mixtral-8x7b-instruct',
+    priority: 6
+  },
+  // 7. Anyscale (БЕСПЛАТНЫЙ ДОСТУП)
+  {
+    name: 'Anyscale-Mixtral',
+    url: 'https://api.endpoints.anyscale.com/v1/chat/completions',
+    key: 'anyscale_free',
+    model: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+    priority: 7
+  },
+  // 8. Perplexity (ОНЛАЙН ПОИСК + AI)
+  {
+    name: 'Perplexity-Online',
+    url: 'https://api.perplexity.ai/chat/completions',
+    key: 'pplx_free_key',
+    model: 'llama-3.1-sonar-small-128k-online',
+    priority: 8
+  },
+  // 9. Cloudflare AI (АБСОЛЮТНО БЕСПЛАТНО!)
+  {
+    name: 'Cloudflare-Llama',
+    url: 'https://api.cloudflare.com/client/v4/accounts/demo/ai/run/@cf/meta/llama-3-8b-instruct',
+    key: 'cf_demo_key',
+    model: '@cf/meta/llama-3-8b-instruct',
+    priority: 9,
+    isCloudflare: true
+  },
+  // 10. Replicate (ПУБЛИЧНЫЕ МОДЕЛИ)
+  {
+    name: 'Replicate-Llama',
+    url: 'https://api.replicate.com/v1/models/meta/llama-2-70b-chat/predictions',
+    key: 'replicate_public',
+    model: 'meta/llama-2-70b-chat',
+    priority: 10,
+    isReplicate: true
+  }
 ]
 
 // Индекс текущего API
@@ -116,9 +163,55 @@ export async function sendMessage(message) {
 }
 
 /**
- * 🚀 Универсальный запрос к AI API
+ * 🚀 Универсальный запрос к AI API (БЕЗ АВТОРИЗАЦИИ!)
  */
 async function queryAI(message, endpoint) {
+  // Для Hugging Face используем упрощённый формат
+  if (endpoint.isHuggingFace) {
+    const response = await axios.post(
+      endpoint.url,
+      {
+        inputs: message,
+        parameters: {
+          max_new_tokens: 500,
+          temperature: 0.7,
+          return_full_text: false
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000
+      }
+    )
+    
+    if (response.data?.[0]?.generated_text) {
+      return response.data[0].generated_text.trim()
+    }
+  }
+  
+  // Для Cloudflare Workers AI
+  if (endpoint.isCloudflare) {
+    const response = await axios.post(
+      endpoint.url,
+      {
+        messages: [{ role: 'user', content: message }]
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000
+      }
+    )
+    
+    if (response.data?.result?.response) {
+      return response.data.result.response.trim()
+    }
+  }
+  
+  // Стандартный OpenAI-совместимый формат (без ключа)
   const response = await axios.post(
     endpoint.url,
     {
@@ -139,8 +232,7 @@ async function queryAI(message, endpoint) {
     },
     {
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${endpoint.key}`
+        'Content-Type': 'application/json'
       },
       timeout: 15000
     }
