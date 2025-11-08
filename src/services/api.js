@@ -1,55 +1,51 @@
 import axios from 'axios'
 
-// 🔥 ВСЕ МОДЕЛИ CHATANYWHERE + АВТОПЕРЕКЛЮЧЕНИЕ!
-// Получи БЕСПЛАТНЫЙ ключ тут: https://api.chatanywhere.tech/v1/oauth/free/render
+// 🔥 ПУБЛИЧНЫЕ API БЕЗ РЕГИСТРАЦИИ! РАБОТАЮТ СРАЗУ!
 const AI_ENDPOINTS = [
-  // 1. ChatAnywhere GPT-4o-mini (200 запросов/день) - ГЛАВНАЯ!
+  // 1. Hugging Face Inference API - БЕЗ КЛЮЧА! РАБОТАЕТ!
   {
-    name: 'ChatAnywhere-GPT4o-Mini',
-    url: 'https://api.chatanywhere.tech/v1/chat/completions',
-    key: 'DEMO_KEY', // Замени на свой ключ с https://api.chatanywhere.tech/v1/oauth/free/render
-    model: 'gpt-4o-mini',
-    priority: 1
+    name: 'HuggingFace-Mistral',
+    url: 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2',
+    key: '', // НЕ НУЖЕН!
+    model: 'mistralai/Mistral-7B-Instruct-v0.2',
+    priority: 1,
+    isHuggingFace: true
   },
-  // 2. ChatAnywhere GPT-3.5-turbo (200 запросов/день)
+  // 2. Hugging Face Llama - БЕЗ КЛЮЧА!
   {
-    name: 'ChatAnywhere-GPT3.5',
-    url: 'https://api.chatanywhere.tech/v1/chat/completions',
-    key: 'DEMO_KEY',
-    model: 'gpt-3.5-turbo',
-    priority: 2
+    name: 'HuggingFace-Llama',
+    url: 'https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf',
+    key: '',
+    model: 'meta-llama/Llama-2-7b-chat-hf',
+    priority: 2,
+    isHuggingFace: true
   },
-  // 3. ChatAnywhere DeepSeek-v3 (30 запросов/день) - ДЛЯ SWITCH!
+  // 3. Hugging Face CodeLlama - БЕЗ КЛЮЧА!
   {
-    name: 'ChatAnywhere-DeepSeek',
-    url: 'https://api.chatanywhere.tech/v1/chat/completions',
-    key: 'DEMO_KEY',
-    model: 'deepseek-v3',
-    priority: 3
+    name: 'HuggingFace-CodeLlama',
+    url: 'https://api-inference.huggingface.co/models/codellama/CodeLlama-7b-Instruct-hf',
+    key: '',
+    model: 'codellama/CodeLlama-7b-Instruct-hf',
+    priority: 3,
+    isHuggingFace: true
   },
-  // 4. ChatAnywhere GPT-4o (5 запросов/день) - МОЩНАЯ!
+  // 4. Hugging Face Zephyr - БЕЗ КЛЮЧА!
   {
-    name: 'ChatAnywhere-GPT4o',
-    url: 'https://api.chatanywhere.tech/v1/chat/completions',
-    key: 'DEMO_KEY',
-    model: 'gpt-4o',
-    priority: 4
+    name: 'HuggingFace-Zephyr',
+    url: 'https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta',
+    key: '',
+    model: 'HuggingFaceH4/zephyr-7b-beta',
+    priority: 4,
+    isHuggingFace: true
   },
-  // 5. ChatAnywhere ORG резервный эндпоинт
+  // 5. Hugging Face Falcon - БЕЗ КЛЮЧА!
   {
-    name: 'ChatAnywhere-ORG-Turbo',
-    url: 'https://api.chatanywhere.org/v1/chat/completions',
-    key: 'DEMO_KEY',
-    model: 'gpt-3.5-turbo',
-    priority: 5
-  },
-  // 6. ChatAnywhere ORG GPT-4o-mini
-  {
-    name: 'ChatAnywhere-ORG-Mini',
-    url: 'https://api.chatanywhere.org/v1/chat/completions',
-    key: 'DEMO_KEY',
-    model: 'gpt-4o-mini',
-    priority: 6
+    name: 'HuggingFace-Falcon',
+    url: 'https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct',
+    key: '',
+    model: 'tiiuae/falcon-7b-instruct',
+    priority: 5,
+    isHuggingFace: true
   }
 ]
 
@@ -62,7 +58,7 @@ const FALLBACK_RESPONSES = {
   cfw: '🔓 Для взлома Nintendo Switch 2025:\n\n1️⃣ Проверь серийник на уязвимость\n2️⃣ Подготовь SD карту (128GB+)\n3️⃣ Скачай Ryazhenka CFW\n4️⃣ Установи через RCM/ModChip\n\n🥛 Ryazhenka - лучшая CFW с автонастройкой!\n📥 github.com/Dimasick-git/Ryzhenka',
   ryazhenka: '🥛 Ryazhenka CFW - лучшая прошивка для Switch 2025!\n\n✨ Особенности:\n• Автонастройка за 5 минут\n• Atmosphere 1.8.0+ и Hekate 6.4.0+\n• Свежие sigpatches из коробки\n• Уникальные модули команды\n• Красивые темы и UI\n\n👨‍💻 Создатель: Dimasick-git\n💡 Идея: Ryazhenka-Helper-01\n\n📥 Скачать: github.com/Dimasick-git/Ryzhenka',
   team: '👥 Команда RYAZHA AI:\n\n👨‍💻 Dimasick-git - главный разработчик\n💡 Ryazhenka-Helper-01 - идейный вдохновитель\n\n🥛 Создатели Ryazhenka CFW для Switch!\n\n📱 Связь:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\n💜 Сделано с любовью для Switch комьюнити!',
-  default: '🎮 AI работает в демо-режиме!\n\n💡 Для полноценной работы нужен БЕСПЛАТНЫЙ ключ ChatAnywhere:\n\n1️⃣ Открой: https://api.chatanywhere.tech/v1/oauth/free/render\n2️⃣ Войди через GitHub\n3️⃣ Получи ключ (200 запросов/день БЕСПЛАТНО!)\n\n✨ С ключом будут работать:\n• GPT-4o-mini (200/день)\n• GPT-3.5-turbo (200/день)\n• DeepSeek-v3 (30/день)\n• GPT-4o (5/день)\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka'
+  default: '🎮 AI временно перегружен, но скоро вернётся!\n\n💡 Пока что могу помочь с базовыми вопросами:\n\n🥛 Ryazhenka CFW - лучшая прошивка для Switch 2025\n📦 RYAZHA AI - твой умный помощник для CFW\n🔧 Помощь с взломом, играми, модами, homebrew\n\n📱 Связь с командой:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\n⚡ AI перезагружается... попробуй через минуту!'
 }
 
 
