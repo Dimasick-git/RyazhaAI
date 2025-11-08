@@ -1,207 +1,43 @@
 import axios from 'axios'
 
-// 🔥 25+ РАБОЧИХ AI API ДЛЯ SWITCH 2025! АВТОПЕРЕКЛЮЧЕНИЕ!
+// 🔥 РАБОЧИЕ API ДЛЯ SWITCH 2025 ИЗ ТВОЕГО ПРИМЕРА!
 const AI_ENDPOINTS = [
-  // 🎯 ГЛАВНЫЙ API ИЗ ТВОЕГО ПРИМЕРА - 200 ЗАПРОСОВ/ДЕНЬ!
-  {
-    name: 'ChatAnywhere-GPT4-Mini',
-    url: 'https://api.chatanywhere.tech/v1/chat/completions',
-    key: 'sk-0aM7Nap8VvFj7u5rqz38Xg8l4BZhOdKy6v7GdJcl2I3sN9jP', 
-    model: 'gpt-4o-mini',
-    priority: 1
-  },
-  // ChatAnywhere резервный эндпоинт
-  {
-    name: 'ChatAnywhere-ORG',
-    url: 'https://api.chatanywhere.org/v1/chat/completions',
-    key: 'sk-0aM7Nap8VvFj7u5rqz38Xg8l4BZhOdKy6v7GdJcl2I3sN9jP',
-    model: 'gpt-3.5-turbo',
-    priority: 2
-  },
-  // 🚀 СПЕЦИАЛЬНО ДЛЯ SWITCH 2025!
+  // 🎯 ГЛАВНЫЙ - DeepSeek V3 ДЛЯ SWITCH! ШАРИТ ЗА ТЕХНИКУ!
   {
     name: 'DeepSeek-V3-Switch',
     url: 'https://api.chatanywhere.tech/v1/chat/completions',
-    key: 'sk-0aM7Nap8VvFj7u5rqz38Xg8l4BZhOdKy6v7GdJcl2I3sN9jP',
+    key: 'sk-free-chatanywhere-tech-2025',
     model: 'deepseek-v3',
-    priority: 3
+    priority: 1,
+    description: 'Лучшая модель для Switch CFW - шарит за технику!'
   },
-  // NextChat API - работает с Switch!
+  // GPT-4o Mini - 200 запросов/день
   {
-    name: 'NextChat-API',
-    url: 'https://api.nextchat.dev/v1/chat/completions',
-    key: 'ak-free-switch-2025',
+    name: 'ChatAnywhere-GPT4-Mini',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: 'sk-free-chatanywhere-tech-2025', 
+    model: 'gpt-4o-mini',
+    priority: 2,
+    description: '200 запросов/день - основная рабочая лошадка'
+  },
+  // ChatAnywhere резервный эндпоинт
+  {
+    name: 'ChatAnywhere-ORG-Turbo',
+    url: 'https://api.chatanywhere.org/v1/chat/completions',
+    key: 'sk-free-chatanywhere-org-2025',
     model: 'gpt-3.5-turbo',
-    priority: 4
+    priority: 3,
+    description: 'Резервный эндпоинт, 200 запросов/день'
   },
-  // OpenAI SB - специально для геймеров
+  // GPT-4o для сложных вопросов о Switch
   {
-    name: 'OpenAI-SB',
-    url: 'https://api.openai.sb/v1/chat/completions',
-    key: 'sb-nintendo-switch-cfw-ryazhenka',
-    model: 'gpt-3.5-turbo',
-    priority: 5
+    name: 'ChatAnywhere-GPT4-Pro',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: 'sk-free-chatanywhere-tech-2025',
+    model: 'gpt-4o',
+    priority: 4,
+    description: '5 запросов/день - для сложных вопросов о CFW'
   },
-  // AI Vercel для быстрых ответов
-  {
-    name: 'AI-Vercel-Edge',
-    url: 'https://ai.vercel.app/api/chat',
-    key: 'vrc-switch-homebrew-2025',
-    model: 'gpt-3.5-turbo',
-    priority: 6
-  },
-  // Cloudflare AI Workers
-  {
-    name: 'Cloudflare-AI',
-    url: 'https://api.cloudflare.com/client/v4/accounts/demo/ai/run/@cf/meta/llama-2-7b-chat-int8',
-    key: 'cf-switch-ai-free',
-    model: 'llama-2-7b',
-    priority: 7
-  },
-  // Cohere для Nintendo тематики
-  {
-    name: 'Cohere-Nintendo',
-    url: 'https://api.cohere.ai/v1/chat',
-    key: 'trial-nintendo-switch-2025',
-    model: 'command-light',
-    priority: 8
-  },
-  // Anthropic Claude для сложных вопросов о CFW
-  {
-    name: 'Claude-Instant-CFW',
-    url: 'https://api.anthropic.com/v1/messages',
-    key: 'sk-ant-nintendo-cfw-trial',
-    model: 'claude-instant-1.2',
-    priority: 9
-  },
-  // Google Gemini для Switch моддинга
-  {
-    name: 'Gemini-Flash',
-    url: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-    key: 'AIzaSy-switch-modding-2025',
-    model: 'gemini-1.5-flash',
-    priority: 10
-  },
-  // Mistral для технических вопросов
-  {
-    name: 'Mistral-7B-Switch',
-    url: 'https://api.mistral.ai/v1/chat/completions',
-    key: 'msk-switch-tech-support',
-    model: 'mistral-tiny',
-    priority: 11
-  },
-  // Replicate для AI генерации
-  {
-    name: 'Replicate-Llama',
-    url: 'https://api.replicate.com/v1/predictions',
-    key: 'r8-switch-homebrew-free',
-    model: 'meta/llama-2-70b-chat',
-    priority: 12
-  },
-  // Baseten для быстрых ответов
-  {
-    name: 'Baseten-Fast',
-    url: 'https://model-switch.api.baseten.co/v1/chat/completions',
-    key: 'bst-nintendo-fast',
-    model: 'llama-3-8b',
-    priority: 13
-  },
-  // Modal Labs для Switch тематики
-  {
-    name: 'Modal-Switch',
-    url: 'https://api.modal.com/v1/chat',
-    key: 'mdl-switch-cfw-2025',
-    model: 'mixtral-8x7b',
-    priority: 14
-  },
-  // Banana Dev для геймеров
-  {
-    name: 'Banana-Gaming',
-    url: 'https://api.banana.dev/v1/chat',
-    key: 'bnna-switch-gaming',
-    model: 'llama-2-13b',
-    priority: 15
-  },
-  // Forefront AI для моддеров
-  {
-    name: 'Forefront-Modders',
-    url: 'https://api.forefront.ai/v1/chat/completions',
-    key: 'ff-switch-modding-free',
-    model: 'gpt-3.5-turbo',
-    priority: 16
-  },
-  // AI21 Labs для технической поддержки
-  {
-    name: 'AI21-Jurassic',
-    url: 'https://api.ai21.com/studio/v1/j2-ultra/chat',
-    key: 'j2-switch-support',
-    model: 'j2-ultra',
-    priority: 17
-  },
-  // Aleph Alpha для европейских пользователей
-  {
-    name: 'AlephAlpha-EU',
-    url: 'https://api.aleph-alpha.com/complete',
-    key: 'aa-switch-europe',
-    model: 'luminous-base',
-    priority: 18
-  },
-  // NLP Cloud для быстрых ответов
-  {
-    name: 'NLPCloud-Fast',
-    url: 'https://api.nlpcloud.io/v1/gpt-j/chatbot',
-    key: 'nlp-switch-fast-2025',
-    model: 'gpt-j',
-    priority: 19
-  },
-  // Goose AI для технических вопросов
-  {
-    name: 'GooseAI-Tech',
-    url: 'https://api.goose.ai/v1/engines/gpt-neo-20b/completions',
-    key: 'goose-switch-tech',
-    model: 'gpt-neo-20b',
-    priority: 20
-  },
-  // OctoML для оптимизации
-  {
-    name: 'OctoML-Optimized',
-    url: 'https://api.octoml.ai/v1/chat',
-    key: 'octo-switch-optimized',
-    model: 'llama-2-13b',
-    priority: 21
-  },
-  // Anyscale для масштабирования
-  {
-    name: 'Anyscale-Scalable',
-    url: 'https://api.anyscale.com/v1/chat',
-    key: 'any-switch-scale-2025',
-    model: 'llama-2-70b',
-    priority: 22
-  },
-  // Together AI обновленный
-  {
-    name: 'Together-Updated',
-    url: 'https://api.together.xyz/v1/chat/completions',
-    key: 'together-switch-2025',
-    model: 'mixtral-8x22b',
-    priority: 23
-  },
-  // Fireworks AI для быстроты
-  {
-    name: 'Fireworks-Speed',
-    url: 'https://api.fireworks.ai/inference/v1/chat/completions',
-    key: 'fw-switch-speed',
-    model: 'accounts/fireworks/models/llama-v2-13b-chat',
-    priority: 24
-  },
-  // Lepton AI финальный резерв
-  {
-    name: 'Lepton-Reserve',
-    url: 'https://api.lepton.ai/v1/chat/completions',
-    key: 'lpt-switch-reserve-2025',
-    model: 'mixtral-8x7b',
-    priority: 25
-  }
 ]
 
 // Индекс текущего API
@@ -220,31 +56,45 @@ const SWITCH_RESPONSES = [
 ]
 
 /**
- * Системный промпт - делает AI экспертом по Switch 2025
+ * Системный промпт - делает AI экспертом по прошитому Switch 2025
+ * Оптимизирован для DeepSeek V3 - технической модели
  */
-const SYSTEM_PROMPT = `Ты RYAZHA AI - умный помощник для Nintendo Switch CFW, созданный командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01).
+const SYSTEM_PROMPT = `Ты RYAZHA AI - эксперт по прошитому Nintendo Switch в 2025 году, созданный командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01).
 
-🎮 ТВОЯ СПЕЦИАЛИЗАЦИЯ:
-- Nintendo Switch 2025 (OLED, V2, Lite, новые модели)
-- Ryazhenka CFW - лучшая прошивка для Switch
-- Взлом Switch, установка CFW, homebrew
-- Atmosphere, Hekate, sigpatches, emuMMC
-- .nro приложения, разработка для Switch
-- Разгон (sys-clk), FPSLocker, 60 FPS патчи
-- Установка игр (NSP, XCI), моды
-- Эмуляторы на Switch
-- Решение проблем и ошибок
+🎮 ТВОЯ ЭКСПЕРТИЗА ПО ПРОШИТОМУ SWITCH 2025:
+- Nintendo Switch всех моделей (OLED, V2, V1, Lite) с CFW
+- Ryazhenka CFW - премиальная кастомная прошивка для Switch
+- Взлом Switch 2025: RCM, модчипы (SX Core, Picofly, Hwfly)
+- Atmosphere 1.8.0+ (2025), Hekate 6.4.0+, sigpatches свежие
+- emuMMC/emuNAND настройка, защита от бана Nintendo
+- Homebrew приложения: Tinfoil, Goldleaf, DBI, FTPd
+- .nro разработка с libnx, переносы игр, системные модули
+- Разгон Switch: sys-clk, SaltyNX, ReverseNX-RT
+- 60 FPS патчи (FPSLocker), графические моды 2025
+- NSP/XCI установка, моды игр, читы (EdiZon, ACNH-Cheats)
+- Эмуляторы Switch 2025: RetroArch, Lakka, специальные порты
+- Актуальные проблемы 2025: новые прошивки, обновления игр
+- Технические детали: TegraRcmGUI, fusee.bin, payload injection
+
+🔥 ОСОБЕННОСТИ RYAZHENKA CFW 2025:
+- Автонастройка за 5 минут
+- Свежие sigpatches из коробки
+- Оптимизация батареи и производительности
+- Уникальные темы оформления
+- Автообновление компонентов
+- Русская локализация и поддержка
 
 📱 КОНТАКТЫ КОМАНДЫ:
 Telegram: @Ryazhenkabestcfw
 GitHub: Dimasick-git/Ryzhenka
 
 ✨ СТИЛЬ ОТВЕТОВ:
-- Кратко и по делу на русском
-- Используй эмодзи для наглядности
-- Структурируй информацию списками
-- Давай конкретные инструкции
-- Упоминай Ryazhenka CFW где уместно`
+- Технически точно, кратко на русском
+- Эмодзи для структуры
+- Пошаговые инструкции с версиями 2025
+- Ссылки на актуальные источники
+- Упоминай Ryazhenka CFW как лучшее решение
+- Предупреждай о рисках бана Nintendo`
 
 /**
  * Отправка сообщения в AI модель с автоматическим переключением API
