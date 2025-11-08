@@ -43,17 +43,6 @@ const AI_ENDPOINTS = [
 // Индекс текущего API
 let currentAPIIndex = 0
 
-// Кастомный API ключ пользователя
-let customAPIKey = null
-
-// Switch-ориентированные fallback ответы
-const SWITCH_RESPONSES = [
-  '🎮 Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW! Создан командой Ryazhenka специально для тебя!',
-  '🥛 Я специализируюсь на вопросах о Nintendo Switch, CFW, Ryazhenka, homebrew и .nro приложениях!',
-  '💡 Могу помочь с установкой CFW, взломом Switch, настройкой Atmosphere, и многим другим!',
-  '🚀 Работаю на бесплатных AI моделях и доступен прямо на твоем Switch через .nro приложение!',
-  '✨ Спроси меня о Ryazhenka CFW, sigpatches, emuMMC, или любых Switch темах!'
-]
 
 /**
  * Системный промпт - делает AI экспертом по прошитому Switch 2025
@@ -102,23 +91,13 @@ GitHub: Dimasick-git/Ryzhenka
  * @returns {Promise<string>} - Ответ AI
  */
 export async function sendMessage(message) {
-  // Если есть кастомный ключ, используем OpenAI
-  if (customAPIKey) {
-    try {
-      return await queryOpenAI(message, customAPIKey)
-    } catch (error) {
-      console.error('Custom API Error:', error)
-      // Продолжаем с бесплатными API
-    }
-  }
-
   // Пробуем все API по очереди
   for (let i = 0; i < AI_ENDPOINTS.length; i++) {
     const apiIndex = (currentAPIIndex + i) % AI_ENDPOINTS.length
     const endpoint = AI_ENDPOINTS[apiIndex]
     
     try {
-      console.log(`🔄 Пробуем ${endpoint.name}...`)
+      console.log(`🔄 Пробуем ${endpoint.name} (${endpoint.model})...`)
       const response = await queryAI(message, endpoint)
       
       // Успех! Запоминаем этот API для следующего раза
@@ -127,15 +106,13 @@ export async function sendMessage(message) {
       
       return response
     } catch (error) {
-      console.error(`❌ ${endpoint.name} не работает:`, error.message)
-      // Пробуем следующий API
-      continue
+      console.error(`❌ ${endpoint.name} ошибка:`, error.message)
+      // Продолжаем со следующим API
     }
   }
   
-  // Если все API не работают, используем умные fallback ответы
-  console.log('⚠️ Все API недоступны, используем fallback')
-  return getFallbackResponse(message)
+  // Если все API не работают, показываем ошибку
+  throw new Error('❌ Все API недоступны. Попробуйте позже.')
 }
 
 /**
@@ -177,66 +154,6 @@ async function queryAI(message, endpoint) {
   throw new Error('Invalid response format')
 }
 
-/**
- * 🔑 Запрос к OpenAI с кастомным ключом
- */
-async function queryOpenAI(message, apiKey) {
-  const response = await axios.post(
-    'https://api.openai.com/v1/chat/completions',
-    {
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: SYSTEM_PROMPT
-        },
-        {
-          role: 'user',
-          content: message
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 800
-    },
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      timeout: 20000
-    }
-  )
-
-  if (response.data?.choices?.[0]?.message?.content) {
-    return response.data.choices[0].message.content.trim()
-  }
-  
-  throw new Error('Invalid OpenAI response')
-}
-
-/**
- * 🔑 Установка кастомного API ключа
- */
-export function setCustomAPIKey(key) {
-  customAPIKey = key
-  if (key) {
-    localStorage.setItem('customAPIKey', key)
-    console.log('✅ Кастомный API ключ сохранен')
-  } else {
-    localStorage.removeItem('customAPIKey')
-    console.log('🗑️ Кастомный API ключ удален')
-  }
-}
-
-/**
- * 🔑 Получение кастомного API ключа
- */
-export function getCustomAPIKey() {
-  if (!customAPIKey) {
-    customAPIKey = localStorage.getItem('customAPIKey')
-  }
-  return customAPIKey
-}
 
 /**
  * 🔍 Проверка статуса AI API
