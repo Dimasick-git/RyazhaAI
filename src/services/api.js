@@ -1,8 +1,56 @@
 import axios from 'axios'
 
-// 🔥 РАБОЧИЕ БЕСПЛАТНЫЕ API + АВТОПЕРЕКЛЮЧЕНИЕ!
+// 🔥 ВСЕ МОДЕЛИ CHATANYWHERE + АВТОПЕРЕКЛЮЧЕНИЕ!
+// Получи БЕСПЛАТНЫЙ ключ тут: https://api.chatanywhere.tech/v1/oauth/free/render
 const AI_ENDPOINTS = [
-  // Публичные демо API которые точно работают БЕЗ ключей
+  // 1. ChatAnywhere GPT-4o-mini (200 запросов/день) - ГЛАВНАЯ!
+  {
+    name: 'ChatAnywhere-GPT4o-Mini',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: 'DEMO_KEY', // Замени на свой ключ с https://api.chatanywhere.tech/v1/oauth/free/render
+    model: 'gpt-4o-mini',
+    priority: 1
+  },
+  // 2. ChatAnywhere GPT-3.5-turbo (200 запросов/день)
+  {
+    name: 'ChatAnywhere-GPT3.5',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: 'DEMO_KEY',
+    model: 'gpt-3.5-turbo',
+    priority: 2
+  },
+  // 3. ChatAnywhere DeepSeek-v3 (30 запросов/день) - ДЛЯ SWITCH!
+  {
+    name: 'ChatAnywhere-DeepSeek',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: 'DEMO_KEY',
+    model: 'deepseek-v3',
+    priority: 3
+  },
+  // 4. ChatAnywhere GPT-4o (5 запросов/день) - МОЩНАЯ!
+  {
+    name: 'ChatAnywhere-GPT4o',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: 'DEMO_KEY',
+    model: 'gpt-4o',
+    priority: 4
+  },
+  // 5. ChatAnywhere ORG резервный эндпоинт
+  {
+    name: 'ChatAnywhere-ORG-Turbo',
+    url: 'https://api.chatanywhere.org/v1/chat/completions',
+    key: 'DEMO_KEY',
+    model: 'gpt-3.5-turbo',
+    priority: 5
+  },
+  // 6. ChatAnywhere ORG GPT-4o-mini
+  {
+    name: 'ChatAnywhere-ORG-Mini',
+    url: 'https://api.chatanywhere.org/v1/chat/completions',
+    key: 'DEMO_KEY',
+    model: 'gpt-4o-mini',
+    priority: 6
+  }
 ]
 
 // Индекс текущего API
@@ -14,7 +62,7 @@ const FALLBACK_RESPONSES = {
   cfw: '🔓 Для взлома Nintendo Switch 2025:\n\n1️⃣ Проверь серийник на уязвимость\n2️⃣ Подготовь SD карту (128GB+)\n3️⃣ Скачай Ryazhenka CFW\n4️⃣ Установи через RCM/ModChip\n\n🥛 Ryazhenka - лучшая CFW с автонастройкой!\n📥 github.com/Dimasick-git/Ryzhenka',
   ryazhenka: '🥛 Ryazhenka CFW - лучшая прошивка для Switch 2025!\n\n✨ Особенности:\n• Автонастройка за 5 минут\n• Atmosphere 1.8.0+ и Hekate 6.4.0+\n• Свежие sigpatches из коробки\n• Уникальные модули команды\n• Красивые темы и UI\n\n👨‍💻 Создатель: Dimasick-git\n💡 Идея: Ryazhenka-Helper-01\n\n📥 Скачать: github.com/Dimasick-git/Ryzhenka',
   team: '👥 Команда RYAZHA AI:\n\n👨‍💻 Dimasick-git - главный разработчик\n💡 Ryazhenka-Helper-01 - идейный вдохновитель\n\n🥛 Создатели Ryazhenka CFW для Switch!\n\n📱 Связь:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\n💜 Сделано с любовью для Switch комьюнити!',
-  default: '🎮 Извини, AI временно недоступен!\n\n💡 Но я могу дать базовую информацию:\n\n🥛 Ryazhenka CFW - лучшая прошивка для Switch\n📦 RYAZHA AI - умный помощник для CFW\n🔧 Помощь с взломом, играми, модами\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka\n\n⚠️ AI вернётся через несколько минут!'
+  default: '🎮 AI работает в демо-режиме!\n\n💡 Для полноценной работы нужен БЕСПЛАТНЫЙ ключ ChatAnywhere:\n\n1️⃣ Открой: https://api.chatanywhere.tech/v1/oauth/free/render\n2️⃣ Войди через GitHub\n3️⃣ Получи ключ (200 запросов/день БЕСПЛАТНО!)\n\n✨ С ключом будут работать:\n• GPT-4o-mini (200/день)\n• GPT-3.5-turbo (200/день)\n• DeepSeek-v3 (30/день)\n• GPT-4o (5/день)\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka'
 }
 
 
