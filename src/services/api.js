@@ -1,51 +1,56 @@
 import axios from 'axios'
 
-// 🔥 ПУБЛИЧНЫЕ API БЕЗ РЕГИСТРАЦИИ! РАБОТАЮТ СРАЗУ!
+// 🔥 РАБОЧИЙ КЛЮЧ CHATANYWHERE! ВСЕ МОДЕЛИ!
+const CHATANYWHERE_KEY = 'sk-AQ63p8U2Z0Nk9UAN7tOUBLhanDLEnlM2WtMWzkgJlONwCsYK'
+
 const AI_ENDPOINTS = [
-  // 1. Hugging Face Inference API - БЕЗ КЛЮЧА! РАБОТАЕТ!
+  // 1. ChatAnywhere GPT-4o-mini (200 запросов/день) - ГЛАВНАЯ!
   {
-    name: 'HuggingFace-Mistral',
-    url: 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2',
-    key: '', // НЕ НУЖЕН!
-    model: 'mistralai/Mistral-7B-Instruct-v0.2',
-    priority: 1,
-    isHuggingFace: true
+    name: 'ChatAnywhere-GPT4o-Mini',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: CHATANYWHERE_KEY,
+    model: 'gpt-4o-mini',
+    priority: 1
   },
-  // 2. Hugging Face Llama - БЕЗ КЛЮЧА!
+  // 2. ChatAnywhere GPT-3.5-turbo (200 запросов/день)
   {
-    name: 'HuggingFace-Llama',
-    url: 'https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf',
-    key: '',
-    model: 'meta-llama/Llama-2-7b-chat-hf',
-    priority: 2,
-    isHuggingFace: true
+    name: 'ChatAnywhere-GPT3.5',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: CHATANYWHERE_KEY,
+    model: 'gpt-3.5-turbo',
+    priority: 2
   },
-  // 3. Hugging Face CodeLlama - БЕЗ КЛЮЧА!
+  // 3. ChatAnywhere DeepSeek-v3 (30 запросов/день) - ДЛЯ SWITCH!
   {
-    name: 'HuggingFace-CodeLlama',
-    url: 'https://api-inference.huggingface.co/models/codellama/CodeLlama-7b-Instruct-hf',
-    key: '',
-    model: 'codellama/CodeLlama-7b-Instruct-hf',
-    priority: 3,
-    isHuggingFace: true
+    name: 'ChatAnywhere-DeepSeek',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: CHATANYWHERE_KEY,
+    model: 'deepseek-v3',
+    priority: 3
   },
-  // 4. Hugging Face Zephyr - БЕЗ КЛЮЧА!
+  // 4. ChatAnywhere GPT-4o (5 запросов/день) - МОЩНАЯ!
   {
-    name: 'HuggingFace-Zephyr',
-    url: 'https://api-inference.huggingface.co/models/HuggingFaceH4/zephyr-7b-beta',
-    key: '',
-    model: 'HuggingFaceH4/zephyr-7b-beta',
-    priority: 4,
-    isHuggingFace: true
+    name: 'ChatAnywhere-GPT4o',
+    url: 'https://api.chatanywhere.tech/v1/chat/completions',
+    key: CHATANYWHERE_KEY,
+    model: 'gpt-4o',
+    priority: 4
   },
-  // 5. Hugging Face Falcon - БЕЗ КЛЮЧА!
+  // 5. ChatAnywhere ORG резервный эндпоинт
   {
-    name: 'HuggingFace-Falcon',
-    url: 'https://api-inference.huggingface.co/models/tiiuae/falcon-7b-instruct',
-    key: '',
-    model: 'tiiuae/falcon-7b-instruct',
-    priority: 5,
-    isHuggingFace: true
+    name: 'ChatAnywhere-ORG-Turbo',
+    url: 'https://api.chatanywhere.org/v1/chat/completions',
+    key: CHATANYWHERE_KEY,
+    model: 'gpt-3.5-turbo',
+    priority: 5
+  },
+  // 6. ChatAnywhere ORG GPT-4o-mini
+  {
+    name: 'ChatAnywhere-ORG-Mini',
+    url: 'https://api.chatanywhere.org/v1/chat/completions',
+    key: CHATANYWHERE_KEY,
+    model: 'gpt-4o-mini',
+    priority: 6
   }
 ]
 
@@ -161,55 +166,10 @@ function getFallbackResponse(message) {
 }
 
 /**
- * 🚀 Универсальный запрос к AI API (БЕЗ АВТОРИЗАЦИИ!)
+ * 🚀 Универсальный запрос к AI API (С КЛЮЧОМ!)
  */
 async function queryAI(message, endpoint) {
-  // Для Hugging Face используем упрощённый формат
-  if (endpoint.isHuggingFace) {
-    const response = await axios.post(
-      endpoint.url,
-      {
-        inputs: message,
-        parameters: {
-          max_new_tokens: 500,
-          temperature: 0.7,
-          return_full_text: false
-        }
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        timeout: 30000
-      }
-    )
-    
-    if (response.data?.[0]?.generated_text) {
-      return response.data[0].generated_text.trim()
-    }
-  }
-  
-  // Для Cloudflare Workers AI
-  if (endpoint.isCloudflare) {
-    const response = await axios.post(
-      endpoint.url,
-      {
-        messages: [{ role: 'user', content: message }]
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        timeout: 15000
-      }
-    )
-    
-    if (response.data?.result?.response) {
-      return response.data.result.response.trim()
-    }
-  }
-  
-  // Стандартный OpenAI-совместимый формат (без ключа)
+  // Стандартный OpenAI-совместимый формат ChatAnywhere
   const response = await axios.post(
     endpoint.url,
     {
@@ -225,14 +185,15 @@ async function queryAI(message, endpoint) {
         }
       ],
       temperature: 0.7,
-      max_tokens: 800,
+      max_tokens: 1000,
       stream: false
     },
     {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${endpoint.key}`
       },
-      timeout: 15000
+      timeout: 30000
     }
   )
 
