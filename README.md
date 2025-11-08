@@ -4,6 +4,11 @@
 [![GitHub followers](https://img.shields.io/github/followers/Dimasick-git?style=social)](https://github.com/Dimasick-git)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+## 📊 Статистика репозитория
+
+![Views](https://komarev.com/ghpvc/?username=Dimasick-git&repo=RyazhaAI&style=flat-square)
+![Downloads](https://img.shields.io/github/downloads/Dimasick-git/RyazhaAI/total?style=flat-square)
+
 > Современный AI чат-бот с 12+ бесплатными API, созданный командой [Ryazhenka](https://github.com/Dimasick-git/Ryzhenka) специально для Nintendo Switch CFW комьюнити!
 
 ## 🌐 Демо
