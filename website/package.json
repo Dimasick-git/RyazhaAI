@@ -1,0 +1,22 @@
+{
+  "name": "ai-chat-website",
+  "version": "1.0.0",
+  "description": "AI Chat Website with Cloud Storage and API Proxy",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.js",
+    "start": "node server/index.js",
+    "install-client": "cd client && npm install"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "axios": "^1.6.0",
+    "https-proxy-agent": "^7.0.2",
+    "node-fetch": "^3.3.2",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.1"
+  }
+}

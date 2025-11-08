@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Icon</title>
+</head>
+<body>
+    <canvas id="canvas" width="256" height="256"></canvas>
+    <br>
+    <button onclick="downloadIcon()">Download icon.jpg</button>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 256, 256);
+        gradient.addColorStop(0, '#667eea');
+        gradient.addColorStop(1, '#764ba2');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 256, 256);
+        
+        // AI text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 80px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('AI', 128, 110);
+        
+        // Chat text
+        ctx.font = 'bold 40px Arial';
+        ctx.fillText('Chat', 128, 170);
+        
+        function downloadIcon() {
+            canvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'icon.jpg';
+                a.click();
+            }, 'image/jpeg', 0.95);
+        }
+        
+        // Auto download
+        setTimeout(downloadIcon, 500);
+    </script>
+</body>
+</html>

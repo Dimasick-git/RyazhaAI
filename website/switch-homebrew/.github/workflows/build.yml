@@ -1,0 +1,30 @@
+name: Build AI Chat for Switch
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build NRO
+      run: |
+        make
+    
+    - name: Upload ai-chat.nro
+      uses: actions/upload-artifact@v4
+      with:
+        name: ai-chat-switch
+        path: |
+          ai-chat.nro
+          *.nro
