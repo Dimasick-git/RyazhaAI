@@ -17,6 +17,6 @@
     "https-proxy-agent": "^7.0.2",
     "node-fetch": "^3.3.2",
     "multer": "^2.0.2",
-    "uuid": "^9.0.1"
+    "uuid": "^14.0.0"
   }
 }
