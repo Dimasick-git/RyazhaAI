@@ -207,6 +207,7 @@ jobs:
           configPath: '.lighthouserc.json'
           uploadArtifacts: true
           temporaryPublicStorage: true
+          artifactName: 'lighthouse-report'
 
   # Notification
   notify:
