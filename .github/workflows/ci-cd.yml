@@ -11,13 +11,14 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  security-events: read
 
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
   # Build and Test
@@ -188,8 +189,14 @@ jobs:
     needs: deploy
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.0
+        
       - name: Wait for deployment
         run: sleep 60
+        
+      - name: Copy Lighthouse config
+        run: cp .lighthouserc.json ./
         
       - name: Check website availability
         run: |
