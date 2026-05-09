@@ -1,0 +1,13 @@
+{
+  "name": "ryazha-ai-release",
+  "version": "2.0.0",
+  "description": "RYAZHA AI - Release package with .nro and web version",
+  "scripts": {
+    "build": "node build-release.js",
+    "build-nro": "chmod +x build-nro.sh && ./build-nro.sh",
+    "package": "npm run build && npm run build-nro && zip -r RyazhaAI-release.zip release/"
+  },
+  "devDependencies": {
+    "archiver": "^6.0.1"
+  }
+}

@@ -1,0 +1,209 @@
+name: Auto Release & .nro Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 2.0.1)'
+        required: false
+        default: '2.0.0'
+
+permissions:
+  contents: write
+  releases: write
+
+jobs:
+  # Build Release Package
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Create release package
+        run: npm run build-release
+        
+      - name: Create release zip
+        run: |
+          cd release
+          zip -r RyazhaAI-release.zip .
+          
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ryazhaai-release
+          path: release/
+          retention-days: 30
+
+  # Build .nro (if devkitPro available)
+  build-nro:
+    runs-on: ubuntu-latest
+    needs: build-release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build release package
+        run: npm run build-release
+        
+      - name: Setup devkitPro
+        uses: devkitpro/pacman-installer@v1
+        with:
+          platform: 'switch'
+          
+      - name: Build .nro file
+        run: |
+          cd release/RyazhaAI-switch
+          make || echo "NRO build skipped - devkitPro not fully configured"
+          
+      - name: Upload .nro artifact
+        if: hashFiles('release/RyazhaAI-switch/build/*.nro') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ryazhaai-nro
+          path: release/RyazhaAI-switch/build/*.nro
+          retention-days: 30
+
+  # Create GitHub Release
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [build-release, build-nro]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          
+      - name: Extract tag name
+        id: tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.TAG }}
+          name: "🎮 RyazhaAI ${{ steps.tag.outputs.TAG }}"
+          body: |
+            ## 🥛 RyazhaAI v${{ steps.tag.outputs.TAG }}
+            
+            ### 📦 Что нового:
+            - 🚀 Автоматическая сборка и релиз
+            - 🎮 Подготовка .nro для Nintendo Switch
+            - 🌐 Веб версия для GitHub Pages
+            - 💬 AI чат с 12+ API
+            
+            ### 📥 Как установить:
+            
+            **Веб версия:**
+            1. Открой https://dimasick-git.github.io/RyazhaAI
+            
+            **Switch .nro:**
+            1. Скачай RyazhaAI.nro из релиза
+            2. Скопируй на SD карту
+            3. Запусти через homebrew launcher
+            
+            **Полный пакет:**
+            1. Скачай RyazhaAI-release.zip
+            2. Распакуй и используй нужную версию
+            
+            ---
+            🚀 Создано командой Ryazhenka - лучшая прошивка для Switch!
+            
+          files: |
+            artifacts/ryazhaai-release/RyazhaAI-release.zip
+            artifacts/ryazhaai-release/dist/**
+            artifacts/ryazhaai-nro/*.nro
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Deploy to GitHub Pages
+  deploy-pages:
+    runs-on: ubuntu-latest
+    needs: build-release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Notification
+  notify:
+    runs-on: ubuntu-latest
+    needs: [create-release, deploy-pages]
+    if: always() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Extract tag name
+        id: tag
+        run: echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        
+      - name: Notify Release
+        run: |
+          echo "🎉 RyazhaAI ${{ steps.tag.outputs.TAG }} released!"
+          echo "📦 Release: https://github.com/Dimasick-git/RyazhaAI/releases/tag/${{ steps.tag.outputs.TAG }}"
+          echo "🌐 Website: https://dimasick-git.github.io/RyazhaAI"
+          
+          if [ "${{ needs.create-release.result }}" == "success" ]; then
+            echo "✅ GitHub Release created successfully!"
+          else
+            echo "❌ GitHub Release failed"
+          fi
+          
+          if [ "${{ needs.deploy-pages.result }}" == "success" ]; then
+            echo "✅ Website deployed to GitHub Pages!"
+          else
+            echo "❌ Website deployment failed"
+          fi

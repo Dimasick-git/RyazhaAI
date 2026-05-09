@@ -1,0 +1,17 @@
+{
+  "name": "RyazhaAI",
+  "version": "2.0.0",
+  "author": "Dimasick-git & Ryazhenka-Helper-01",
+  "description": "🥛 RYAZHA AI - Умный помощник для Nintendo Switch CFW",
+  "homepage": "https://dimasick-git.github.io/RyazhaAI",
+  "repository": "https://github.com/Dimasick-git/RyazhaAI",
+  "license": "MIT",
+  "category": "Utility",
+  "tags": [
+    "ai",
+    "assistant",
+    "switch",
+    "ryazhenka",
+    "cfw"
+  ]
+}
