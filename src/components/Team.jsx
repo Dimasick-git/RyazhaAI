@@ -32,7 +32,7 @@ function Team() {
       {/* Header */}
       <div className="text-center mb-16">
         <h2 className="text-5xl font-bold gradient-text mb-6">
-          👥 Команда Ryazhenka
+          Команда Ryazhenka
         </h2>
         <p className="text-xl text-gray-400 max-w-2xl mx-auto">
           Энтузиасты, создающие лучшую CFW для Nintendo Switch и инструменты для комьюнити!
@@ -54,7 +54,7 @@ function Team() {
                   className="w-full h-full rounded-xl object-cover"
                   onError={(e) => {
                     e.target.style.display = 'none'
-                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-4xl">👨‍💻</div>'
+                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-4xl">DEV</div>'
                   }}
                 />
               </div>
@@ -126,40 +126,41 @@ function Team() {
       {/* Projects */}
       <div className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl border border-ryaha-border p-10">
         <h3 className="text-3xl font-bold gradient-text mb-6 text-center">
-          🚀 Наши проекты
+          Наши проекты
         </h3>
         
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-ryaha-card rounded-xl p-6 border border-ryaha-border">
             <div className="flex items-center gap-3 mb-3">
-              <span className="text-3xl">🥛</span>
+              <span className="text-3xl">CFW</span>
               <h4 className="text-xl font-bold text-white">Ryazhenka CFW</h4>
             </div>
             <p className="text-gray-300 mb-4">
               Лучшая кастомная прошивка для Nintendo Switch с автоматической настройкой и уникальными модулями.
             </p>
-            <a
-              href="https://github.com/Dimasick-git/Ryzhenka"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-semibold"
-            >
-              <Github size={18} />
-              Смотреть на GitHub →
-            </a>
+            <div className="flex gap-2">
+              <a href="https://github.com/Dimasick-git/Ryzhenka" target="_blank" rel="noopener noreferrer" 
+                 className="px-3 py-1 bg-ryaha-bg rounded-lg text-sm hover:bg-ryaha-hover transition-colors">
+                GitHub
+              </a>
+            </div>
           </div>
 
           <div className="bg-ryaha-card rounded-xl p-6 border border-ryaha-border">
             <div className="flex items-center gap-3 mb-3">
-              <span className="text-3xl">🤖</span>
+              <span className="text-3xl">AI</span>
               <h4 className="text-xl font-bold text-white">RYAZHA AI</h4>
             </div>
             <p className="text-gray-300 mb-4">
               Умный AI помощник для Nintendo Switch с поддержкой .nro и веб-интерфейсом.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
+              <a href="https://github.com/Dimasick-git/Ryazhenka" target="_blank" rel="noopener noreferrer" 
+                 className="px-3 py-1 bg-ryaha-bg rounded-lg text-sm hover:bg-ryaha-hover transition-colors">
+                GitHub
+              </a>
               <a
-                href="https://github.com/Dimasick-git/Ryzhenka"
+                href="https://github.com/Dimasick-git/Ryazhenka"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold"
@@ -175,7 +176,7 @@ function Team() {
       {/* Contact */}
       <div className="mt-16 text-center">
         <h3 className="text-3xl font-bold gradient-text mb-6">
-          💬 Связаться с нами
+          Связаться с нами
         </h3>
         <p className="text-gray-300 mb-8 text-lg">
           Есть вопросы, идеи или хочешь помочь проекту? Пиши нам!

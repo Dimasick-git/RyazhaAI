@@ -20,15 +20,15 @@ function App() {
         <section className="pt-32 pb-20 px-4">
           <div className="max-w-6xl mx-auto text-center">
             <div className="inline-block mb-6">
-              <span className="text-6xl mb-4 inline-block animate-pulse-slow">🥛</span>
+              <span className="text-6xl mb-4 inline-block animate-pulse-slow">RYAZHA</span>
             </div>
             <h1 className="text-6xl font-bold mb-6">
               <span className="gradient-text">RYAZHA AI</span>
             </h1>
             <p className="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
-              Умный AI помощник для Nintendo Switch CFW! 🎮
+              Умный AI помощник для Nintendo Switch CFW!
               <br />
-              Создан командой Ryazhenka - лучшей прошивки для Switch! 🚀
+              Создан командой Ryazhenka - лучшей прошивки для Switch!
             </p>
             
             {/* Tab Navigation */}
@@ -41,7 +41,7 @@ function App() {
                     : 'bg-ryaha-card text-gray-400 hover:bg-ryaha-hover'
                 }`}
               >
-                💬 AI Чат
+                AI Чат
               </button>
               <button
                 onClick={() => setActiveTab('faq')}
@@ -51,7 +51,7 @@ function App() {
                     : 'bg-ryaha-card text-gray-400 hover:bg-ryaha-hover'
                 }`}
               >
-                ❓ FAQ Switch
+                FAQ Switch
               </button>
               <button
                 onClick={() => setActiveTab('features')}
@@ -61,7 +61,7 @@ function App() {
                     : 'bg-ryaha-card text-gray-400 hover:bg-ryaha-hover'
                 }`}
               >
-                ✨ Возможности
+                Возможности
               </button>
               <button
                 onClick={() => setActiveTab('team')}
@@ -71,7 +71,7 @@ function App() {
                     : 'bg-ryaha-card text-gray-400 hover:bg-ryaha-hover'
                 }`}
               >
-                👥 Команда
+                Команда
               </button>
             </div>
           </div>

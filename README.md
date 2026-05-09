@@ -1,4 +1,4 @@
-# 🥛 RYAZHA AI v2.0.0 - Умный помощник для Nintendo Switch
+# RYAZHA AI v2.0.0 - Умный помощник для Nintendo Switch
 
 [![GitHub stars](https://img.shields.io/github/stars/Dimasick-git?style=social)](https://github.com/Dimasick-git)
 [![GitHub followers](https://img.shields.io/github/followers/Dimasick-git?style=social)](https://github.com/Dimasick-git)
@@ -11,19 +11,19 @@
 
 > Современный AI чат-бот с 12+ бесплатными API, созданный командой [Ryazhenka](https://github.com/Dimasick-git/Ryzhenka) специально для Nintendo Switch CFW комьюнити!
 
-## 🌐 Демо
+## Демо
 
 **Попробуй прямо сейчас:**
 https://dimasick-git.github.io/RyazhaAI
 
-## 📱 Switch приложение
+## Switch приложение
 
 **Скачай .nro файл:**
 [Releases](https://github.com/Dimasick-git/RyazhaAI/releases/latest)
 
-## ✨ Возможности
+## Возможности
 
-### 🌐 Веб-версия:
+### Веб-версия:
 - **12+ бесплатных AI API** с автоматическим переключением
 - **GPT-4 модель** через ChatAnywhere
 - **Настройки API ключа** - используй свой OpenAI ключ
@@ -31,14 +31,14 @@ https://dimasick-git.github.io/RyazhaAI
 - **Космический дизайн** с анимациями
 - **Адаптивный** для всех устройств
 
-### 🎮 Switch приложение (.nro):
+### Switch приложение (.nro):
 - **Автоматический запуск** браузера через 2 секунды
 - **Красивая иконка** 256x256 для HBmenu
 - **Автор указан:** Dimasick-git
 - **Ссылки** на GitHub и Telegram
 - **Поддержка геймпада** и тач-скрина
 
-### 🧠 Знания AI:
+### Знания AI:
 - **Ryazhenka CFW** - детальная информация
 - **Все проекты Dimasick-git** с GitHub
 - **Nintendo Switch 2026** - актуальная информация
@@ -47,17 +47,17 @@ https://dimasick-git.github.io/RyazhaAI
 - **Установка игр** - NSP, XCI
 - **Homebrew и эмуляторы**
 
-## 🚀 Установка Switch приложения
+## Установка Switch приложения
 
 1. Скачай `ryazha-ai.nro` из [Releases](https://github.com/Dimasick-git/RyazhaAI/releases/latest)
 2. Скопируй на SD карту: `/switch/ryazha-ai/ryazha-ai.nro`
 3. Вставь SD в Switch
 4. Запусти Homebrew Menu
-5. Найди "RYAZHA AI" 🥛
+5. Найди "RYAZHA AI"
 6. Запусти приложение!
 7. Через 2 секунды откроется сайт автоматически!
 
-## 💻 Разработка
+## Разработка
 
 ### Установка зависимостей
 
@@ -92,13 +92,13 @@ npm run deploy
 По умолчанию используются бесплатные API, но ты можешь добавить свой OpenAI ключ:
 
 1. Открой сайт
-2. Нажми на иконку настроек ⚙️
+2. Нажми на иконку настроек 
 3. Введи свой API ключ
 4. Сохрани
 
 Ключ сохраняется в localStorage браузера.
 
-## 🔧 Сборка Switch приложения
+## Сборка Switch приложения
 
 ### Требования:
 - DevkitPro с установленным libnx

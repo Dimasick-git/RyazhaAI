@@ -59,11 +59,11 @@ let currentAPIIndex = 0
 
 // Fallback ответы если все API не работают
 const FALLBACK_RESPONSES = {
-  greeting: '👋 Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\n🥛 Создан командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01)\n🎮 Специализируюсь на Switch, CFW, homebrew\n💬 Задавай любые вопросы!\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka',
-  cfw: '🔓 Для взлома Nintendo Switch 2026:\n\n1️⃣ Проверь серийник на уязвимость\n2️⃣ Подготовь SD карту (128GB+)\n3️⃣ Скачай Ryazhenka CFW\n4️⃣ Установи через RCM/ModChip\n\n🥛 Ryazhenka - лучшая CFW с автонастройкой!\n📥 github.com/Dimasick-git/Ryzhenka',
-  ryazhenka: '🥛 Ryazhenka CFW - лучшая прошивка для Switch 2026!\n\n✨ Особенности:\n• Автонастройка за 5 минут\n• Atmosphere 1.8.0+ и Hekate 6.4.0+\n• Свежие sigpatches из коробки\n• Уникальные модули команды\n• Красивые темы и UI\n\n👨‍💻 Создатель: Dimasick-git\n💡 Идея: Ryazhenka-Helper-01\n\n📥 Скачать: github.com/Dimasick-git/Ryzhenka',
-  team: '👥 Команда RYAZHA AI:\n\n👨‍💻 Dimasick-git - главный разработчик\n💡 Ryazhenka-Helper-01 - идейный вдохновитель\n\n🥛 Создатели Ryazhenka CFW для Switch!\n\n📱 Связь:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\n💜 Сделано с любовью для Switch комьюнити!',
-  default: '🎮 AI временно перегружен, но скоро вернётся!\n\n💡 Пока что могу помочь с базовыми вопросами:\n\n🥛 Ryazhenka CFW - лучшая прошивка для Switch 2026\n📦 RYAZHA AI - твой умный помощник для CFW\n🔧 Помощь с взломом, играми, модами, homebrew\n\n📱 Связь с командой:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\n⚡ AI перезагружается... попробуй через минуту!'
+  greeting: 'Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\nСоздан командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01)\nСпециализируюсь на Switch, CFW, homebrew\nЗадавай любые вопросы!\n\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka',
+  cfw: 'Для взлома Nintendo Switch 2026:\n\n1. Проверь серийник на уязвимость\n2. Подготовь SD карту (128GB+)\n3. Скачай Ryazhenka CFW\n4. Установи через RCM/ModChip\n\nRyazhenka - лучшая CFW с автонастройкой!\ngithub.com/Dimasick-git/Ryzhenka',
+  ryazhenka: 'Ryazhenka CFW - лучшая прошивка для Switch 2026!\n\nОсобенности:\n• Автонастройка за 5 минут\n• Atmosphere 1.8.0+ и Hekate 6.4.0+\n• Свежие sigpatches из коробки\n• Уникальные модули команды\n• Красивые темы и UI\n\nСоздатель: Dimasick-git\nИдея: Ryazhenka-Helper-01\n\nСкачать: github.com/Dimasick-git/Ryzhenka',
+  team: 'Команда RYAZHA AI:\n\nDimasick-git - главный разработчик\nRyazhenka-Helper-01 - идейный вдохновитель\n\nСоздатели Ryazhenka CFW для Switch!\n\nСвязь:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\nСделано для Switch комьюнити!',
+  default: 'AI временно перегружен, но скоро вернётся!\n\nПока что могу помочь с базовыми вопросами:\n\nRyazhenka CFW - лучшая прошивка для Switch 2026\nRYAZHA AI - твой умный помощник для CFW\nПомощь с взломом, играми, модами, homebrew\n\nСвязь с командой:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\nAI перезагружается... попробуй через минуту!'
 }
 
 
@@ -73,7 +73,7 @@ const FALLBACK_RESPONSES = {
  */
 const SYSTEM_PROMPT = `Ты RYAZHA AI - эксперт по прошитому Nintendo Switch в 2026 году, созданный командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01).
 
-🎮 ТВОЯ ЭКСПЕРТИЗА ПО ПРОШИТОМУ SWITCH 2026:
+ТВОЯ ЭКСПЕРТИЗА ПО ПРОШИТОМУ SWITCH 2026:
 - Nintendo Switch всех моделей (OLED, V2, V1, Lite) с CFW
 - Ryazhenka CFW - премиальная кастомная прошивка для Switch
 - Взлом Switch 2026: RCM, модчипы (SX Core, Picofly, Hwfly)
@@ -88,7 +88,7 @@ const SYSTEM_PROMPT = `Ты RYAZHA AI - эксперт по прошитому N
 - Актуальные проблемы 2026: новые прошивки, обновления игр
 - Технические детали: TegraRcmGUI, fusee.bin, payload injection
 
-🔥 ОСОБЕННОСТИ RYAZHENKA CFW 2026:
+ОСОБЕННОСТИ RYAZHENKA CFW 2026:
 - Автонастройка за 5 минут
 - Свежие sigpatches из коробки
 - Оптимизация батареи и производительности
@@ -96,13 +96,12 @@ const SYSTEM_PROMPT = `Ты RYAZHA AI - эксперт по прошитому N
 - Автообновление компонентов
 - Русская локализация и поддержка
 
-📱 КОНТАКТЫ КОМАНДЫ:
+КОНТАКТЫ КОМАНДЫ:
 Telegram: @Ryazhenkabestcfw
 GitHub: Dimasick-git/Ryzhenka
 
-✨ СТИЛЬ ОТВЕТОВ:
+СТИЛЬ ОТВЕТОВ:
 - Технически точно, кратко на русском
-- Эмодзи для структуры
 - Пошаговые инструкции с версиями 2026
 - Ссылки на актуальные источники
 - Упоминай Ryazhenka CFW как лучшее решение
@@ -125,23 +124,23 @@ export async function sendMessage(message) {
     const endpoint = AI_ENDPOINTS[apiIndex]
     
     try {
-      console.log(`🔄 [${i + 1}/${AI_ENDPOINTS.length}] Пробуем ${endpoint.name}...`)
+      console.log(`[${i + 1}/${AI_ENDPOINTS.length}] Пробуем ${endpoint.name}...`)
       const response = await queryAI(message, endpoint)
       
       // Успех! Запоминаем этот API для следующего раза
       currentAPIIndex = apiIndex
-      console.log(`✅ ${endpoint.name} работает!`)
+      console.log(`${endpoint.name} работает!`)
       
       return response
     } catch (error) {
-      console.error(`❌ ${endpoint.name} ошибка:`, error.message)
+      console.error(`${endpoint.name} ошибка:`, error.message)
       // Автоматически переключаемся на следующий API
       continue
     }
   }
   
   // Если ВСЕ API не работают - используем умные fallback ответы
-  console.log('⚠️ Все API недоступны, используем fallback ответы')
+  console.log('Все API недоступны, используем fallback ответы')
   return getFallbackResponse(message)
 }
 
@@ -166,7 +165,7 @@ function getFallbackResponse(message) {
 }
 
 /**
- * 🚀 Универсальный запрос к AI API (С КЛЮЧОМ!)
+ * Универсальный запрос к AI API (С КЛЮЧОМ!)
  */
 async function queryAI(message, endpoint) {
   // Стандартный OpenAI-совместимый формат ChatAnywhere
@@ -207,7 +206,7 @@ async function queryAI(message, endpoint) {
 
 
 /**
- * 🔍 Проверка статуса AI API
+ * Проверка статуса AI API
  */
 export async function checkAPIStatus() {
   const workingAPIs = []
@@ -224,14 +223,14 @@ export async function checkAPIStatus() {
   if (workingAPIs.length > 0) {
     return { 
       status: 'online', 
-      message: `✅ Работает ${workingAPIs.length} API: ${workingAPIs.join(', ')}`,
+      message: `Работает ${workingAPIs.length} API: ${workingAPIs.join(', ')}`,
       apis: workingAPIs
     }
   }
   
   return { 
     status: 'offline', 
-    message: '⚠️ Все API недоступны. Используется демо-режим.',
+    message: 'Все API недоступны. Используется демо-режим.',
     apis: []
   }
 }
