@@ -211,7 +211,32 @@ const finalReadme = `# 🎮 RyazhaAI Switch Release
 
 fs.writeFileSync(path.join(releaseDir, 'README.md'), finalReadme)
 
+// Автоматически запускаем сборку .nro если есть devkitPro
+console.log('🔨 Starting .nro compilation...')
+try {
+  const { execSync } = require('child_process')
+  
+  // Проверяем наличие devkitPro
+  const devkitProCheck = process.env.DEVKITPRO || '/opt/devkitpro'
+  if (fs.existsSync(devkitProCheck)) {
+    console.log('✅ Found devkitPro, building .nro...')
+    
+    // Выполняем сборку .nro
+    execSync('chmod +x build-nro.sh && ./build-nro.sh', { 
+      cwd: releaseDir,
+      stdio: 'inherit'
+    })
+    
+    console.log('✅ .nro build completed successfully!')
+  } else {
+    console.log('⚠️ devkitPro not found, skipping .nro build')
+    console.log('💡 Install devkitPro to build .nro automatically')
+  }
+} catch (error) {
+  console.log('⚠️ .nro build failed:', error.message)
+  console.log('� You can build .nro manually with: npm run build-nro')
+}
+
 console.log('🎉 Release package created successfully!')
 console.log(`📁 Release folder: ${releaseDir}`)
 console.log('📦 Run "npm run package" to create final .zip')
-console.log('🎮 Run "npm run build-nro" to create .nro file')

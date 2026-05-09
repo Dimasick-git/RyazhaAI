@@ -16,6 +16,9 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # Build and Test
   build:
@@ -52,11 +55,21 @@ jobs:
             echo "No tests found, skipping"
           fi
           
+      - name: Build release package with .nro
+        run: npm run build-release
+        
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4.4.0
         with:
           name: ryazhaai-dist
           path: dist/
+          retention-days: 7
+          
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4.4.0
+        with:
+          name: ryazhaai-release
+          path: release/
           retention-days: 7
 
   # Deploy to GitHub Pages
@@ -112,6 +125,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+        if: secrets.DOCKER_USERNAME && secrets.DOCKER_PASSWORD
           
       - name: Extract metadata
         id: meta
