@@ -13,7 +13,8 @@ on:
 
 permissions:
   contents: write
-  releases: write
+  pages: write
+  id-token: write
 
 jobs:
   # Build Release Package

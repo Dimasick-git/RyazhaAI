@@ -201,13 +201,13 @@ jobs:
       - name: Notify deployment status
         run: |
           if [ "${{ needs.deploy.result }}" == "success" ]; then
-            echo "✅ RyazhaAI успешно развернут на GitHub Pages!"
-            echo "🌐 URL: https://dimasick-git.github.io/RyazhaAI"
+            echo "RyazhaAI успешно развернут на GitHub Pages!"
+            echo "URL: https://dimasick-git.github.io/RyazhaAI"
           else
-            echo "❌ Деплой не удался"
+            echo "Деплой не удался"
           fi
           
           if [ "${{ needs.docker.result }}" == "success" ]; then
-            echo "🐳 Docker образ успешно собран и опубликован"
-            echo "📦 Image: dimasick/ryazhaai:latest"
+            echo "Docker образ успешно собран и опубликован"
+            echo "Image: dimasick/ryazhaai:latest"
           fi
