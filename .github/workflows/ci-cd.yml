@@ -205,9 +205,8 @@ jobs:
           urls: |
             https://dimasick-git.github.io/RyazhaAI
           configPath: '.lighthouserc.json'
-          uploadArtifacts: true
+          uploadArtifacts: false
           temporaryPublicStorage: true
-          artifactName: 'lighthouse-report'
 
   # Notification
   notify:
