@@ -194,9 +194,6 @@ jobs:
       - name: Wait for deployment
         run: sleep 60
         
-      - name: Copy Lighthouse config
-        run: cp .lighthouserc.json ./
-        
       - name: Check website availability
         run: |
           echo "Checking https://dimasick-git.github.io/RyazhaAI..."
