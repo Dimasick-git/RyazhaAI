@@ -12,7 +12,7 @@
     "deploy": "npm run build && gh-pages -d dist",
     "build-release": "node build-release.js",
     "build-nro": "cd release && chmod +x build-nro.sh && ./build-nro.sh",
-    "package": "npm run build-release && npm run build-nro && cd release && zip -r RyazhaAI-release.zip .",
+    "package": "npm run build-release && npm run build-nro && cd release && powershell -Command \"Compress-Archive -Path dist,switch,RyazhaAI.nro,README.md -DestinationPath RyazhaAI-release.zip -Force\"",
     "release": "npm run package"
   },
   "homepage": "https://dimasick-git.github.io/RyazhaAI",

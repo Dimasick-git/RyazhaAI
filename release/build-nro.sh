@@ -10,11 +10,14 @@ if [ ! -d "$DEVKITPRO" ]; then
 fi
 
 # Компилируем
-make -C RyazhaAI-switch
+make -C switch
 
 if [ $? -eq 0 ]; then
     echo "✅ RyazhaAI.nro создан успешно!"
-    echo "📦 Файл находится в: RyazhaAI-switch/build/RyazhaAI.nro"
+    echo "📦 Файл находится в: switch/build/RyazhaAI.nro"
+    # Копируем .nro в корень релиза
+    cp switch/build/RyazhaAI.nro ../RyazhaAI.nro
+    echo "📦 Скопировано в корень релиза: RyazhaAI.nro"
 else
     echo "❌ Ошибка сборки .nro файла"
     exit 1

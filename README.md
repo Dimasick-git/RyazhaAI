@@ -41,7 +41,7 @@ https://dimasick-git.github.io/RyazhaAI
 ### 🧠 Знания AI:
 - **Ryazhenka CFW** - детальная информация
 - **Все проекты Dimasick-git** с GitHub
-- **Nintendo Switch 2025** - актуальная информация
+- **Nintendo Switch 2026** - актуальная информация
 - **Разгон и оптимизация** - sys-clk, ReverseNX
 - **FPSLocker и 60 FPS** патчи
 - **Установка игр** - NSP, XCI

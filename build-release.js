@@ -30,7 +30,7 @@ console.log('📋 Copying dist files...')
 fs.cpSync(distDir, path.join(releaseDir, 'dist'), { recursive: true })
 
 // Создаем структуру для .nro
-const nroDir = path.join(releaseDir, 'RyazhaAI-switch')
+const nroDir = path.join(releaseDir, 'switch')
 fs.mkdirSync(nroDir, { recursive: true })
 
 // Копируем dist в nro папку
@@ -156,11 +156,14 @@ if [ ! -d "$DEVKITPRO" ]; then
 fi
 
 # Компилируем
-make -C RyazhaAI-switch
+make -C switch
 
 if [ $? -eq 0 ]; then
     echo "✅ RyazhaAI.nro создан успешно!"
-    echo "📦 Файл находится в: RyazhaAI-switch/build/RyazhaAI.nro"
+    echo "📦 Файл находится в: switch/build/RyazhaAI.nro"
+    # Копируем .nro в корень релиза
+    cp switch/build/RyazhaAI.nro ../RyazhaAI.nro
+    echo "📦 Скопировано в корень релиза: RyazhaAI.nro"
 else
     echo "❌ Ошибка сборки .nro файла"
     exit 1
@@ -186,42 +189,24 @@ const releasePackageJson = {
 
 fs.writeFileSync(path.join(releaseDir, 'package.json'), JSON.stringify(releasePackageJson, null, 2))
 
-// Создаем финальный README
-const finalReadme = `# 🚀 RyazhaAI Release Package
+// Создаем финальный README для релиза
+const finalReadme = `# 🎮 RyazhaAI Switch Release
 
 ## 📦 Что включено:
-- ✅ **Web версия** (dist/) - для GitHub Pages
-- ✅ **Switch версия** (RyazhaAI-switch/) - для .nro компиляции
-- ✅ **Скрипты сборки** - автоматизация процесса
+- ✅ **dist/** - Веб версия приложения
+- ✅ **switch/** - Switch версия с .nro файлом
+- ✅ **RyazhaAI.nro** - Готовый файл для Nintendo Switch
 
-## 🎮 Как использовать:
+## 🚀 Установка на Switch:
+1. Распакуй архив
+2. Скопируй папку switch/ на SD карту
+3. Запусти RyazhaAI.nro через homebrew launcher
 
-### Веб версия:
-1. Залей dist/ на GitHub Pages
-2. Открой https://dimasick-git.github.io/RyazhaAI
-
-### Switch .nro:
-1. Установи devkitPro
-2. Запусти: \`npm run build-nro\`
-3. Скопируй RyazhaAI.nro на Switch
-
-### Автоматическая упаковка:
-\`\`\`bash
-npm run package
-\`\`\`
-
-## 📁 Структура:
-\`\`\`
-release/
-├── dist/                    # Веб версия
-├── RyazhaAI-switch/         # Switch версия
-├── build-nro.sh            # Скрипт сборки .nro
-├── build-release.js        # Скрипт сборки релиза
-└── README.md               # Этот файл
-\`\`\`
+## 🌐 Веб версия:
+Открой https://dimasick-git.github.io/RyazhaAI
 
 ---
-🥛 RYAZHA AI - Создано с любовью для Switch комьюнити!
+🥛 RYAZHA AI - Создано в 2026 для Switch комьюнити!
 `
 
 fs.writeFileSync(path.join(releaseDir, 'README.md'), finalReadme)
