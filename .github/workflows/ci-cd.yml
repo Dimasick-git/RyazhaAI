@@ -131,7 +131,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5.5.1
         with:
-          images: dimasick/ryazhaai
+          images: dimasickgit880312/ryazhaai
           tags: |
             type=ref,event=branch
             type=ref,event=pr
