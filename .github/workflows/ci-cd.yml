@@ -46,7 +46,7 @@ jobs:
         
       - name: Run tests (if available)
         run: |
-          if npm run | grep -q "test"; then
+          if npm run 2>&1 | grep -q "test"; then
             npm test
           else
             echo "No tests found, skipping"
@@ -95,11 +95,11 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # Docker Build and Deploy
+  # Docker Build and Deploy (только если есть Dockerfile)
   docker:
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && hashFiles('**/Dockerfile') != ''
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -108,6 +108,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
         
       - name: Log in to Docker Hub
+        if: ${{ secrets.DOCKER_USERNAME != '' }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -129,7 +130,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          push: ${{ secrets.DOCKER_USERNAME != '' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -168,11 +169,11 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  # Performance and Health Check
+  # Performance and Health Check (только если есть Lighthouse конфиг)
   health-check:
     runs-on: ubuntu-latest
     needs: deploy
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && hashFiles('**/.lighthouserc.json') != ''
     steps:
       - name: Wait for deployment
         run: sleep 60
