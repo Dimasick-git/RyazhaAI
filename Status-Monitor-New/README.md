@@ -29,9 +29,9 @@ If it's not working in dock, you need to first start Ryazha-Status-Monitor, then
 - Network type + Wi-fi password
 
 # Requirements:
-- Ultrahand Overlay or Tesla Menu (version >=1.2.3)
+- Ryazhahand Overlay or Tesla Menu (version >=1.2.3)
 
-How to setup everything: [HERE](https://gist.github.com/masagrator/65fcbd5ad09243399268d145aaab899b)
+How to setup everything: [HERE](https://gist.github.com/ppkantorski/65fcbd5ad09243399268d145aaab899b)
 
 ---
 
@@ -42,6 +42,7 @@ How to setup everything: [HERE](https://gist.github.com/masagrator/65fcbd5ad0924
 - KazushiMe for writing code to read registers from max17050 chip
 - CTCaer for Hekate from which I took max17050.h and calculation formulas for reading battery stats from max17050 chip
 - ChanseyIsTheBest for testing Game Resolutions menu
+- ppkantorski for creating the Ultrahand Overlay framework
 
 # FAQ:
 Q: This homebrew has any impact on games?
