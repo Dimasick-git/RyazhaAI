@@ -6,7 +6,7 @@ function ChatInterface() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: '👋 Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\n⚡ Работаю на БЕСПЛАТНОМ БЕЗЛИМИТНОМ Cody API!\n🥛 Создан командой Ryazhenka специально для тебя!\n\n🎮 Могу помочь с:\n• Взломом Switch и установкой CFW\n• Ryazhenka прошивкой и настройкой\n• .nro приложениями и homebrew\n• Sigpatches, emuMMC, любыми Switch темами!\n\n💬 Задавай любые вопросы - отвечу умно и по делу! 🚀\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka'
+      content: '👋 Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\n🥛 Создан командой Ryazhenka специально для тебя!\n\n🎮 Могу помочь с:\n• Взломом Switch и установкой CFW\n• Ryazhenka прошивкой и настройкой\n• .nro приложениями и homebrew\n• Sigpatches, emuMMC, любыми Switch темами!\n\n💬 Задавай любые вопросы - отвечу умно и по делу! 🚀\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka'
     }
   ])
   const [input, setInput] = useState('')
@@ -26,12 +26,13 @@ function ChatInterface() {
     if (!input.trim() || isLoading) return
 
     const userMessage = input.trim()
+    const history = messages  // React state — ещё не обновлено, содержит историю без нового сообщения
     setInput('')
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setIsLoading(true)
 
     try {
-      const response = await sendMessage(userMessage)
+      const response = await sendMessage(userMessage, history)
       setMessages(prev => [...prev, { role: 'assistant', content: response }])
     } catch (error) {
       setMessages(prev => [...prev, { 

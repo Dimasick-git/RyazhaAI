@@ -109,27 +109,28 @@ GitHub: Dimasick-git/Ryzhenka
 /**
  * Отправка сообщения в AI модель с автоматическим переключением API
  * @param {string} message - Сообщение пользователя
+ * @param {Array} history - История диалога [{role, content}, ...]
  * @returns {Promise<string>} - Ответ AI
  */
-export async function sendMessage(message) {
+export async function sendMessage(message, history = []) {
   // Если нет API, сразу используем fallback
   if (AI_ENDPOINTS.length === 0) {
     return getFallbackResponse(message)
   }
-  
+
   // Пробуем все API по очереди С АВТОПЕРЕКЛЮЧЕНИЕМ
   for (let i = 0; i < AI_ENDPOINTS.length; i++) {
     const apiIndex = (currentAPIIndex + i) % AI_ENDPOINTS.length
     const endpoint = AI_ENDPOINTS[apiIndex]
-    
+
     try {
       console.log(`[${i + 1}/${AI_ENDPOINTS.length}] Пробуем ${endpoint.name}...`)
-      const response = await queryAI(message, endpoint)
-      
+      const response = await queryAI(message, endpoint, history)
+
       // Успех! Запоминаем этот API для следующего раза
       currentAPIIndex = apiIndex
       console.log(`${endpoint.name} работает!`)
-      
+
       return response
     } catch (error) {
       console.error(`${endpoint.name} ошибка:`, error.message)
@@ -137,7 +138,7 @@ export async function sendMessage(message) {
       continue
     }
   }
-  
+
   // Если ВСЕ API не работают - используем умные fallback ответы
   console.log('Все API недоступны, используем fallback ответы')
   return getFallbackResponse(message)
@@ -166,21 +167,19 @@ function getFallbackResponse(message) {
 /**
  * Универсальный запрос к AI API (С КЛЮЧОМ!)
  */
-async function queryAI(message, endpoint) {
+async function queryAI(message, endpoint, history = []) {
+  // Берём последние 20 сообщений, чтобы не превысить лимит токенов
+  const recentHistory = history.slice(-20)
+
   // Стандартный OpenAI-совместимый формат ChatAnywhere
   const response = await axios.post(
     endpoint.url,
     {
       model: endpoint.model,
       messages: [
-        {
-          role: 'system',
-          content: SYSTEM_PROMPT
-        },
-        {
-          role: 'user',
-          content: message
-        }
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...recentHistory.map(m => ({ role: m.role, content: m.content })),
+        { role: 'user', content: message }
       ],
       temperature: 0.7,
       max_tokens: 1000,
@@ -199,7 +198,7 @@ async function queryAI(message, endpoint) {
   if (response.data?.choices?.[0]?.message?.content) {
     return response.data.choices[0].message.content.trim()
   }
-  
+
   throw new Error('Invalid response format')
 }
 
