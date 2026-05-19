@@ -14,7 +14,7 @@ export async function chatWithAI(message, retryCount = 0) {
   const apiKey = process.env.OPENAI_API_KEY;
   
   if (!apiKey || apiKey === 'your_openai_api_key_here' || apiKey === 'your_api_key_from_chatanywhere') {
-    return 'Пожалуйста, получите бесплатный API ключ на https://api.chatanywhere.tech/v1/oauth/free/render и добавьте его в файл .env';
+    throw new Error('API ключ не настроен. Пожалуйста, добавьте OPENAI_API_KEY в файл .env');
   }
 
   const config = {
