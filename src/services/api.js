@@ -42,16 +42,9 @@ function getFallbackResponse(message) {
   return FALLBACK_RESPONSES.default
 }
 
-/**
- * Отправка сообщения в AI модель через backend /api/chat
- * @param {string} message - Сообщение пользователя
- * @param {Array} history - История диалога [{role, content}, ...]
- * @returns {Promise<string>} - Ответ AI
- */
 export async function sendMessage(message, history = []) {
   const apiBase = getAPIBase()
 
-  // Production but VITE_API_URL not set
   if (import.meta.env.PROD && apiBase === null) {
     return 'Ошибка конфигурации: URL бэкенда не задан (VITE_API_URL не установлен). Обратитесь к администратору.'
   }
@@ -60,16 +53,10 @@ export async function sendMessage(message, history = []) {
     const response = await axios.post(
       `${apiBase}/api/chat`,
       { message, history },
-      {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 30000
-      }
+      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
     )
 
-    if (response.data?.response) {
-      return response.data.response
-    }
-
+    if (response.data?.response) return response.data.response
     throw new Error('Invalid response format')
   } catch (error) {
     console.error('API call failed:', error.message)
@@ -78,17 +65,62 @@ export async function sendMessage(message, history = []) {
 }
 
 /**
- * Проверка статуса AI API через backend
+ * Streaming version — calls onChunk(text) for each text piece as it arrives.
+ * Throws on error so caller can fall back to sendMessage().
  */
+export async function sendMessageStream(message, history = [], onChunk) {
+  const apiBase = getAPIBase()
+
+  if (import.meta.env.PROD && apiBase === null) {
+    throw new Error('URL бэкенда не настроен (VITE_API_URL)')
+  }
+
+  const response = await fetch(`${apiBase}/api/chat/stream`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, history }),
+  })
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.error || `HTTP ${response.status}`)
+  }
+
+  if (!response.body) throw new Error('Streaming not supported by browser')
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buf = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buf += decoder.decode(value, { stream: true })
+    const lines = buf.split('\n')
+    buf = lines.pop()
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue
+      const raw = line.slice(6).trim()
+      if (!raw) continue
+      try {
+        const data = JSON.parse(raw)
+        if (data.chunk) onChunk(data.chunk)
+        if (data.done) return
+        if (data.error) throw new Error(data.error)
+      } catch (e) {
+        if (e.message && !e.message.includes('JSON')) throw e
+      }
+    }
+  }
+}
+
 export async function checkAPIStatus() {
   const apiBase = getAPIBase()
 
   if (import.meta.env.PROD && apiBase === null) {
-    return {
-      status: 'offline',
-      message: 'URL бэкенда не настроен (VITE_API_URL).',
-      apis: []
-    }
+    return { status: 'offline', message: 'URL бэкенда не настроен (VITE_API_URL).', apis: [] }
   }
 
   try {
@@ -97,16 +129,13 @@ export async function checkAPIStatus() {
       return {
         status: 'online',
         message: 'Бэкенд доступен',
-        apis: ['backend']
+        streaming: response.data.streaming === true,
+        apis: ['backend'],
       }
     }
-  } catch (error) {
+  } catch {
     // fall through
   }
 
-  return {
-    status: 'offline',
-    message: 'Бэкенд недоступен. Используется демо-режим.',
-    apis: []
-  }
+  return { status: 'offline', message: 'Бэкенд недоступен. Используется демо-режим.', apis: [] }
 }
