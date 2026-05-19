@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -20,8 +20,8 @@ app.use(express.static(path.join(__dirname, '../client/dist')));
 
 app.post('/api/chat', async (req, res) => {
   try {
-    const { message, useKnowledge = true } = req.body;
-    
+    const { message, history = [], useKnowledge = true } = req.body;
+
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
@@ -30,13 +30,13 @@ app.post('/api/chat', async (req, res) => {
     if (useKnowledge) {
       const relevantData = searchKnowledge(message);
       if (relevantData.length > 0) {
-        context = '\n\nРелевантная информация из базы знаний:\n' + 
+        context = '\n\nРелевантная информация из базы знаний:\n' +
                   relevantData.map(item => `- ${item.content}`).join('\n');
       }
     }
 
     const fullMessage = message + context;
-    const response = await chatWithAI(fullMessage);
+    const response = await chatWithAI(fullMessage, history, useKnowledge);
     
     res.json({ 
       response,
