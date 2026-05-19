@@ -1,7 +1,6 @@
 import axios from 'axios'
 
-// 🔥 РАБОЧИЙ КЛЮЧ CHATANYWHERE! ВСЕ МОДЕЛИ!
-const CHATANYWHERE_KEY = 'sk-AQ63p8U2Z0Nk9UAN7tOUBLhanDLEnlM2WtMWzkgJlONwCsYK'
+const CHATANYWHERE_KEY = import.meta.env.VITE_CHATANYWHERE_KEY || ''
 
 const AI_ENDPOINTS = [
   // 1. ChatAnywhere GPT-4o-mini (200 запросов/день) - ГЛАВНАЯ!
