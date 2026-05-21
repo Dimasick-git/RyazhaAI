@@ -1,12 +1,21 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, Bot, User, Loader2, Trash2, Copy, Check, Wifi, WifiOff } from 'lucide-react'
-import { sendMessageStream, sendMessage, checkAPIStatus } from '../services/api'
+import { Send, Bot, User, Loader2, Trash2, Copy, Check, Download, RefreshCw, Sparkles } from 'lucide-react'
+import { sendMessageStream, sendMessage } from '../services/api'
 
 const INITIAL_MESSAGE = {
   role: 'assistant',
   content:
     '👋 Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\n🥛 Создан командой Ryazhenka специально для тебя!\n\n🎮 Могу помочь с:\n• Взломом Switch и установкой CFW\n• Ryazhenka прошивкой и настройкой\n• .nro приложениями и homebrew\n• Sigpatches, emuMMC, любыми Switch темами!\n\n💬 Задавай любые вопросы - отвечу умно и по делу! 🚀\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka',
 }
+
+const QUICK_QUESTIONS = [
+  '🎮 Как взломать Switch?',
+  '📦 Что такое Ryazhenka?',
+  '💾 Как установить sigpatches?',
+  '🗂️ Что такое emuMMC?',
+  '🔧 Как обновить CFW?',
+  '🎵 Как установить темы?',
+]
 
 const STORAGE_KEY = 'ryazha-ai-messages'
 
@@ -23,109 +32,107 @@ function loadMessages() {
   return [INITIAL_MESSAGE]
 }
 
-// Простой markdown-парсер: **жирный**, *курсив*, `код`, ### заголовки, - списки
-function renderMarkdown(text) {
+// Simple markdown renderer: handles code blocks, inline code, bold, italic, lists, headers
+function MessageContent({ text }) {
   const lines = text.split('\n')
   const elements = []
-  let key = 0
+  let i = 0
 
-  for (let i = 0; i < lines.length; i++) {
+  while (i < lines.length) {
     const line = lines[i]
 
-    // Заголовки ### ## #
-    const headingMatch = line.match(/^(#{1,3})\s+(.+)$/)
-    if (headingMatch) {
-      const level = headingMatch[1].length
-      const content = headingMatch[2]
-      const cls = level === 1
-        ? 'text-xl font-bold text-white mt-2 mb-1'
-        : level === 2
-        ? 'text-lg font-bold text-white mt-2 mb-1'
-        : 'text-base font-semibold text-indigo-300 mt-1'
-      elements.push(<p key={key++} className={cls}>{inlineMarkdown(content, key)}</p>)
-      continue
-    }
-
-    // Элементы списка • - *
-    const listMatch = line.match(/^[\s]*[•\-\*]\s+(.+)$/)
-    if (listMatch) {
-      elements.push(
-        <div key={key++} className="flex gap-2 my-0.5">
-          <span className="text-indigo-400 flex-shrink-0 mt-0.5">•</span>
-          <span>{inlineMarkdown(listMatch[1], key)}</span>
-        </div>
-      )
-      continue
-    }
-
-    // Нумерованный список 1. 2. ...
-    const numMatch = line.match(/^(\d+)\.\s+(.+)$/)
-    if (numMatch) {
-      elements.push(
-        <div key={key++} className="flex gap-2 my-0.5">
-          <span className="text-indigo-400 flex-shrink-0 font-mono text-sm mt-0.5">{numMatch[1]}.</span>
-          <span>{inlineMarkdown(numMatch[2], key)}</span>
-        </div>
-      )
-      continue
-    }
-
-    // Пустая строка — отступ
-    if (line.trim() === '') {
-      elements.push(<div key={key++} className="h-2" />)
-      continue
-    }
-
-    // Обычный текст
-    elements.push(<p key={key++} className="leading-relaxed">{inlineMarkdown(line, key)}</p>)
-  }
-
-  return elements
-}
-
-function inlineMarkdown(text, baseKey) {
-  // Разбиваем по паттернам: **bold**, *italic*, `code`
-  const parts = []
-  let remaining = text
-  let idx = 0
-
-  const patterns = [
-    { re: /\*\*(.+?)\*\*/, render: (m) => <strong key={idx++} className="font-bold text-white">{m[1]}</strong> },
-    { re: /\*(.+?)\*/, render: (m) => <em key={idx++} className="italic text-gray-300">{m[1]}</em> },
-    { re: /`(.+?)`/, render: (m) => <code key={idx++} className="bg-ryaha-bg border border-ryaha-border rounded px-1.5 py-0.5 text-xs font-mono text-indigo-300">{m[1]}</code> },
-  ]
-
-  while (remaining.length > 0) {
-    let earliest = null
-    let earliestIndex = Infinity
-    let chosenPattern = null
-
-    for (const p of patterns) {
-      const match = p.re.exec(remaining)
-      if (match && match.index < earliestIndex) {
-        earliest = match
-        earliestIndex = match.index
-        chosenPattern = p
+    // Fenced code block
+    if (line.startsWith('```')) {
+      const lang = line.slice(3).trim()
+      const codeLines = []
+      i++
+      while (i < lines.length && !lines[i].startsWith('```')) {
+        codeLines.push(lines[i])
+        i++
       }
+      elements.push(
+        <pre key={i} className="bg-black/40 border border-ryaha-border rounded-lg p-3 my-2 overflow-x-auto text-sm font-mono text-emerald-300 whitespace-pre">
+          {lang && <div className="text-gray-500 text-xs mb-1">{lang}</div>}
+          {codeLines.join('\n')}
+        </pre>
+      )
+      i++ // skip closing ```
+      continue
     }
 
-    if (!earliest) {
-      parts.push(remaining)
-      break
+    // Headers
+    if (line.startsWith('### ')) {
+      elements.push(<h3 key={i} className="text-base font-bold text-white mt-3 mb-1">{renderInline(line.slice(4))}</h3>)
+      i++; continue
+    }
+    if (line.startsWith('## ')) {
+      elements.push(<h2 key={i} className="text-lg font-bold text-white mt-3 mb-1">{renderInline(line.slice(3))}</h2>)
+      i++; continue
+    }
+    if (line.startsWith('# ')) {
+      elements.push(<h1 key={i} className="text-xl font-bold text-white mt-3 mb-1">{renderInline(line.slice(2))}</h1>)
+      i++; continue
     }
 
-    if (earliestIndex > 0) {
-      parts.push(remaining.slice(0, earliestIndex))
+    // Unordered list item
+    if (/^[-*•] /.test(line)) {
+      const listItems = []
+      while (i < lines.length && /^[-*•] /.test(lines[i])) {
+        listItems.push(<li key={i} className="ml-4">{renderInline(lines[i].slice(2))}</li>)
+        i++
+      }
+      elements.push(<ul key={`ul-${i}`} className="list-disc list-inside space-y-0.5 my-1">{listItems}</ul>)
+      continue
     }
-    parts.push(chosenPattern.render(earliest))
-    remaining = remaining.slice(earliestIndex + earliest[0].length)
+
+    // Numbered list item
+    if (/^\d+\. /.test(line)) {
+      const listItems = []
+      while (i < lines.length && /^\d+\. /.test(lines[i])) {
+        listItems.push(<li key={i} className="ml-4">{renderInline(lines[i].replace(/^\d+\. /, ''))}</li>)
+        i++
+      }
+      elements.push(<ol key={`ol-${i}`} className="list-decimal list-inside space-y-0.5 my-1">{listItems}</ol>)
+      continue
+    }
+
+    // Empty line → spacer
+    if (line.trim() === '') {
+      elements.push(<div key={i} className="h-1" />)
+      i++; continue
+    }
+
+    // Regular paragraph
+    elements.push(<p key={i} className="leading-relaxed">{renderInline(line)}</p>)
+    i++
   }
 
-  return parts.length === 1 && typeof parts[0] === 'string' ? parts[0] : parts
+  return <div className="space-y-0.5 text-sm">{elements}</div>
 }
 
-function MessageContent({ content }) {
-  return <div className="space-y-0.5 text-sm">{renderMarkdown(content)}</div>
+function renderInline(text) {
+  // Split by inline code, bold, italic
+  const parts = []
+  const regex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|__[^_]+__)/g
+  let last = 0
+  let match
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > last) parts.push(text.slice(last, match.index))
+    const token = match[0]
+    if (token.startsWith('`')) {
+      parts.push(<code key={match.index} className="bg-black/40 text-emerald-300 px-1 py-0.5 rounded text-xs font-mono">{token.slice(1, -1)}</code>)
+    } else if (token.startsWith('**')) {
+      parts.push(<strong key={match.index} className="font-semibold text-white">{token.slice(2, -2)}</strong>)
+    } else if (token.startsWith('__')) {
+      parts.push(<strong key={match.index} className="font-semibold text-white">{token.slice(2, -2)}</strong>)
+    } else if (token.startsWith('*')) {
+      parts.push(<em key={match.index} className="italic text-gray-300">{token.slice(1, -1)}</em>)
+    }
+    last = match.index + token.length
+  }
+  if (last < text.length) parts.push(text.slice(last))
+  return parts.length > 0 ? parts : text
 }
 
 function CopyButton({ text }) {
@@ -166,33 +173,12 @@ function BounceDots() {
   )
 }
 
-function StatusBadge({ status }) {
-  if (!status) return null
-  const online = status.status === 'online'
-  return (
-    <div
-      className={`flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full border ${
-        online
-          ? 'border-green-500/30 bg-green-500/10 text-green-400'
-          : 'border-red-500/30 bg-red-500/10 text-red-400'
-      }`}
-      title={status.message}
-    >
-      {online ? <Wifi size={10} /> : <WifiOff size={10} />}
-      <span>{online ? 'Online' : 'Demo'}</span>
-      {online && status.streaming && (
-        <span className="text-green-500/60">· stream</span>
-      )}
-    </div>
-  )
-}
-
 function ChatInterface() {
   const [messages, setMessages] = useState(loadMessages)
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [streamText, setStreamText] = useState('')
-  const [apiStatus, setApiStatus] = useState(null)
+  const [showQuickQ, setShowQuickQ] = useState(true)
 
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
@@ -205,7 +191,6 @@ function ChatInterface() {
     scrollToBottom()
   }, [messages, streamText, scrollToBottom])
 
-  // Persist conversation to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
@@ -214,35 +199,37 @@ function ChatInterface() {
     }
   }, [messages])
 
-  // Check API status on mount and every 60s
-  useEffect(() => {
-    let cancelled = false
-    const check = async () => {
-      const result = await checkAPIStatus()
-      if (!cancelled) setApiStatus(result)
-    }
-    check()
-    const timer = setInterval(check, 60000)
-    return () => {
-      cancelled = true
-      clearInterval(timer)
-    }
-  }, [])
-
   const clearHistory = () => {
     setMessages([INITIAL_MESSAGE])
+    setShowQuickQ(true)
     localStorage.removeItem(STORAGE_KEY)
     inputRef.current?.focus()
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!input.trim() || isLoading) return
+  const exportChat = () => {
+    const text = messages
+      .map((m) => `[${m.role === 'user' ? 'Вы' : 'RYAZHA AI'}]\n${m.content}`)
+      .join('\n\n---\n\n')
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ryazha-ai-chat-${new Date().toISOString().slice(0, 10)}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
-    const userMessage = input.trim()
-    const history = messages
-    setInput('')
-    setMessages((prev) => [...prev, { role: 'user', content: userMessage }])
+  const regenerateLast = async () => {
+    if (isLoading) return
+    const lastUserIdx = [...messages].reverse().findIndex((m) => m.role === 'user')
+    if (lastUserIdx === -1) return
+    const idx = messages.length - 1 - lastUserIdx
+    const userMessage = messages[idx].content
+    const history = messages.slice(0, idx)
+
+    // remove last assistant response if it exists after user message
+    const newMessages = messages.slice(0, idx + 1).filter((_, i) => i <= idx)
+    setMessages(newMessages)
     setIsLoading(true)
     setStreamText('')
 
@@ -254,7 +241,6 @@ function ChatInterface() {
       })
       setMessages((prev) => [...prev, { role: 'assistant', content: full }])
     } catch {
-      // streaming failed — fall back to regular request
       try {
         const response = await sendMessage(userMessage, history)
         setMessages((prev) => [...prev, { role: 'assistant', content: response }])
@@ -270,6 +256,45 @@ function ChatInterface() {
     }
   }
 
+  const submitMessage = useCallback(async (text) => {
+    const userMessage = text.trim()
+    if (!userMessage || isLoading) return
+
+    const history = messages
+    setInput('')
+    setShowQuickQ(false)
+    setMessages((prev) => [...prev, { role: 'user', content: userMessage }])
+    setIsLoading(true)
+    setStreamText('')
+
+    try {
+      let full = ''
+      await sendMessageStream(userMessage, history, (chunk) => {
+        full += chunk
+        setStreamText(full)
+      })
+      setMessages((prev) => [...prev, { role: 'assistant', content: full }])
+    } catch {
+      try {
+        const response = await sendMessage(userMessage, history)
+        setMessages((prev) => [...prev, { role: 'assistant', content: response }])
+      } catch {
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!' },
+        ])
+      }
+    } finally {
+      setIsLoading(false)
+      setStreamText('')
+    }
+  }, [isLoading, messages])
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    submitMessage(input)
+  }
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -278,6 +303,7 @@ function ChatInterface() {
   }
 
   const msgCount = messages.length - 1
+  const hasAssistantAfterUser = messages.length >= 2 && messages[messages.length - 1]?.role === 'assistant'
 
   return (
     <div className="bg-ryaha-card rounded-2xl border border-ryaha-border overflow-hidden glow-effect">
@@ -289,22 +315,41 @@ function ChatInterface() {
           {msgCount > 0 && (
             <span className="text-xs text-gray-600">· {msgCount} сообщ.</span>
           )}
-          <StatusBadge status={apiStatus} />
         </div>
-        {msgCount > 0 && (
-          <button
-            onClick={clearHistory}
-            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
-            title="Очистить историю"
-          >
-            <Trash2 size={13} />
-            Очистить
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          {hasAssistantAfterUser && !isLoading && (
+            <button
+              onClick={regenerateLast}
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-indigo-400 transition-colors px-2 py-1 rounded-lg hover:bg-indigo-500/10"
+              title="Сгенерировать ответ заново"
+            >
+              <RefreshCw size={13} />
+            </button>
+          )}
+          {msgCount > 0 && (
+            <>
+              <button
+                onClick={exportChat}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-green-400 transition-colors px-2 py-1 rounded-lg hover:bg-green-500/10"
+                title="Экспортировать чат"
+              >
+                <Download size={13} />
+              </button>
+              <button
+                onClick={clearHistory}
+                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
+                title="Очистить историю"
+              >
+                <Trash2 size={13} />
+                Очистить
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Messages */}
-      <div className="h-[460px] overflow-y-auto p-6 space-y-4">
+      <div className="h-[440px] overflow-y-auto p-6 space-y-4">
         {messages.map((message, index) => (
           <div
             key={index}
@@ -316,7 +361,7 @@ function ChatInterface() {
               </div>
             )}
 
-            <div className="flex flex-col gap-1 max-w-[80%]">
+            <div className="flex flex-col gap-1 max-w-[82%]">
               <div
                 className={`rounded-2xl px-4 py-3 ${
                   message.role === 'user'
@@ -325,7 +370,7 @@ function ChatInterface() {
                 }`}
               >
                 {message.role === 'assistant' ? (
-                  <MessageContent content={message.content} />
+                  <MessageContent text={message.content} />
                 ) : (
                   <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>
                 )}
@@ -351,14 +396,14 @@ function ChatInterface() {
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
               <Bot size={17} />
             </div>
-            <div className="max-w-[80%] bg-ryaha-hover border border-ryaha-border rounded-2xl px-4 py-3 text-gray-200">
-              <MessageContent content={streamText} />
-              <span className="inline-block w-1.5 h-3.5 bg-indigo-400 ml-0.5 animate-pulse align-middle rounded-sm" />
+            <div className="max-w-[82%] bg-ryaha-hover border border-ryaha-border rounded-2xl px-4 py-3 text-gray-200">
+              <MessageContent text={streamText} />
+              <span className="inline-block w-1.5 h-4 bg-indigo-400 ml-0.5 animate-pulse align-middle rounded-sm" />
             </div>
           </div>
         )}
 
-        {/* Bouncing dots while waiting for first chunk */}
+        {/* Waiting dots */}
         {isLoading && !streamText && (
           <div className="flex gap-3 justify-start">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
@@ -373,30 +418,61 @@ function ChatInterface() {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Quick question chips */}
+      {showQuickQ && msgCount === 0 && (
+        <div className="px-6 pb-3 border-t border-ryaha-border/50 pt-3">
+          <div className="flex items-center gap-1.5 mb-2 text-xs text-gray-500">
+            <Sparkles size={11} />
+            <span>Быстрые вопросы</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {QUICK_QUESTIONS.map((q) => (
+              <button
+                key={q}
+                onClick={() => submitMessage(q)}
+                disabled={isLoading}
+                className="text-xs px-3 py-1.5 rounded-full bg-ryaha-hover border border-ryaha-border text-gray-300 hover:border-indigo-500/50 hover:text-indigo-300 hover:bg-indigo-500/10 transition-all disabled:opacity-50"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <form onSubmit={handleSubmit} className="border-t border-ryaha-border p-4 bg-ryaha-bg">
-        <div className="flex gap-3">
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Задай свой вопрос… (Enter для отправки)"
-            className="flex-1 bg-ryaha-card border border-ryaha-border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-sm"
-            disabled={isLoading}
-          />
+        <div className="flex gap-3 items-end">
+          <div className="flex-1 relative">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value)
+                e.target.style.height = 'auto'
+                e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder="Задай свой вопрос… (Enter для отправки, Shift+Enter — новая строка)"
+              rows={1}
+              className="w-full bg-ryaha-card border border-ryaha-border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none overflow-hidden text-sm"
+              disabled={isLoading}
+            />
+            {input.length > 0 && (
+              <span className="absolute bottom-2 right-3 text-xs text-gray-600">{input.length}</span>
+            )}
+          </div>
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl px-6 py-3 font-semibold hover:shadow-lg hover:shadow-indigo-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl px-5 py-3 font-semibold hover:shadow-lg hover:shadow-indigo-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0"
           >
             {isLoading ? (
               <Loader2 size={18} className="animate-spin" />
             ) : (
               <Send size={18} />
             )}
-            <span className="hidden sm:inline">{isLoading ? 'Думаю…' : 'Отправить'}</span>
+            <span className="hidden sm:inline text-sm">{isLoading ? 'Думаю…' : 'Отправить'}</span>
           </button>
         </div>
       </form>
