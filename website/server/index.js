@@ -42,9 +42,29 @@ setInterval(() => {
   }
 }, 5 * 60_000);
 
-// ── Middleware ───────────────────────────────────────────────────
+// ── Middleware & Input validation ────────────────────────────────
+const MAX_MESSAGE_LEN = 2000;
+const MAX_HISTORY_LEN = 20;
+const MAX_HISTORY_CONTENT_LEN = 1000;
+
+function validateInput(message, history) {
+  if (!message || typeof message !== 'string') {
+    return 'Message is required';
+  }
+  if (message.length > MAX_MESSAGE_LEN) {
+    return `Сообщение слишком длинное (максимум ${MAX_MESSAGE_LEN} символов)`;
+  }
+  if (history && !Array.isArray(history)) {
+    return 'History must be an array';
+  }
+  if (history && history.length > MAX_HISTORY_LEN) {
+    return `История слишком длинная (максимум ${MAX_HISTORY_LEN} сообщений)`;
+  }
+  return null;
+}
+
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // ── Helper: build knowledge context ─────────────────────────────
@@ -63,11 +83,17 @@ function getKnowledgeContext(message) {
 
 // ── POST /api/chat (non-streaming, legacy) ───────────────────────
 app.post('/api/chat', async (req, res) => {
+  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'Слишком много запросов. Подождите минуту.' });
+  }
+
   try {
     const { message, history = [], useKnowledge = true } = req.body;
 
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
+    const validationError = validateInput(message, history);
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
     }
 
     const context = useKnowledge ? getKnowledgeContext(message) : '';
@@ -90,8 +116,9 @@ app.post('/api/chat/stream', async (req, res) => {
 
   const { message, history = [], useKnowledge = true } = req.body;
 
-  if (!message) {
-    return res.status(400).json({ error: 'Message is required' });
+  const validationError = validateInput(message, history);
+  if (validationError) {
+    return res.status(400).json({ error: validationError });
   }
 
   res.setHeader('Content-Type', 'text/event-stream');

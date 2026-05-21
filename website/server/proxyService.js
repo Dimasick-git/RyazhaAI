@@ -87,11 +87,17 @@ function getValidatedApiKey() {
   return apiKey;
 }
 
+const ALLOWED_ROLES = new Set(['user', 'assistant']);
+const MAX_CONTENT_LEN = 1000;
+
 function buildMessages(message, history) {
-  const recentHistory = (history || []).slice(-20);
+  const recentHistory = (history || [])
+    .slice(-20)
+    .filter(m => m && ALLOWED_ROLES.has(m.role) && typeof m.content === 'string')
+    .map(m => ({ role: m.role, content: m.content.slice(0, MAX_CONTENT_LEN) }));
   return [
     { role: 'system', content: SYSTEM_PROMPT },
-    ...recentHistory.map(m => ({ role: m.role, content: m.content })),
+    ...recentHistory,
     { role: 'user', content: message },
   ];
 }
