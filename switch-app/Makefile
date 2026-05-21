@@ -166,7 +166,7 @@ $(OFILES_SRC)	: $(HFILES_BIN)
 #---------------------------------------------------------------------------------
 %.nacp:
 	@echo creating metadata...
-	@nacptool --create "AI RYAHA" "Dimasick" "1.0.0" $@
+	@nacptool --create "RYAZHA AI" "Dimasick-git" "2.1.0" $@
 
 -include $(DEPENDS)
 

@@ -155,18 +155,17 @@ function Team() {
               Умный AI помощник для Nintendo Switch с поддержкой .nro и веб-интерфейсом.
             </p>
             <div className="flex gap-2">
-              <a href="https://github.com/Dimasick-git/Ryazhenka" target="_blank" rel="noopener noreferrer" 
+              <a href="https://github.com/Dimasick-git/RyazhaAI" target="_blank" rel="noopener noreferrer"
                  className="px-3 py-1 bg-ryaha-bg rounded-lg text-sm hover:bg-ryaha-hover transition-colors">
                 GitHub
               </a>
               <a
-                href="https://github.com/Dimasick-git/Ryazhenka"
+                href="https://dimasick-git.github.io/RyazhaAI"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold"
+                className="inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 font-semibold text-sm"
               >
-                <Github size={18} />
-                GitHub →
+                Веб-версия →
               </a>
             </div>
           </div>
