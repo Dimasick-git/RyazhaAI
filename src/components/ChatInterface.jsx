@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, Bot, User, Loader2, Trash2, Copy, Check, Download, RefreshCw, Sparkles } from 'lucide-react'
+import { Send, Bot, User, Loader2, Trash2, Copy, Check, Download, RefreshCw, Sparkles, Mic, MicOff, ThumbsUp, ThumbsDown, Share2 } from 'lucide-react'
 import { sendMessageStream, sendMessage } from '../services/api'
 
 const INITIAL_MESSAGE = {
@@ -17,7 +17,33 @@ const QUICK_QUESTIONS = [
   '🎵 Как установить темы?',
 ]
 
+// Context-aware follow-up suggestions based on keywords in the last AI reply
+const FOLLOWUP_RULES = [
+  { keywords: ['atmosphere', 'атмосфер'], questions: ['Как обновить Atmosphere?', 'Где скачать sigpatches?', 'Что такое Hekate?'] },
+  { keywords: ['hekate', 'хекате'], questions: ['Как создать emuMMC?', 'Как настроить Hekate?', 'Что такое NAND backup?'] },
+  { keywords: ['emummc', 'emunand', 'эмунанд'], questions: ['Как перенести игры на emuMMC?', 'Что такое sysMMC?', 'Как обновить emuMMC?'] },
+  { keywords: ['sigpatch', 'сигпатч'], questions: ['Как обновить sigpatches?', 'Где взять свежие sigpatches?', 'Почему игры не запускаются?'] },
+  { keywords: ['тема', 'theme', 'nxthemes'], questions: ['Где найти темы для Switch?', 'Как установить NXThemes?', 'Как создать свою тему?'] },
+  { keywords: ['homebrew', 'хомбрю', '.nro'], questions: ['Какие лучшие homebrew приложения?', 'Как установить .nro?', 'Что такое Tesla overlay?'] },
+  { keywords: ['rcm', 'рцм', 'jig'], questions: ['Как войти в RCM?', 'Что такое fusee?', 'Как использовать payload?'] },
+  { keywords: ['modchip', 'моддчип', 'picofly'], questions: ['Как установить modchip?', 'Что такое Picofly?', 'Чем отличается modchip от RCM?'] },
+  { keywords: ['banning', 'ban', 'бан'], questions: ['Как избежать бана?', 'Что такое 90DNS?', 'Безопасно ли играть онлайн?'] },
+  { keywords: ['ryazhenka', 'ряженка'], questions: ['Что нового в Ryazhenka?', 'Как установить Ryazhenka?', 'Что входит в Ryazhenka?'] },
+]
+
+function getFollowupSuggestions(text) {
+  if (!text) return []
+  const lower = text.toLowerCase()
+  for (const rule of FOLLOWUP_RULES) {
+    if (rule.keywords.some((k) => lower.includes(k))) {
+      return rule.questions
+    }
+  }
+  return []
+}
+
 const STORAGE_KEY = 'ryazha-ai-messages'
+const REACTIONS_KEY = 'ryazha-ai-reactions'
 
 function loadMessages() {
   try {
@@ -32,7 +58,15 @@ function loadMessages() {
   return [INITIAL_MESSAGE]
 }
 
-// Simple markdown renderer: handles code blocks, inline code, bold, italic, lists, headers
+function loadReactions() {
+  try {
+    const saved = localStorage.getItem(REACTIONS_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return {}
+}
+
+// Simple markdown renderer
 function MessageContent({ text }) {
   const lines = text.split('\n')
   const elements = []
@@ -41,7 +75,6 @@ function MessageContent({ text }) {
   while (i < lines.length) {
     const line = lines[i]
 
-    // Fenced code block
     if (line.startsWith('```')) {
       const lang = line.slice(3).trim()
       const codeLines = []
@@ -56,11 +89,10 @@ function MessageContent({ text }) {
           {codeLines.join('\n')}
         </pre>
       )
-      i++ // skip closing ```
+      i++
       continue
     }
 
-    // Headers
     if (line.startsWith('### ')) {
       elements.push(<h3 key={i} className="text-base font-bold text-white mt-3 mb-1">{renderInline(line.slice(4))}</h3>)
       i++; continue
@@ -74,7 +106,6 @@ function MessageContent({ text }) {
       i++; continue
     }
 
-    // Unordered list item
     if (/^[-*•] /.test(line)) {
       const listItems = []
       while (i < lines.length && /^[-*•] /.test(lines[i])) {
@@ -85,7 +116,6 @@ function MessageContent({ text }) {
       continue
     }
 
-    // Numbered list item
     if (/^\d+\. /.test(line)) {
       const listItems = []
       while (i < lines.length && /^\d+\. /.test(lines[i])) {
@@ -96,13 +126,11 @@ function MessageContent({ text }) {
       continue
     }
 
-    // Empty line → spacer
     if (line.trim() === '') {
       elements.push(<div key={i} className="h-1" />)
       i++; continue
     }
 
-    // Regular paragraph
     elements.push(<p key={i} className="leading-relaxed">{renderInline(line)}</p>)
     i++
   }
@@ -111,7 +139,6 @@ function MessageContent({ text }) {
 }
 
 function renderInline(text) {
-  // Split by inline code, bold, italic
   const parts = []
   const regex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|__[^_]+__)/g
   let last = 0
@@ -143,9 +170,7 @@ function CopyButton({ text }) {
       await navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // clipboard not available
-    }
+    } catch {}
   }
 
   return (
@@ -156,6 +181,28 @@ function CopyButton({ text }) {
     >
       {copied ? <Check size={13} className="text-green-400" /> : <Copy size={13} />}
     </button>
+  )
+}
+
+function ReactionButtons({ msgIndex, reactions, onReact }) {
+  const reaction = reactions[msgIndex]
+  return (
+    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <button
+        onClick={() => onReact(msgIndex, 'up')}
+        className={`p-1 rounded transition-colors ${reaction === 'up' ? 'text-green-400' : 'text-gray-600 hover:text-green-400'}`}
+        title="Полезно"
+      >
+        <ThumbsUp size={13} />
+      </button>
+      <button
+        onClick={() => onReact(msgIndex, 'down')}
+        className={`p-1 rounded transition-colors ${reaction === 'down' ? 'text-red-400' : 'text-gray-600 hover:text-red-400'}`}
+        title="Не полезно"
+      >
+        <ThumbsDown size={13} />
+      </button>
+    </div>
   )
 }
 
@@ -173,12 +220,93 @@ function BounceDots() {
   )
 }
 
+function VoiceButton({ onResult, disabled }) {
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef(null)
+
+  const supported = typeof window !== 'undefined' &&
+    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
+
+  const toggle = useCallback(() => {
+    if (!supported) return
+
+    if (isListening) {
+      recognitionRef.current?.stop()
+      setIsListening(false)
+      return
+    }
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    const rec = new SR()
+    rec.lang = 'ru-RU'
+    rec.interimResults = false
+    rec.maxAlternatives = 1
+
+    rec.onresult = (e) => {
+      const transcript = e.results[0][0].transcript
+      onResult(transcript)
+      setIsListening(false)
+    }
+    rec.onerror = () => setIsListening(false)
+    rec.onend = () => setIsListening(false)
+
+    recognitionRef.current = rec
+    rec.start()
+    setIsListening(true)
+  }, [isListening, onResult, supported])
+
+  if (!supported) return null
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={disabled}
+      className={`p-3 rounded-xl transition-all flex-shrink-0 ${
+        isListening
+          ? 'bg-red-500/20 text-red-400 border border-red-500/50 animate-pulse'
+          : 'bg-ryaha-card border border-ryaha-border text-gray-400 hover:text-indigo-400 hover:border-indigo-500/50'
+      } disabled:opacity-40 disabled:cursor-not-allowed`}
+      title={isListening ? 'Остановить запись' : 'Голосовой ввод'}
+    >
+      {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+    </button>
+  )
+}
+
+function ShareButton({ messages }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleShare = async () => {
+    const text = messages
+      .map((m) => `[${m.role === 'user' ? 'Вы' : 'RYAZHA AI'}]\n${m.content}`)
+      .join('\n\n---\n\n')
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {}
+  }
+
+  return (
+    <button
+      onClick={handleShare}
+      className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-400 transition-colors px-2 py-1 rounded-lg hover:bg-blue-500/10"
+      title="Скопировать чат"
+    >
+      {copied ? <Check size={13} className="text-green-400" /> : <Share2 size={13} />}
+    </button>
+  )
+}
+
 function ChatInterface() {
   const [messages, setMessages] = useState(loadMessages)
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [streamText, setStreamText] = useState('')
   const [showQuickQ, setShowQuickQ] = useState(true)
+  const [reactions, setReactions] = useState(loadReactions)
+  const [followups, setFollowups] = useState([])
 
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
@@ -194,15 +322,34 @@ function ChatInterface() {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
-    } catch {
-      // storage quota exceeded — ignore
-    }
+    } catch {}
   }, [messages])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(REACTIONS_KEY, JSON.stringify(reactions))
+    } catch {}
+  }, [reactions])
+
+  const handleReact = useCallback((msgIndex, type) => {
+    setReactions((prev) => {
+      const next = { ...prev }
+      if (next[msgIndex] === type) {
+        delete next[msgIndex]
+      } else {
+        next[msgIndex] = type
+      }
+      return next
+    })
+  }, [])
 
   const clearHistory = () => {
     setMessages([INITIAL_MESSAGE])
     setShowQuickQ(true)
+    setFollowups([])
+    setReactions({})
     localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(REACTIONS_KEY)
     inputRef.current?.focus()
   }
 
@@ -227,11 +374,11 @@ function ChatInterface() {
     const userMessage = messages[idx].content
     const history = messages.slice(0, idx)
 
-    // remove last assistant response if it exists after user message
     const newMessages = messages.slice(0, idx + 1).filter((_, i) => i <= idx)
     setMessages(newMessages)
     setIsLoading(true)
     setStreamText('')
+    setFollowups([])
 
     try {
       let full = ''
@@ -240,10 +387,12 @@ function ChatInterface() {
         setStreamText(full)
       })
       setMessages((prev) => [...prev, { role: 'assistant', content: full }])
+      setFollowups(getFollowupSuggestions(full))
     } catch {
       try {
         const response = await sendMessage(userMessage, history)
         setMessages((prev) => [...prev, { role: 'assistant', content: response }])
+        setFollowups(getFollowupSuggestions(response))
       } catch {
         setMessages((prev) => [
           ...prev,
@@ -263,6 +412,7 @@ function ChatInterface() {
     const history = messages
     setInput('')
     setShowQuickQ(false)
+    setFollowups([])
     setMessages((prev) => [...prev, { role: 'user', content: userMessage }])
     setIsLoading(true)
     setStreamText('')
@@ -274,10 +424,12 @@ function ChatInterface() {
         setStreamText(full)
       })
       setMessages((prev) => [...prev, { role: 'assistant', content: full }])
+      setFollowups(getFollowupSuggestions(full))
     } catch {
       try {
         const response = await sendMessage(userMessage, history)
         setMessages((prev) => [...prev, { role: 'assistant', content: response }])
+        setFollowups(getFollowupSuggestions(response))
       } catch {
         setMessages((prev) => [
           ...prev,
@@ -301,6 +453,11 @@ function ChatInterface() {
       handleSubmit(e)
     }
   }
+
+  const handleVoiceResult = useCallback((transcript) => {
+    setInput((prev) => prev ? `${prev} ${transcript}` : transcript)
+    inputRef.current?.focus()
+  }, [])
 
   const msgCount = messages.length - 1
   const hasAssistantAfterUser = messages.length >= 2 && messages[messages.length - 1]?.role === 'assistant'
@@ -328,6 +485,7 @@ function ChatInterface() {
           )}
           {msgCount > 0 && (
             <>
+              <ShareButton messages={messages} />
               <button
                 onClick={exportChat}
                 className="flex items-center gap-1 text-xs text-gray-500 hover:text-green-400 transition-colors px-2 py-1 rounded-lg hover:bg-green-500/10"
@@ -376,8 +534,9 @@ function ChatInterface() {
                 )}
               </div>
               {message.role === 'assistant' && (
-                <div className="flex items-center pl-1">
+                <div className="flex items-center gap-1 pl-1">
                   <CopyButton text={message.content} />
+                  <ReactionButtons msgIndex={index} reactions={reactions} onReact={handleReact} />
                 </div>
               )}
             </div>
@@ -418,7 +577,29 @@ function ChatInterface() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Quick question chips */}
+      {/* Follow-up suggestions after AI reply */}
+      {!isLoading && followups.length > 0 && (
+        <div className="px-6 pb-3 border-t border-ryaha-border/50 pt-3">
+          <div className="flex items-center gap-1.5 mb-2 text-xs text-gray-500">
+            <Sparkles size={11} className="text-indigo-400" />
+            <span>Продолжить разговор:</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {followups.map((q) => (
+              <button
+                key={q}
+                onClick={() => submitMessage(q)}
+                disabled={isLoading}
+                className="text-xs px-3 py-1.5 rounded-full bg-ryaha-hover border border-indigo-500/30 text-indigo-300 hover:border-indigo-500/70 hover:bg-indigo-500/10 transition-all disabled:opacity-50"
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Quick question chips (initial state) */}
       {showQuickQ && msgCount === 0 && (
         <div className="px-6 pb-3 border-t border-ryaha-border/50 pt-3">
           <div className="flex items-center gap-1.5 mb-2 text-xs text-gray-500">
@@ -462,6 +643,7 @@ function ChatInterface() {
               <span className="absolute bottom-2 right-3 text-xs text-gray-600">{input.length}</span>
             )}
           </div>
+          <VoiceButton onResult={handleVoiceResult} disabled={isLoading} />
           <button
             type="submit"
             disabled={isLoading || !input.trim()}

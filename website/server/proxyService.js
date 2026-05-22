@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import dotenv from 'dotenv';
-import crypto from 'crypto';
 
 dotenv.config();
 
@@ -14,57 +13,6 @@ const AI_ENDPOINTS = [
   { url: 'https://api.chatanywhere.org/v1/chat/completions', model: 'gpt-4o-mini' },
 ];
 
-// ── Endpoint health tracker ──────────────────────────────────────
-// Skips endpoints that failed recently (60 s cool-down)
-const ENDPOINT_FAIL_TTL_MS = 60_000;
-const endpointFailAt = new Map(); // `${url}::${model}` → timestamp
-
-function endpointKey(ep) { return `${ep.url}::${ep.model}`; }
-
-function markFailed(ep) { endpointFailAt.set(endpointKey(ep), Date.now()); }
-
-function isHealthy(ep) {
-  const failedAt = endpointFailAt.get(endpointKey(ep));
-  return !failedAt || Date.now() - failedAt > ENDPOINT_FAIL_TTL_MS;
-}
-
-// ── Simple response cache ────────────────────────────────────────
-// Caches non-streaming responses for 5 minutes to save API calls
-const CACHE_TTL_MS = 5 * 60_000;
-const responseCache = new Map(); // hash → { text, expiresAt }
-
-function cacheKey(messages) {
-  const payload = JSON.stringify(messages.map(m => ({ r: m.role, c: m.content.slice(0, 200) })));
-  return crypto.createHash('md5').update(payload).digest('hex');
-}
-
-function getCached(key) {
-  const entry = responseCache.get(key);
-  if (!entry || Date.now() > entry.expiresAt) {
-    responseCache.delete(key);
-    return null;
-  }
-  return entry.text;
-}
-
-function setCache(key, text) {
-  // Limit cache size to 100 entries (drop oldest)
-  if (responseCache.size >= 100) {
-    const firstKey = responseCache.keys().next().value;
-    responseCache.delete(firstKey);
-  }
-  responseCache.set(key, { text, expiresAt: Date.now() + CACHE_TTL_MS });
-}
-
-// Periodically purge expired cache entries
-setInterval(() => {
-  const now = Date.now();
-  for (const [k, v] of responseCache.entries()) {
-    if (now > v.expiresAt) responseCache.delete(k);
-  }
-}, CACHE_TTL_MS);
-
-// ── System prompt ────────────────────────────────────────────────
 const SYSTEM_PROMPT = `Ты RYAZHA AI - эксперт по прошитому Nintendo Switch в 2026 году, созданный командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01).
 
 ТВОЯ ЭКСПЕРТИЗА ПО ПРОШИТОМУ SWITCH 2026:
@@ -96,7 +44,6 @@ GitHub: Dimasick-git/Ryzhenka
 
 СТИЛЬ ОТВЕТОВ:
 - Технически точно, кратко на русском
-- Используй markdown: **жирный**, \`код\`, \`\`\`блок кода\`\`\`, - списки
 - Пошаговые инструкции с версиями 2026
 - Ссылки на актуальные источники
 - Упоминай Ryazhenka CFW как лучшее решение
@@ -159,18 +106,7 @@ export async function chatWithAI(message, history = []) {
   const apiKey = getValidatedApiKey();
   const messages = buildMessages(message, history);
 
-  // Try cache first (only for fresh conversations, not mid-dialogue)
-  const key = cacheKey(messages);
-  const cached = getCached(key);
-  if (cached) {
-    console.log('Cache hit — skipping API call');
-    return cached;
-  }
-
-  const healthy = AI_ENDPOINTS.filter(isHealthy);
-  const order = healthy.length > 0 ? healthy : AI_ENDPOINTS; // fallback: try all
-
-  for (const endpoint of order) {
+  for (const endpoint of AI_ENDPOINTS) {
     try {
       console.log(`Trying ${endpoint.model} at ${endpoint.url}...`);
       const response = await axios.post(
@@ -182,14 +118,12 @@ export async function chatWithAI(message, history = []) {
       const content = response.data?.choices?.[0]?.message?.content;
       if (content) {
         console.log(`Success with ${endpoint.model}`);
-        setCache(key, content.trim());
         return content.trim();
       }
 
       throw new Error('Invalid response format');
     } catch (error) {
       console.error(`Endpoint ${endpoint.model} failed:`, error.message);
-      markFailed(endpoint);
     }
   }
 
@@ -200,10 +134,7 @@ export async function chatWithAIStream(message, history = [], onChunk) {
   const apiKey = getValidatedApiKey();
   const messages = buildMessages(message, history);
 
-  const healthy = AI_ENDPOINTS.filter(isHealthy);
-  const order = healthy.length > 0 ? healthy : AI_ENDPOINTS;
-
-  for (const endpoint of order) {
+  for (const endpoint of AI_ENDPOINTS) {
     try {
       console.log(`[stream] Trying ${endpoint.model}...`);
       const response = await axios.post(
@@ -251,7 +182,6 @@ export async function chatWithAIStream(message, history = [], onChunk) {
       throw new Error('Empty stream response');
     } catch (error) {
       console.error(`[stream] Endpoint ${endpoint.model} failed:`, error.message);
-      markFailed(endpoint);
     }
   }
 

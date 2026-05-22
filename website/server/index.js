@@ -14,30 +14,6 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ── CORS: allow only known origins ──────────────────────────────
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || '')
-  .split(',')
-  .map(o => o.trim())
-  .filter(Boolean);
-
-// Always allow localhost in dev and the GitHub Pages URL
-const DEFAULT_ORIGINS = [
-  'http://localhost:5173',
-  'http://localhost:3001',
-  'https://dimasick-git.github.io',
-];
-const ALL_ORIGINS = new Set([...DEFAULT_ORIGINS, ...ALLOWED_ORIGINS]);
-
-app.use(cors({
-  origin: (origin, cb) => {
-    // Allow non-browser clients (curl, mobile apps) and whitelisted origins
-    if (!origin || ALL_ORIGINS.has(origin)) return cb(null, true);
-    cb(new Error(`CORS: origin ${origin} not allowed`));
-  },
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'X-API-Key'],
-}));
-
 // ── Rate limiter: 15 requests per minute per IP ─────────────────
 const rateLimitMap = new Map();
 
@@ -69,6 +45,7 @@ setInterval(() => {
 // ── Middleware & Input validation ────────────────────────────────
 const MAX_MESSAGE_LEN = 2000;
 const MAX_HISTORY_LEN = 20;
+const MAX_HISTORY_CONTENT_LEN = 1000;
 
 function validateInput(message, history) {
   if (!message || typeof message !== 'string') {
@@ -86,21 +63,7 @@ function validateInput(message, history) {
   return null;
 }
 
-// ── Knowledge API auth middleware ────────────────────────────────
-const KNOWLEDGE_API_KEY = process.env.KNOWLEDGE_API_KEY || '';
-
-function requireApiKey(req, res, next) {
-  if (!KNOWLEDGE_API_KEY) {
-    // No key configured — deny all writes to be safe
-    return res.status(503).json({ error: 'Knowledge API writes are disabled (KNOWLEDGE_API_KEY not set)' });
-  }
-  const provided = req.headers['x-api-key'] || req.query.api_key;
-  if (provided !== KNOWLEDGE_API_KEY) {
-    return res.status(401).json({ error: 'Invalid or missing API key' });
-  }
-  next();
-}
-
+app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
@@ -118,16 +81,9 @@ function getKnowledgeContext(message) {
   return '';
 }
 
-// ── Real IP helper (works behind proxies / Railway / Render) ─────
-function getClientIp(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) return forwarded.split(',')[0].trim();
-  return req.socket?.remoteAddress || 'unknown';
-}
-
 // ── POST /api/chat (non-streaming, legacy) ───────────────────────
 app.post('/api/chat', async (req, res) => {
-  const ip = getClientIp(req);
+  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
   if (isRateLimited(ip)) {
     return res.status(429).json({ error: 'Слишком много запросов. Подождите минуту.' });
   }
@@ -152,7 +108,7 @@ app.post('/api/chat', async (req, res) => {
 
 // ── POST /api/chat/stream (SSE streaming) ───────────────────────
 app.post('/api/chat/stream', async (req, res) => {
-  const ip = getClientIp(req);
+  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
 
   if (isRateLimited(ip)) {
     return res.status(429).json({ error: 'Слишком много запросов. Подождите минуту.' });
@@ -193,17 +149,11 @@ app.get('/api/knowledge', (req, res) => {
   }
 });
 
-// POST requires API key — prevents anonymous abuse
-app.post('/api/knowledge', requireApiKey, (req, res) => {
+app.post('/api/knowledge', (req, res) => {
   try {
     const { content, category, tags } = req.body;
-    if (!content || typeof content !== 'string' || content.trim().length === 0) {
-      return res.status(400).json({ error: 'Content is required' });
-    }
-    if (content.length > 5000) {
-      return res.status(400).json({ error: 'Content too long (max 5000 chars)' });
-    }
-    res.json({ success: true, entry: addKnowledge(content.trim(), category, tags) });
+    if (!content) return res.status(400).json({ error: 'Content is required' });
+    res.json({ success: true, entry: addKnowledge(content, category, tags) });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -228,5 +178,4 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📊 Proxy: ${process.env.USE_PROXY === 'true' ? 'Enabled' : 'Disabled'}`);
   console.log(`⚡ Streaming: enabled`);
-  console.log(`🔐 Knowledge API writes: ${KNOWLEDGE_API_KEY ? 'protected' : 'disabled'}`);
 });
