@@ -17,6 +17,7 @@
     "https-proxy-agent": "^7.0.2",
     "node-fetch": "^3.3.2",
     "multer": "^2.0.2",
-    "uuid": "^14.0.0"
+    "uuid": "^14.0.0",
+    "@anthropic-ai/sdk": "^0.39.0"
   }
 }
