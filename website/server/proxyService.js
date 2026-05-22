@@ -1,32 +1,70 @@
 import axios from 'axios';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import dotenv from 'dotenv';
+import crypto from 'crypto';
 
 dotenv.config();
 
-// ── Anthropic SDK (optional – only loaded when ANTHROPIC_API_KEY is set) ──────
-let anthropic = null;
-if (process.env.ANTHROPIC_API_KEY) {
-  try {
-    const { default: Anthropic } = await import('@anthropic-ai/sdk');
-    anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    console.log('[Claude] Anthropic SDK loaded — Claude is primary provider');
-  } catch {
-    console.warn('[Claude] @anthropic-ai/sdk not installed, falling back to ChatAnywhere');
-  }
-}
-
-// ── ChatAnywhere fallback endpoints (OpenAI-compatible) ────────────────────────
-const OPENAI_ENDPOINTS = [
+const AI_ENDPOINTS = [
   { url: 'https://api.chatanywhere.tech/v1/chat/completions', model: 'gpt-4o-mini' },
+  { url: 'https://api.chatanywhere.tech/v1/chat/completions', model: 'gpt-3.5-turbo' },
   { url: 'https://api.chatanywhere.tech/v1/chat/completions', model: 'deepseek-v3' },
   { url: 'https://api.chatanywhere.tech/v1/chat/completions', model: 'gpt-4o' },
-  { url: 'https://api.chatanywhere.tech/v1/chat/completions', model: 'gpt-3.5-turbo' },
-  { url: 'https://api.chatanywhere.org/v1/chat/completions', model: 'gpt-4o-mini' },
   { url: 'https://api.chatanywhere.org/v1/chat/completions', model: 'gpt-3.5-turbo' },
+  { url: 'https://api.chatanywhere.org/v1/chat/completions', model: 'gpt-4o-mini' },
 ];
 
-// ── System prompt ──────────────────────────────────────────────────────────────
+// ── Endpoint health tracker ──────────────────────────────────────
+// Skips endpoints that failed recently (60 s cool-down)
+const ENDPOINT_FAIL_TTL_MS = 60_000;
+const endpointFailAt = new Map(); // `${url}::${model}` → timestamp
+
+function endpointKey(ep) { return `${ep.url}::${ep.model}`; }
+
+function markFailed(ep) { endpointFailAt.set(endpointKey(ep), Date.now()); }
+
+function isHealthy(ep) {
+  const failedAt = endpointFailAt.get(endpointKey(ep));
+  return !failedAt || Date.now() - failedAt > ENDPOINT_FAIL_TTL_MS;
+}
+
+// ── Simple response cache ────────────────────────────────────────
+// Caches non-streaming responses for 5 minutes to save API calls
+const CACHE_TTL_MS = 5 * 60_000;
+const responseCache = new Map(); // hash → { text, expiresAt }
+
+function cacheKey(messages) {
+  const payload = JSON.stringify(messages.map(m => ({ r: m.role, c: m.content.slice(0, 200) })));
+  return crypto.createHash('md5').update(payload).digest('hex');
+}
+
+function getCached(key) {
+  const entry = responseCache.get(key);
+  if (!entry || Date.now() > entry.expiresAt) {
+    responseCache.delete(key);
+    return null;
+  }
+  return entry.text;
+}
+
+function setCache(key, text) {
+  // Limit cache size to 100 entries (drop oldest)
+  if (responseCache.size >= 100) {
+    const firstKey = responseCache.keys().next().value;
+    responseCache.delete(firstKey);
+  }
+  responseCache.set(key, { text, expiresAt: Date.now() + CACHE_TTL_MS });
+}
+
+// Periodically purge expired cache entries
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of responseCache.entries()) {
+    if (now > v.expiresAt) responseCache.delete(k);
+  }
+}, CACHE_TTL_MS);
+
+// ── System prompt ────────────────────────────────────────────────
 const SYSTEM_PROMPT = `Ты RYAZHA AI - эксперт по прошитому Nintendo Switch в 2026 году, созданный командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01).
 
 ТВОЯ ЭКСПЕРТИЗА ПО ПРОШИТОМУ SWITCH 2026:
@@ -58,137 +96,120 @@ GitHub: Dimasick-git/Ryzhenka
 
 СТИЛЬ ОТВЕТОВ:
 - Технически точно, кратко на русском
+- Используй markdown: **жирный**, \`код\`, \`\`\`блок кода\`\`\`, - списки
 - Пошаговые инструкции с версиями 2026
 - Ссылки на актуальные источники
 - Упоминай Ryazhenka CFW как лучшее решение
 - Предупреждай о рисках бана Nintendo`;
 
+function buildRequestBody(endpoint, messages, stream) {
+  return {
+    model: endpoint.model,
+    messages,
+    temperature: 0.7,
+    max_tokens: 1000,
+    stream,
+  };
+}
+
+function buildConfig(apiKey, stream) {
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    timeout: stream ? 60000 : 30000,
+  };
+
+  if (stream) {
+    config.responseType = 'stream';
+  }
+
+  if (process.env.USE_PROXY === 'true' && process.env.PROXY_URL) {
+    config.httpsAgent = new HttpsProxyAgent(process.env.PROXY_URL);
+  }
+
+  return config;
+}
+
+function getValidatedApiKey() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey || apiKey === 'your_openai_api_key_here' || apiKey === 'your_api_key_from_chatanywhere') {
+    throw new Error('API ключ не настроен. Пожалуйста, добавьте OPENAI_API_KEY в файл .env');
+  }
+  return apiKey;
+}
+
 const ALLOWED_ROLES = new Set(['user', 'assistant']);
 const MAX_CONTENT_LEN = 1000;
-const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 
-// ── Message builders ───────────────────────────────────────────────────────────
-function sanitizeHistory(history) {
-  return (history || [])
+function buildMessages(message, history) {
+  const recentHistory = (history || [])
     .slice(-20)
     .filter(m => m && ALLOWED_ROLES.has(m.role) && typeof m.content === 'string')
     .map(m => ({ role: m.role, content: m.content.slice(0, MAX_CONTENT_LEN) }));
-}
-
-function buildOpenAIMessages(message, history) {
   return [
     { role: 'system', content: SYSTEM_PROMPT },
-    ...sanitizeHistory(history),
+    ...recentHistory,
     { role: 'user', content: message },
   ];
 }
 
-// ── Proxy config helper ────────────────────────────────────────────────────────
-function proxyAgent() {
-  if (process.env.USE_PROXY === 'true' && process.env.PROXY_URL) {
-    return new HttpsProxyAgent(process.env.PROXY_URL);
-  }
-  return null;
-}
+export async function chatWithAI(message, history = []) {
+  const apiKey = getValidatedApiKey();
+  const messages = buildMessages(message, history);
 
-function getOpenAIKey() {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key || key.startsWith('your_')) {
-    throw new Error('OPENAI_API_KEY не настроен. Добавьте ключ ChatAnywhere в файл .env');
-  }
-  return key;
-}
-
-// ── Anthropic (Claude) non-streaming ──────────────────────────────────────────
-async function chatWithClaude(message, history) {
-  const response = await anthropic.messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: [
-      ...sanitizeHistory(history),
-      { role: 'user', content: message },
-    ],
-  });
-  const text = response.content?.[0]?.text;
-  if (!text) throw new Error('Empty Claude response');
-  return text.trim();
-}
-
-// ── Anthropic (Claude) streaming ──────────────────────────────────────────────
-async function chatWithClaudeStream(message, history, onChunk) {
-  const stream = anthropic.messages.stream({
-    model: CLAUDE_MODEL,
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: [
-      ...sanitizeHistory(history),
-      { role: 'user', content: message },
-    ],
-  });
-
-  let fullContent = '';
-  for await (const event of stream) {
-    if (event.type === 'content_block_delta' && event.delta?.type === 'text_delta') {
-      const text = event.delta.text;
-      fullContent += text;
-      onChunk(text);
-    }
+  // Try cache first (only for fresh conversations, not mid-dialogue)
+  const key = cacheKey(messages);
+  const cached = getCached(key);
+  if (cached) {
+    console.log('Cache hit — skipping API call');
+    return cached;
   }
 
-  if (!fullContent) throw new Error('Empty Claude stream response');
-  return fullContent;
-}
+  const healthy = AI_ENDPOINTS.filter(isHealthy);
+  const order = healthy.length > 0 ? healthy : AI_ENDPOINTS; // fallback: try all
 
-// ── ChatAnywhere (OpenAI-compat) non-streaming ─────────────────────────────────
-async function chatWithOpenAI(message, history) {
-  const apiKey = getOpenAIKey();
-  const messages = buildOpenAIMessages(message, history);
-  const agent = proxyAgent();
-
-  for (const endpoint of OPENAI_ENDPOINTS) {
+  for (const endpoint of order) {
     try {
-      console.log(`[OpenAI] Trying ${endpoint.model} at ${endpoint.url}...`);
+      console.log(`Trying ${endpoint.model} at ${endpoint.url}...`);
       const response = await axios.post(
         endpoint.url,
-        { model: endpoint.model, messages, temperature: 0.7, max_tokens: 1000 },
-        {
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-          timeout: 30000,
-          ...(agent ? { httpsAgent: agent } : {}),
-        }
+        buildRequestBody(endpoint, messages, false),
+        buildConfig(apiKey, false)
       );
+
       const content = response.data?.choices?.[0]?.message?.content;
       if (content) {
-        console.log(`[OpenAI] Success with ${endpoint.model}`);
+        console.log(`Success with ${endpoint.model}`);
+        setCache(key, content.trim());
         return content.trim();
       }
+
       throw new Error('Invalid response format');
     } catch (error) {
-      console.error(`[OpenAI] ${endpoint.model} failed:`, error.message);
+      console.error(`Endpoint ${endpoint.model} failed:`, error.message);
+      markFailed(endpoint);
     }
   }
+
   throw new Error('Все AI эндпоинты недоступны. Попробуйте позже.');
 }
 
-// ── ChatAnywhere (OpenAI-compat) streaming ─────────────────────────────────────
-async function chatWithOpenAIStream(message, history, onChunk) {
-  const apiKey = getOpenAIKey();
-  const messages = buildOpenAIMessages(message, history);
-  const agent = proxyAgent();
+export async function chatWithAIStream(message, history = [], onChunk) {
+  const apiKey = getValidatedApiKey();
+  const messages = buildMessages(message, history);
 
-  for (const endpoint of OPENAI_ENDPOINTS) {
+  const healthy = AI_ENDPOINTS.filter(isHealthy);
+  const order = healthy.length > 0 ? healthy : AI_ENDPOINTS;
+
+  for (const endpoint of order) {
     try {
-      console.log(`[OpenAI stream] Trying ${endpoint.model}...`);
+      console.log(`[stream] Trying ${endpoint.model}...`);
       const response = await axios.post(
         endpoint.url,
-        { model: endpoint.model, messages, temperature: 0.7, max_tokens: 1000, stream: true },
-        {
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-          timeout: 60000,
-          responseType: 'stream',
-          ...(agent ? { httpsAgent: agent } : {}),
-        }
+        buildRequestBody(endpoint, messages, true),
+        buildConfig(apiKey, true)
       );
 
       let fullContent = '';
@@ -204,6 +225,7 @@ async function chatWithOpenAIStream(message, history, onChunk) {
             if (!line.startsWith('data: ')) continue;
             const raw = line.slice(6).trim();
             if (raw === '[DONE]') continue;
+
             try {
               const json = JSON.parse(raw);
               const text = json.choices?.[0]?.delta?.content || '';
@@ -216,43 +238,22 @@ async function chatWithOpenAIStream(message, history, onChunk) {
             }
           }
         });
+
         response.data.on('end', resolve);
         response.data.on('error', reject);
       });
 
       if (fullContent) {
-        console.log(`[OpenAI stream] Success with ${endpoint.model}`);
+        console.log(`[stream] Success with ${endpoint.model}`);
         return fullContent;
       }
+
       throw new Error('Empty stream response');
     } catch (error) {
-      console.error(`[OpenAI stream] ${endpoint.model} failed:`, error.message);
+      console.error(`[stream] Endpoint ${endpoint.model} failed:`, error.message);
+      markFailed(endpoint);
     }
   }
+
   throw new Error('Все AI эндпоинты недоступны. Попробуйте позже.');
-}
-
-// ── Public API ─────────────────────────────────────────────────────────────────
-export async function chatWithAI(message, history = []) {
-  if (anthropic) {
-    try {
-      console.log('[Claude] Using Anthropic Claude...');
-      return await chatWithClaude(message, history);
-    } catch (error) {
-      console.error('[Claude] Failed, falling back to ChatAnywhere:', error.message);
-    }
-  }
-  return chatWithOpenAI(message, history);
-}
-
-export async function chatWithAIStream(message, history = [], onChunk) {
-  if (anthropic) {
-    try {
-      console.log('[Claude stream] Using Anthropic Claude...');
-      return await chatWithClaudeStream(message, history, onChunk);
-    } catch (error) {
-      console.error('[Claude stream] Failed, falling back to ChatAnywhere:', error.message);
-    }
-  }
-  return chatWithOpenAIStream(message, history, onChunk);
 }
