@@ -337,7 +337,7 @@ function ChatInterface() {
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-100)))
     } catch {}
   }, [messages])
 

@@ -30,7 +30,7 @@ function Footer() {
               <Github size={18} />
               <span>GitHub</span>
             </a>
-            <span className="text-gray-500">v2.0.0</span>
+            <span className="text-gray-500">v2.1.0</span>
           </div>
         </div>
         
