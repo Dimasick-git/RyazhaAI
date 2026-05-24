@@ -3,9 +3,14 @@ import { Send, Bot, User, Loader2, Trash2, Copy, Check, Download, RefreshCw, Spa
 import { sendMessageStream, sendMessage } from '../services/api'
 
 const INITIAL_MESSAGE = {
+  id: 'initial',
   role: 'assistant',
   content:
     '👋 Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\n🥛 Создан командой Ryazhenka специально для тебя!\n\n🎮 Могу помочь с:\n• Взломом Switch и установкой CFW\n• Ryazhenka прошивкой и настройкой\n• .nro приложениями и homebrew\n• Sigpatches, emuMMC, любыми Switch темами!\n\n💬 Задавай любые вопросы - отвечу умно и по делу! 🚀\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka',
+}
+
+function genMsgId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2)
 }
 
 const QUICK_QUESTIONS = [
@@ -50,7 +55,8 @@ function loadMessages() {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       const parsed = JSON.parse(saved)
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+      if (Array.isArray(parsed) && parsed.length > 0)
+        return parsed.map((m, i) => ({ id: m.id ?? (i === 0 ? 'initial' : `legacy_${i}`), ...m }))
     }
   } catch {
     // corrupted storage — ignore
@@ -140,14 +146,24 @@ function MessageContent({ text }) {
 
 function renderInline(text) {
   const parts = []
-  const regex = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|__[^_]+__)/g
+  const regex = /(\[[^\]]+\]\([^)]+\)|`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|__[^_]+__)/g
   let last = 0
   let match
 
   while ((match = regex.exec(text)) !== null) {
     if (match.index > last) parts.push(text.slice(last, match.index))
     const token = match[0]
-    if (token.startsWith('`')) {
+    if (token.startsWith('[')) {
+      const labelEnd = token.indexOf(']')
+      const label = token.slice(1, labelEnd)
+      const url = token.slice(labelEnd + 2, -1)
+      parts.push(
+        <a key={match.index} href={url} target="_blank" rel="noopener noreferrer"
+          className="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors">
+          {label}
+        </a>
+      )
+    } else if (token.startsWith('`')) {
       parts.push(<code key={match.index} className="bg-black/40 text-emerald-300 px-1 py-0.5 rounded text-xs font-mono">{token.slice(1, -1)}</code>)
     } else if (token.startsWith('**')) {
       parts.push(<strong key={match.index} className="font-semibold text-white">{token.slice(2, -2)}</strong>)
@@ -184,19 +200,19 @@ function CopyButton({ text }) {
   )
 }
 
-function ReactionButtons({ msgIndex, reactions, onReact }) {
-  const reaction = reactions[msgIndex]
+function ReactionButtons({ msgId, reactions, onReact }) {
+  const reaction = reactions[msgId]
   return (
     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
       <button
-        onClick={() => onReact(msgIndex, 'up')}
+        onClick={() => onReact(msgId, 'up')}
         className={`p-1 rounded transition-colors ${reaction === 'up' ? 'text-green-400' : 'text-gray-600 hover:text-green-400'}`}
         title="Полезно"
       >
         <ThumbsUp size={13} />
       </button>
       <button
-        onClick={() => onReact(msgIndex, 'down')}
+        onClick={() => onReact(msgId, 'down')}
         className={`p-1 rounded transition-colors ${reaction === 'down' ? 'text-red-400' : 'text-gray-600 hover:text-red-400'}`}
         title="Не полезно"
       >
@@ -331,13 +347,13 @@ function ChatInterface() {
     } catch {}
   }, [reactions])
 
-  const handleReact = useCallback((msgIndex, type) => {
+  const handleReact = useCallback((msgId, type) => {
     setReactions((prev) => {
       const next = { ...prev }
-      if (next[msgIndex] === type) {
-        delete next[msgIndex]
+      if (next[msgId] === type) {
+        delete next[msgId]
       } else {
-        next[msgIndex] = type
+        next[msgId] = type
       }
       return next
     })
@@ -386,17 +402,17 @@ function ChatInterface() {
         full += chunk
         setStreamText(full)
       })
-      setMessages((prev) => [...prev, { role: 'assistant', content: full }])
+      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: full }])
       setFollowups(getFollowupSuggestions(full))
     } catch {
       try {
         const response = await sendMessage(userMessage, history)
-        setMessages((prev) => [...prev, { role: 'assistant', content: response }])
+        setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response }])
         setFollowups(getFollowupSuggestions(response))
       } catch {
         setMessages((prev) => [
           ...prev,
-          { role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!' },
+          { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!' },
         ])
       }
     } finally {
@@ -413,7 +429,7 @@ function ChatInterface() {
     setInput('')
     setShowQuickQ(false)
     setFollowups([])
-    setMessages((prev) => [...prev, { role: 'user', content: userMessage }])
+    setMessages((prev) => [...prev, { id: genMsgId(), role: 'user', content: userMessage }])
     setIsLoading(true)
     setStreamText('')
 
@@ -423,17 +439,17 @@ function ChatInterface() {
         full += chunk
         setStreamText(full)
       })
-      setMessages((prev) => [...prev, { role: 'assistant', content: full }])
+      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: full }])
       setFollowups(getFollowupSuggestions(full))
     } catch {
       try {
         const response = await sendMessage(userMessage, history)
-        setMessages((prev) => [...prev, { role: 'assistant', content: response }])
+        setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response }])
         setFollowups(getFollowupSuggestions(response))
       } catch {
         setMessages((prev) => [
           ...prev,
-          { role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!' },
+          { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!' },
         ])
       }
     } finally {
@@ -508,9 +524,9 @@ function ChatInterface() {
 
       {/* Messages */}
       <div className="h-[440px] overflow-y-auto p-6 space-y-4">
-        {messages.map((message, index) => (
+        {messages.map((message) => (
           <div
-            key={index}
+            key={message.id}
             className={`flex gap-3 group ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             {message.role === 'assistant' && (
@@ -536,7 +552,7 @@ function ChatInterface() {
               {message.role === 'assistant' && (
                 <div className="flex items-center gap-1 pl-1">
                   <CopyButton text={message.content} />
-                  <ReactionButtons msgIndex={index} reactions={reactions} onReact={handleReact} />
+                  <ReactionButtons msgId={message.id} reactions={reactions} onReact={handleReact} />
                 </div>
               )}
             </div>
