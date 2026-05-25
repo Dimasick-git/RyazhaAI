@@ -1,6 +1,9 @@
+import { useState } from 'react'
 import { Github, Send, Heart, Code, Lightbulb } from 'lucide-react'
 
 function Team() {
+  const [imgErrors, setImgErrors] = useState({})
+
   const team = [
     {
       name: "Dimasick-git",
@@ -48,15 +51,16 @@ function Team() {
           >
             <div className="flex items-start gap-6">
               <div className={`w-24 h-24 rounded-2xl bg-gradient-to-r ${member.gradient} p-1 flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                <img 
-                  src={member.avatarUrl} 
-                  alt={member.name}
-                  className="w-full h-full rounded-xl object-cover"
-                  onError={(e) => {
-                    e.target.style.display = 'none'
-                    e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center text-4xl">DEV</div>'
-                  }}
-                />
+                {imgErrors[member.name] ? (
+                  <div className="w-full h-full flex items-center justify-center text-4xl rounded-xl">DEV</div>
+                ) : (
+                  <img
+                    src={member.avatarUrl}
+                    alt={member.name}
+                    className="w-full h-full rounded-xl object-cover"
+                    onError={() => setImgErrors(prev => ({ ...prev, [member.name]: true }))}
+                  />
+                )}
               </div>
               
               <div className="flex-1">

@@ -63,7 +63,15 @@ function validateInput(message, history) {
  return null;
 }
 
-app.use(cors());
+app.set('trust proxy', 1);
+app.use(cors({
+  origin: [
+    'https://dimasick-git.github.io',
+    'http://localhost:3000',
+    'http://localhost:5173',
+  ],
+  credentials: true,
+}));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
@@ -96,8 +104,8 @@ app.post('/api/chat', async (req, res) => {
  return res.status(400).json({ error: validationError });
  }
 
- const context = useKnowledge? getKnowledgeContext(message): '';
- const response = await chatWithAI(message + context, history);
+ const context = useKnowledge ? getKnowledgeContext(message) : '';
+ const response = await chatWithAI(message, history, context);
 
  res.json({ response, usedKnowledge: context.length > 0 });
  } catch (error) {
@@ -130,8 +138,8 @@ app.post('/api/chat/stream', async (req, res) => {
  const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
  try {
- const context = useKnowledge? getKnowledgeContext(message): '';
- await chatWithAIStream(message + context, history, (chunk) => send({ chunk }));
+ const context = useKnowledge ? getKnowledgeContext(message) : '';
+ await chatWithAIStream(message, history, (chunk) => send({ chunk }), context);
  send({ done: true });
  } catch (error) {
  send({ error: error.message });

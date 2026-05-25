@@ -54,7 +54,7 @@ function buildRequestBody(endpoint, messages, stream) {
     model: endpoint.model,
     messages,
     temperature: 0.7,
-    max_tokens: 1000,
+    max_tokens: 2048,
     stream,
   };
 }
@@ -90,21 +90,24 @@ function getValidatedApiKey() {
 const ALLOWED_ROLES = new Set(['user', 'assistant']);
 const MAX_CONTENT_LEN = 1000;
 
-function buildMessages(message, history) {
+function buildMessages(message, history, context = '') {
   const recentHistory = (history || [])
     .slice(-20)
     .filter(m => m && ALLOWED_ROLES.has(m.role) && typeof m.content === 'string')
     .map(m => ({ role: m.role, content: m.content.slice(0, MAX_CONTENT_LEN) }));
+  const systemContent = context
+    ? `${SYSTEM_PROMPT}\n\nРелевантная информация из базы знаний:\n${context}`
+    : SYSTEM_PROMPT;
   return [
-    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: systemContent },
     ...recentHistory,
     { role: 'user', content: message },
   ];
 }
 
-export async function chatWithAI(message, history = []) {
+export async function chatWithAI(message, history = [], context = '') {
   const apiKey = getValidatedApiKey();
-  const messages = buildMessages(message, history);
+  const messages = buildMessages(message, history, context);
 
   for (const endpoint of AI_ENDPOINTS) {
     try {
@@ -130,9 +133,9 @@ export async function chatWithAI(message, history = []) {
   throw new Error('Все AI эндпоинты недоступны. Попробуйте позже.');
 }
 
-export async function chatWithAIStream(message, history = [], onChunk) {
+export async function chatWithAIStream(message, history = [], onChunk, context = '') {
   const apiKey = getValidatedApiKey();
-  const messages = buildMessages(message, history);
+  const messages = buildMessages(message, history, context);
 
   for (const endpoint of AI_ENDPOINTS) {
     try {
@@ -171,7 +174,10 @@ export async function chatWithAIStream(message, history = [], onChunk) {
         });
 
         response.data.on('end', resolve);
-        response.data.on('error', reject);
+        response.data.on('error', (err) => {
+          response.data.destroy();
+          reject(err);
+        });
       });
 
       if (fullContent) {

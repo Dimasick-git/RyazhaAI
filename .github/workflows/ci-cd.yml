@@ -166,7 +166,7 @@ jobs:
         run: npm ci
         
       - name: Run npm audit
-        run: npm audit --audit-level=moderate || true
+        run: npm audit --audit-level=critical
         
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
