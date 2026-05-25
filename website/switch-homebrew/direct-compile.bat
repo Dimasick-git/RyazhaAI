@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 echo ========================================
-echo   Прямая компиляция (БЕЗ pacman)
+echo Прямая компиляция (БЕЗ pacman)
 echo ========================================
 echo.
 
@@ -14,19 +14,19 @@ set "PATH=C:\devkitPro\msys2\usr\bin;C:\devkitPro\devkitA64\bin;C:\devkitPro\too
 
 echo [1/5] Проверка DevkitPro...
 if not exist "C:\devkitPro\devkitA64\bin\aarch64-none-elf-gcc.exe" (
-    echo [ОШИБКА] DevkitA64 не найден!
-    pause
-    exit /b 1
+ echo [ОШИБКА] DevkitA64 не найден!
+ pause
+ exit /b 1
 )
 echo [OK] DevkitA64 найден
 
 echo.
 echo [2/5] Проверка libnx...
 if not exist "C:\devkitPro\libnx" (
-    echo [ОШИБКА] libnx не найден!
-    echo Попробуйте переустановить DevkitPro с компонентом libnx
-    pause
-    exit /b 1
+ echo [ОШИБКА] libnx не найден!
+ echo Попробуйте переустановить DevkitPro с компонентом libnx
+ pause
+ exit /b 1
 )
 echo [OK] libnx найден
 
@@ -46,32 +46,32 @@ C:\devkitPro\msys2\usr\bin\bash.exe -lc "export DEVKITPRO=/c/devkitPro && export
 echo.
 echo [5/5] Проверка результата...
 if exist "ai-chat.nro" (
-    echo.
-    echo ========================================
-    echo   ✓ УСПЕХ! Файл создан!
-    echo ========================================
-    echo.
-    echo Файл: ai-chat.nro
-    for %%A in (ai-chat.nro) do echo Размер: %%~zA байт
-    echo.
-    echo Следующий шаг:
-    echo 1. Скопируйте ai-chat.nro на SD карту Switch
-    echo 2. Путь на SD: /switch/ai-chat/ai-chat.nro
-    echo 3. Запустите через Homebrew Menu
-    echo.
+ echo.
+ echo ========================================
+ echo УСПЕХ! Файл создан!
+ echo ========================================
+ echo.
+ echo Файл: ai-chat.nro
+ for %%A in (ai-chat.nro) do echo Размер: %%~zA байт
+ echo.
+ echo Следующий шаг:
+ echo 1. Скопируйте ai-chat.nro на SD карту Switch
+ echo 2. Путь на SD: /switch/ai-chat/ai-chat.nro
+ echo 3. Запустите через Homebrew Menu
+ echo.
 ) else (
-    echo.
-    echo ========================================
-    echo   ✗ ОШИБКА! Файл не создан
-    echo ========================================
-    echo.
-    echo Возможные причины:
-    echo - libnx не установлен полностью
-    echo - Отсутствуют необходимые библиотеки
-    echo.
-    echo Попробуйте переустановить DevkitPro:
-    echo https://github.com/devkitPro/installer/releases
-    echo.
+ echo.
+ echo ========================================
+ echo ОШИБКА! Файл не создан
+ echo ========================================
+ echo.
+ echo Возможные причины:
+ echo - libnx не установлен полностью
+ echo - Отсутствуют необходимые библиотеки
+ echo.
+ echo Попробуйте переустановить DevkitPro:
+ echo https://github.com/devkitPro/installer/releases
+ echo.
 )
 
 pause

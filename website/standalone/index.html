@@ -1,418 +1,418 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat - Облачное хранилище</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .header {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            color: white;
-        }
-        h1 {
-            font-size: 32px;
-            margin-bottom: 5px;
-        }
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .tab {
-            flex: 1;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 15px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        .tab.active {
-            background: white;
-            color: #667eea;
-            font-weight: bold;
-        }
-        .content {
-            display: none;
-        }
-        .content.active {
-            display: block;
-        }
-        #messages {
-            height: 500px;
-            overflow-y: auto;
-            padding: 20px;
-            background: #f5f5f5;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        .message {
-            margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
-        }
-        .message.user {
-            justify-content: flex-end;
-        }
-        .message-bubble {
-            max-width: 70%;
-            padding: 12px 18px;
-            border-radius: 18px;
-            word-wrap: break-word;
-        }
-        .message.user .message-bubble {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        .message.assistant .message-bubble {
-            background: white;
-            color: #333;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .message.error .message-bubble {
-            background: #fee;
-            color: #c00;
-        }
-        .input-group {
-            display: flex;
-            gap: 10px;
-        }
-        input, textarea, select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: inherit;
-        }
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        button {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        button:hover {
-            transform: translateY(-2px);
-        }
-        button:active {
-            transform: translateY(0);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-        .knowledge-item {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid #667eea;
-        }
-        .tags {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-        }
-        .tag {
-            background: #667eea;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-        }
-        .alert {
-            padding: 15px;
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            color: #155724;
-        }
-        .alert.error {
-            background: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-    </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>AI Chat - Облачное хранилище</title>
+ <style>
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }
+ body {
+ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ min-height: 100vh;
+ padding: 20px;
+ }
+.container {
+ max-width: 1000px;
+ margin: 0 auto;
+ }
+.card {
+ background: rgba(255, 255, 255, 0.95);
+ border-radius: 20px;
+ padding: 30px;
+ margin-bottom: 20px;
+ box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+ }
+.header {
+ background: rgba(255, 255, 255, 0.15);
+ backdrop-filter: blur(10px);
+ border-radius: 20px;
+ padding: 25px;
+ margin-bottom: 20px;
+ color: white;
+ }
+ h1 {
+ font-size: 32px;
+ margin-bottom: 5px;
+ }
+.tabs {
+ display: flex;
+ gap: 10px;
+ margin-bottom: 20px;
+ }
+.tab {
+ flex: 1;
+ padding: 15px;
+ background: rgba(255, 255, 255, 0.2);
+ border: none;
+ border-radius: 15px;
+ color: white;
+ font-size: 16px;
+ cursor: pointer;
+ transition: all 0.3s;
+ }
+.tab:hover {
+ background: rgba(255, 255, 255, 0.3);
+ }
+.tab.active {
+ background: white;
+ color: #667eea;
+ font-weight: bold;
+ }
+.content {
+ display: none;
+ }
+.content.active {
+ display: block;
+ }
+ #messages {
+ height: 500px;
+ overflow-y: auto;
+ padding: 20px;
+ background: #f5f5f5;
+ border-radius: 15px;
+ margin-bottom: 20px;
+ }
+.message {
+ margin-bottom: 15px;
+ display: flex;
+ gap: 10px;
+ }
+.message.user {
+ justify-content: flex-end;
+ }
+.message-bubble {
+ max-width: 70%;
+ padding: 12px 18px;
+ border-radius: 18px;
+ word-wrap: break-word;
+ }
+.message.user.message-bubble {
+ background: linear-gradient(135deg, #667eea, #764ba2);
+ color: white;
+ }
+.message.assistant.message-bubble {
+ background: white;
+ color: #333;
+ box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+ }
+.message.error.message-bubble {
+ background: #fee;
+ color: #c00;
+ }
+.input-group {
+ display: flex;
+ gap: 10px;
+ }
+ input, textarea, select {
+ width: 100%;
+ padding: 12px;
+ border: 2px solid #ddd;
+ border-radius: 10px;
+ font-size: 16px;
+ font-family: inherit;
+ }
+ input:focus, textarea:focus, select:focus {
+ outline: none;
+ border-color: #667eea;
+ }
+ button {
+ padding: 12px 24px;
+ background: linear-gradient(135deg, #667eea, #764ba2);
+ color: white;
+ border: none;
+ border-radius: 10px;
+ font-size: 16px;
+ cursor: pointer;
+ transition: transform 0.2s;
+ }
+ button:hover {
+ transform: translateY(-2px);
+ }
+ button:active {
+ transform: translateY(0);
+ }
+.form-group {
+ margin-bottom: 15px;
+ }
+ label {
+ display: block;
+ margin-bottom: 8px;
+ font-weight: bold;
+ color: #333;
+ }
+.knowledge-item {
+ background: #f9f9f9;
+ padding: 15px;
+ border-radius: 10px;
+ margin-bottom: 10px;
+ border-left: 4px solid #667eea;
+ }
+.tags {
+ display: flex;
+ gap: 8px;
+ margin-top: 10px;
+ flex-wrap: wrap;
+ }
+.tag {
+ background: #667eea;
+ color: white;
+ padding: 4px 12px;
+ border-radius: 15px;
+ font-size: 12px;
+ }
+.alert {
+ padding: 15px;
+ background: #d4edda;
+ border: 1px solid #c3e6cb;
+ border-radius: 10px;
+ margin-bottom: 15px;
+ color: #155724;
+ }
+.alert.error {
+ background: #f8d7da;
+ border-color: #f5c6cb;
+ color: #721c24;
+ }
+ </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🤖 AI Chat</h1>
-            <p>Облачное хранилище знаний</p>
-        </div>
+ <div class="container">
+ <div class="header">
+ <h1> AI Chat</h1>
+ <p>Облачное хранилище знаний</p>
+ </div>
 
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('chat')">💬 Чат</button>
-            <button class="tab" onclick="showTab('knowledge')">📚 База знаний</button>
-            <button class="tab" onclick="showTab('settings')">⚙️ Настройки</button>
-        </div>
+ <div class="tabs">
+ <button class="tab active" onclick="showTab('chat')"> Чат</button>
+ <button class="tab" onclick="showTab('knowledge')"> База знаний</button>
+ <button class="tab" onclick="showTab('settings')"> Настройки</button>
+ </div>
 
-        <!-- Chat Tab -->
-        <div id="chat" class="content active">
-            <div class="card">
-                <div id="messages">
-                    <div class="message assistant">
-                        <div class="message-bubble">
-                            Привет! Я AI ассистент. Настройте API ключ во вкладке "Настройки", чтобы начать общение.
-                        </div>
-                    </div>
-                </div>
-                <form onsubmit="sendMessage(event)">
-                    <div class="input-group">
-                        <input type="text" id="messageInput" placeholder="Введите сообщение..." required>
-                        <button type="submit">Отправить</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+ <!-- Chat Tab -->
+ <div id="chat" class="content active">
+ <div class="card">
+ <div id="messages">
+ <div class="message assistant">
+ <div class="message-bubble">
+ Привет! Я AI ассистент. Настройте API ключ во вкладке "Настройки", чтобы начать общение.
+ </div>
+ </div>
+ </div>
+ <form onsubmit="sendMessage(event)">
+ <div class="input-group">
+ <input type="text" id="messageInput" placeholder="Введите сообщение..." required>
+ <button type="submit">Отправить</button>
+ </div>
+ </form>
+ </div>
+ </div>
 
-        <!-- Knowledge Tab -->
-        <div id="knowledge" class="content">
-            <div class="card">
-                <h2>📚 База знаний</h2>
-                <form onsubmit="addKnowledge(event)" style="margin-top: 20px;">
-                    <div class="form-group">
-                        <label>Информация:</label>
-                        <textarea id="knowledgeContent" rows="4" placeholder="Введите информацию..." required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Категория:</label>
-                        <input type="text" id="knowledgeCategory" placeholder="Например: продукты, услуги">
-                    </div>
-                    <div class="form-group">
-                        <label>Теги (через запятую):</label>
-                        <input type="text" id="knowledgeTags" placeholder="тег1, тег2, тег3">
-                    </div>
-                    <button type="submit">➕ Добавить запись</button>
-                </form>
-                <div id="knowledgeList" style="margin-top: 30px;"></div>
-            </div>
-        </div>
+ <!-- Knowledge Tab -->
+ <div id="knowledge" class="content">
+ <div class="card">
+ <h2> База знаний</h2>
+ <form onsubmit="addKnowledge(event)" style="margin-top: 20px;">
+ <div class="form-group">
+ <label>Информация:</label>
+ <textarea id="knowledgeContent" rows="4" placeholder="Введите информацию..." required></textarea>
+ </div>
+ <div class="form-group">
+ <label>Категория:</label>
+ <input type="text" id="knowledgeCategory" placeholder="Например: продукты, услуги">
+ </div>
+ <div class="form-group">
+ <label>Теги (через запятую):</label>
+ <input type="text" id="knowledgeTags" placeholder="тег1, тег2, тег3">
+ </div>
+ <button type="submit"> Добавить запись</button>
+ </form>
+ <div id="knowledgeList" style="margin-top: 30px;"></div>
+ </div>
+ </div>
 
-        <!-- Settings Tab -->
-        <div id="settings" class="content">
-            <div class="card">
-                <h2>⚙️ Настройки API</h2>
-                <div class="alert">
-                    <strong>Получите бесплатный API ключ:</strong><br>
-                    <a href="https://api.chatanywhere.tech/v1/oauth/free/render" target="_blank" style="color: #667eea;">
-                        https://api.chatanywhere.tech/v1/oauth/free/render
-                    </a>
-                </div>
-                <div class="form-group">
-                    <label>API Ключ ChatAnywhere:</label>
-                    <input type="password" id="apiKey" placeholder="sk-ваш_ключ_здесь">
-                </div>
-                <div class="form-group">
-                    <label>Модель:</label>
-                    <select id="modelSelect">
-                        <option value="gpt-4o-mini">GPT-4o Mini (200 запросов/день)</option>
-                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo (200 запросов/день)</option>
-                        <option value="deepseek-v3">DeepSeek V3 (30 запросов/день)</option>
-                        <option value="gpt-4o">GPT-4o (5 запросов/день)</option>
-                    </select>
-                </div>
-                <button onclick="saveSettings()">💾 Сохранить настройки</button>
-            </div>
-        </div>
-    </div>
+ <!-- Settings Tab -->
+ <div id="settings" class="content">
+ <div class="card">
+ <h2> Настройки API</h2>
+ <div class="alert">
+ <strong>Получите бесплатный API ключ:</strong><br>
+ <a href="https://api.chatanywhere.tech/v1/oauth/free/render" target="_blank" style="color: #667eea;">
+ https://api.chatanywhere.tech/v1/oauth/free/render
+ </a>
+ </div>
+ <div class="form-group">
+ <label>API Ключ ChatAnywhere:</label>
+ <input type="password" id="apiKey" placeholder="sk-ваш_ключ_здесь">
+ </div>
+ <div class="form-group">
+ <label>Модель:</label>
+ <select id="modelSelect">
+ <option value="gpt-4o-mini">GPT-4o Mini (200 запросов/день)</option>
+ <option value="gpt-3.5-turbo">GPT-3.5 Turbo (200 запросов/день)</option>
+ <option value="deepseek-v3">DeepSeek V3 (30 запросов/день)</option>
+ <option value="gpt-4o">GPT-4o (5 запросов/день)</option>
+ </select>
+ </div>
+ <button onclick="saveSettings()"> Сохранить настройки</button>
+ </div>
+ </div>
+ </div>
 
-    <script>
-        let knowledge = JSON.parse(localStorage.getItem('knowledge') || '[]');
-        let apiKey = localStorage.getItem('apiKey') || '';
-        let model = localStorage.getItem('model') || 'gpt-4o-mini';
+ <script>
+ let knowledge = JSON.parse(localStorage.getItem('knowledge') || '[]');
+ let apiKey = localStorage.getItem('apiKey') || '';
+ let model = localStorage.getItem('model') || 'gpt-4o-mini';
 
-        // Загрузка настроек
-        document.addEventListener('DOMContentLoaded', function() {
-            if (apiKey) document.getElementById('apiKey').value = apiKey;
-            document.getElementById('modelSelect').value = model;
-            renderKnowledge();
-        });
+ // Загрузка настроек
+ document.addEventListener('DOMContentLoaded', function() {
+ if (apiKey) document.getElementById('apiKey').value = apiKey;
+ document.getElementById('modelSelect').value = model;
+ renderKnowledge();
+ });
 
-        function showTab(tabName) {
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-            
-            if (tabName === 'knowledge') renderKnowledge();
-        }
+ function showTab(tabName) {
+ document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+ document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+ 
+ document.getElementById(tabName).classList.add('active');
+ event.target.classList.add('active');
+ 
+ if (tabName === 'knowledge') renderKnowledge();
+ }
 
-        function saveSettings() {
-            apiKey = document.getElementById('apiKey').value;
-            model = document.getElementById('modelSelect').value;
-            localStorage.setItem('apiKey', apiKey);
-            localStorage.setItem('model', model);
-            alert('✅ Настройки сохранены!');
-        }
+ function saveSettings() {
+ apiKey = document.getElementById('apiKey').value;
+ model = document.getElementById('modelSelect').value;
+ localStorage.setItem('apiKey', apiKey);
+ localStorage.setItem('model', model);
+ alert(' Настройки сохранены!');
+ }
 
-        async function sendMessage(e) {
-            e.preventDefault();
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            if (!message) return;
+ async function sendMessage(e) {
+ e.preventDefault();
+ const input = document.getElementById('messageInput');
+ const message = input.value.trim();
+ if (!message) return;
 
-            addMessage('user', message);
-            input.value = '';
+ addMessage('user', message);
+ input.value = '';
 
-            if (!apiKey) {
-                addMessage('error', '⚠️ Настройте API ключ во вкладке "Настройки"');
-                return;
-            }
+ if (!apiKey) {
+ addMessage('error', ' Настройте API ключ во вкладке "Настройки"');
+ return;
+ }
 
-            // Поиск в базе знаний
-            let context = '';
-            const relevantKnowledge = knowledge.filter(k => 
-                k.content.toLowerCase().includes(message.toLowerCase()) ||
-                (k.category && k.category.toLowerCase().includes(message.toLowerCase())) ||
-                (k.tags && k.tags.some(t => t.toLowerCase().includes(message.toLowerCase())))
-            ).slice(0, 3);
+ // Поиск в базе знаний
+ let context = '';
+ const relevantKnowledge = knowledge.filter(k => 
+ k.content.toLowerCase().includes(message.toLowerCase()) ||
+ (k.category && k.category.toLowerCase().includes(message.toLowerCase())) ||
+ (k.tags && k.tags.some(t => t.toLowerCase().includes(message.toLowerCase())))
+ ).slice(0, 3);
 
-            if (relevantKnowledge.length > 0) {
-                context = '\n\nИнформация из базы знаний:\n' + 
-                          relevantKnowledge.map(k => `- ${k.content}`).join('\n');
-            }
+ if (relevantKnowledge.length > 0) {
+ context = '\n\nИнформация из базы знаний:\n' + 
+ relevantKnowledge.map(k => `- ${k.content}`).join('\n');
+ }
 
-            addMessage('assistant', '⏳ Думаю...');
+ addMessage('assistant', '⏳ Думаю...');
 
-            try {
-                const response = await fetch('https://api.chatanywhere.tech/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: model,
-                        messages: [
-                            { role: 'system', content: 'Ты полезный AI ассистент. Отвечай на русском языке.' },
-                            { role: 'user', content: message + context }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 1000
-                    })
-                });
+ try {
+ const response = await fetch('https://api.chatanywhere.tech/v1/chat/completions', {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ 'Authorization': `Bearer ${apiKey}`
+ },
+ body: JSON.stringify({
+ model: model,
+ messages: [
+ { role: 'system', content: 'Ты полезный AI ассистент. Отвечай на русском языке.' },
+ { role: 'user', content: message + context }
+ ],
+ temperature: 0.7,
+ max_tokens: 1000
+ })
+ });
 
-                const data = await response.json();
-                
-                // Удаляем "Думаю..."
-                const messages = document.getElementById('messages');
-                messages.removeChild(messages.lastChild);
+ const data = await response.json();
+ 
+ // Удаляем "Думаю..."
+ const messages = document.getElementById('messages');
+ messages.removeChild(messages.lastChild);
 
-                if (data.choices && data.choices[0]) {
-                    let reply = data.choices[0].message.content;
-                    if (context) reply += '\n\n📚 Использована база знаний';
-                    addMessage('assistant', reply);
-                } else {
-                    addMessage('error', '❌ Ошибка: ' + (data.error?.message || 'Неизвестная ошибка'));
-                }
-            } catch (error) {
-                const messages = document.getElementById('messages');
-                if (messages.lastChild) messages.removeChild(messages.lastChild);
-                addMessage('error', '❌ Ошибка подключения: ' + error.message);
-            }
-        }
+ if (data.choices && data.choices[0]) {
+ let reply = data.choices[0].message.content;
+ if (context) reply += '\n\n Использована база знаний';
+ addMessage('assistant', reply);
+ } else {
+ addMessage('error', ' Ошибка: ' + (data.error?.message || 'Неизвестная ошибка'));
+ }
+ } catch (error) {
+ const messages = document.getElementById('messages');
+ if (messages.lastChild) messages.removeChild(messages.lastChild);
+ addMessage('error', ' Ошибка подключения: ' + error.message);
+ }
+ }
 
-        function addMessage(type, content) {
-            const messages = document.getElementById('messages');
-            const div = document.createElement('div');
-            div.className = `message ${type}`;
-            div.innerHTML = `<div class="message-bubble">${content}</div>`;
-            messages.appendChild(div);
-            messages.scrollTop = messages.scrollHeight;
-        }
+ function addMessage(type, content) {
+ const messages = document.getElementById('messages');
+ const div = document.createElement('div');
+ div.className = `message ${type}`;
+ div.innerHTML = `<div class="message-bubble">${content}</div>`;
+ messages.appendChild(div);
+ messages.scrollTop = messages.scrollHeight;
+ }
 
-        function addKnowledge(e) {
-            e.preventDefault();
-            const content = document.getElementById('knowledgeContent').value.trim();
-            const category = document.getElementById('knowledgeCategory').value.trim() || 'Общее';
-            const tags = document.getElementById('knowledgeTags').value.split(',').map(t => t.trim()).filter(t => t);
+ function addKnowledge(e) {
+ e.preventDefault();
+ const content = document.getElementById('knowledgeContent').value.trim();
+ const category = document.getElementById('knowledgeCategory').value.trim() || 'Общее';
+ const tags = document.getElementById('knowledgeTags').value.split(',').map(t => t.trim()).filter(t => t);
 
-            if (!content) return;
+ if (!content) return;
 
-            knowledge.push({
-                id: Date.now(),
-                content,
-                category,
-                tags,
-                createdAt: new Date().toISOString()
-            });
+ knowledge.push({
+ id: Date.now(),
+ content,
+ category,
+ tags,
+ createdAt: new Date().toISOString()
+ });
 
-            localStorage.setItem('knowledge', JSON.stringify(knowledge));
-            
-            document.getElementById('knowledgeContent').value = '';
-            document.getElementById('knowledgeCategory').value = '';
-            document.getElementById('knowledgeTags').value = '';
-            
-            renderKnowledge();
-            alert('✅ Запись добавлена!');
-        }
+ localStorage.setItem('knowledge', JSON.stringify(knowledge));
+ 
+ document.getElementById('knowledgeContent').value = '';
+ document.getElementById('knowledgeCategory').value = '';
+ document.getElementById('knowledgeTags').value = '';
+ 
+ renderKnowledge();
+ alert(' Запись добавлена!');
+ }
 
-        function renderKnowledge() {
-            const list = document.getElementById('knowledgeList');
-            if (knowledge.length === 0) {
-                list.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">База знаний пуста. Добавьте первую запись!</p>';
-                return;
-            }
+ function renderKnowledge() {
+ const list = document.getElementById('knowledgeList');
+ if (knowledge.length === 0) {
+ list.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">База знаний пуста. Добавьте первую запись!</p>';
+ return;
+ }
 
-            list.innerHTML = knowledge.map(k => `
-                <div class="knowledge-item">
-                    <strong>${k.content}</strong>
-                    <div class="tags">
-                        <span class="tag">${k.category}</span>
-                        ${k.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                        <span class="tag">📅 ${new Date(k.createdAt).toLocaleDateString('ru-RU')}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-    </script>
+ list.innerHTML = knowledge.map(k => `
+ <div class="knowledge-item">
+ <strong>${k.content}</strong>
+ <div class="tags">
+ <span class="tag">${k.category}</span>
+ ${k.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+ <span class="tag"> ${new Date(k.createdAt).toLocaleDateString('ru-RU')}</span>
+ </div>
+ </div>
+ `).join('');
+ }
+ </script>
 </body>
 </html>

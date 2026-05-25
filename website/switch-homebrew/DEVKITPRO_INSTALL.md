@@ -1,25 +1,25 @@
-# Установка DevkitPro и компиляция .nro для Nintendo Switch
+# Установка DevkitPro и компиляция.nro для Nintendo Switch
 
 ## Шаг 1: Установка DevkitPro
 
 ### Windows:
 
 1. **Скачайте установщик:**
-   - https://github.com/devkitPro/installer/releases/latest
-   - Файл: `devkitProUpdater-X.X.X.exe`
+ - https://github.com/devkitPro/installer/releases/latest
+ - Файл: `devkitProUpdater-X.X.X.exe`
 
 2. **Запустите установщик:**
-   - Выберите компоненты:
-     - ✅ `Switch Development`
-     - ✅ `devkitA64`
-     - ✅ `libnx`
-     - ✅ `switch-tools`
-     - ✅ `switch-examples`
+ - Выберите компоненты:
+ - `Switch Development`
+ - `devkitA64`
+ - `libnx`
+ - `switch-tools`
+ - `switch-examples`
 
 3. **Путь установки (по умолчанию):**
-   ```
-   C:\devkitPro\
-   ```
+ ```
+ C:\devkitPro\
+ ```
 
 4. **Дождитесь завершения установки** (5-10 минут)
 
@@ -78,13 +78,13 @@ $env:DEVKITARM
 2. Дополнительные параметры системы
 3. Переменные среды
 4. Создайте новые системные переменные:
-   - `DEVKITPRO` = `C:\devkitPro`
-   - `DEVKITARM` = `C:\devkitPro\devkitARM`
-   - `DEVKITPPC` = `C:\devkitPro\devkitPPC`
+ - `DEVKITPRO` = `C:\devkitPro`
+ - `DEVKITARM` = `C:\devkitPro\devkitARM`
+ - `DEVKITPPC` = `C:\devkitPro\devkitPPC`
 
 5. Добавьте в PATH:
-   - `C:\devkitPro\msys2\usr\bin`
-   - `C:\devkitPro\tools\bin`
+ - `C:\devkitPro\msys2\usr\bin`
+ - `C:\devkitPro\tools\bin`
 
 ### Linux/macOS:
 
@@ -219,38 +219,38 @@ make
 ```bash
 # Все сразу (опционально)
 pacman -S \
-  switch-dev \
-  switch-sdl2 \
-  switch-sdl2_gfx \
-  switch-sdl2_image \
-  switch-sdl2_ttf \
-  switch-sdl2_mixer \
-  switch-curl \
-  switch-mbedtls \
-  switch-freetype \
-  switch-libpng \
-  switch-libjpeg-turbo \
-  switch-zlib \
-  switch-bzip2 \
-  switch-jansson \
-  switch-ffmpeg
+ switch-dev \
+ switch-sdl2 \
+ switch-sdl2_gfx \
+ switch-sdl2_image \
+ switch-sdl2_ttf \
+ switch-sdl2_mixer \
+ switch-curl \
+ switch-mbedtls \
+ switch-freetype \
+ switch-libpng \
+ switch-libjpeg-turbo \
+ switch-zlib \
+ switch-bzip2 \
+ switch-jansson \
+ switch-ffmpeg
 ```
 
 ## Структура проекта после установки
 
 ```
 C:\devkitPro\
-├── devkitA64\          # ARM64 компилятор
-├── libnx\              # Nintendo Switch библиотека
-├── portlibs\           # Портированные библиотеки
-│   └── switch\
-├── tools\              # Утилиты
-└── msys2\              # MSYS2 окружение (Windows)
+├── devkitA64\ # ARM64 компилятор
+├── libnx\ # Nintendo Switch библиотека
+├── portlibs\ # Портированные библиотеки
+│ └── switch\
+├── tools\ # Утилиты
+└── msys2\ # MSYS2 окружение (Windows)
 ```
 
 ## Готово!
 
-Теперь можно компилировать .nro файлы для Nintendo Switch!
+Теперь можно компилировать.nro файлы для Nintendo Switch!
 
 ## Следующий шаг
 

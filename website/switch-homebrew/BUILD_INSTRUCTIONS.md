@@ -2,44 +2,44 @@
 
 ## Предварительные требования
 
-✅ DevkitPro установлен (см. DEVKITPRO_INSTALL.md)
-✅ Переменные окружения настроены
-✅ Сайт размещен онлайн (Netlify/GitHub Pages)
+ DevkitPro установлен (см. DEVKITPRO_INSTALL.md)
+ Переменные окружения настроены
+ Сайт размещен онлайн (Netlify/GitHub Pages)
 
 ## Быстрая сборка
 
 ### Windows:
 
 1. **Откройте MSYS2:**
-   - Пуск → DevkitPro → MSYS2
+ - Пуск → DevkitPro → MSYS2
 
 2. **Перейдите в папку проекта:**
-   ```bash
-   cd /c/website/switch-homebrew
-   ```
+ ```bash
+ cd /c/website/switch-homebrew
+ ```
 
 3. **Измените URL в коде:**
-   ```bash
-   nano source/main.c
-   # Или откройте в блокноте
-   ```
-   
-   Найдите строку:
-   ```c
-   const char* url = "https://your-website-url.com/standalone/simple.html";
-   ```
-   
-   Замените на ваш реальный URL.
+ ```bash
+ nano source/main.c
+ # Или откройте в блокноте
+ ```
+ 
+ Найдите строку:
+ ```c
+ const char* url = "https://your-website-url.com/standalone/simple.html";
+ ```
+ 
+ Замените на ваш реальный URL.
 
 4. **Скомпилируйте:**
-   ```bash
-   make
-   ```
+ ```bash
+ make
+ ```
 
 5. **Результат:**
-   ```
-   ai-chat.nro - готовый файл!
-   ```
+ ```
+ ai-chat.nro - готовый файл!
+ ```
 
 ### Linux/macOS:
 
@@ -91,12 +91,12 @@ make
 ```
 
 Что происходит:
-1. ✅ Компиляция `source/main.c` → `main.o`
-2. ✅ Линковка с libnx
-3. ✅ Создание ELF файла
-4. ✅ Конвертация в .nro формат
-5. ✅ Добавление иконки и метаданных
-6. ✅ Готовый файл: `ai-chat.nro`
+1. Компиляция `source/main.c` → `main.o`
+2. Линковка с libnx
+3. Создание ELF файла
+4. Конвертация в.nro формат
+5. Добавление иконки и метаданных
+6. Готовый файл: `ai-chat.nro`
 
 ## Очистка проекта
 
@@ -120,9 +120,9 @@ make clean && make
 ### На реальном Switch:
 
 1. Скопируйте `ai-chat.nro` на SD карту:
-   ```
-   /switch/ai-chat/ai-chat.nro
-   ```
+ ```
+ /switch/ai-chat/ai-chat.nro
+ ```
 
 2. Вставьте SD карту в Switch
 
@@ -138,7 +138,7 @@ make clean && make
 switch-homebrew/
 ├── Makefile
 ├── source/
-│   └── main.c
+│ └── main.c
 └── icon.jpg
 
 # Пересоздайте папки если нужно
@@ -159,14 +159,14 @@ cp $DEVKITPRO/libnx/default_icon.jpg icon.jpg
 make
 ```
 
-### .nro файл не запускается на Switch
+###.nro файл не запускается на Switch
 - Убедитесь, что Switch имеет CFW (Atmosphere)
 - Проверьте версию Atmosphere (должна быть актуальная)
 - Убедитесь, что файл в правильной папке `/switch/ai-chat/`
 
 ## Оптимизация размера
 
-Для уменьшения размера .nro:
+Для уменьшения размера.nro:
 
 В `Makefile` измените:
 ```makefile
@@ -186,24 +186,24 @@ make clean && make
 
 ## Дополнительные возможности
 
-### Добавление RomFS (файлы внутри .nro)
+### Добавление RomFS (файлы внутри.nro)
 
 1. Создайте папку `romfs/`:
-   ```bash
-   mkdir -p romfs
-   ```
+ ```bash
+ mkdir -p romfs
+ ```
 
 2. Положите файлы в `romfs/`
 
 3. В `Makefile` раскомментируйте:
-   ```makefile
-   ROMFS := romfs
-   ```
+ ```makefile
+ ROMFS:= romfs
+ ```
 
 4. В коде используйте:
-   ```c
-   FILE* file = fopen("romfs:/file.txt", "r");
-   ```
+ ```c
+ FILE* file = fopen("romfs:/file.txt", "r");
+ ```
 
 ### Добавление звуков/музыки
 
@@ -222,7 +222,7 @@ pacman -S switch-sdl2_mixer
 ai-chat.nro - 500KB-2MB
 ```
 
-Готово к установке на Switch! 🎮
+Готово к установке на Switch! 
 
 ## Автоматическая сборка
 
@@ -230,15 +230,15 @@ ai-chat.nro - 500KB-2MB
 
 ```bash
 #!/bin/bash
-echo "🔨 Компиляция AI Chat для Switch..."
+echo " Компиляция AI Chat для Switch..."
 make clean
 make
 if [ -f "ai-chat.nro" ]; then
-    echo "✅ Успешно! Файл: ai-chat.nro"
-    ls -lh ai-chat.nro
+ echo " Успешно! Файл: ai-chat.nro"
+ ls -lh ai-chat.nro
 else
-    echo "❌ Ошибка компиляции"
-    exit 1
+ echo " Ошибка компиляции"
+ exit 1
 fi
 ```
 
@@ -250,7 +250,7 @@ chmod +x build.sh
 
 ## Следующие шаги
 
-1. ✅ Скомпилировали .nro
-2. ⏭️ Скопируйте на SD карту Switch
-3. ⏭️ Запустите на Switch
-4. ⏭️ Наслаждайтесь AI чатом!
+1. Скомпилировали.nro
+2. ⏭ Скопируйте на SD карту Switch
+3. ⏭ Запустите на Switch
+4. ⏭ Наслаждайтесь AI чатом!

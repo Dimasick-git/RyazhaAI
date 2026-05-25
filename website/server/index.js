@@ -18,28 +18,28 @@ const PORT = process.env.PORT || 3001;
 const rateLimitMap = new Map();
 
 function isRateLimited(ip) {
-  const now = Date.now();
-  const windowMs = 60_000;
-  const maxReqs = 15;
+ const now = Date.now();
+ const windowMs = 60_000;
+ const maxReqs = 15;
 
-  const prev = (rateLimitMap.get(ip) || []).filter(ts => now - ts < windowMs);
-  if (prev.length >= maxReqs) {
-    rateLimitMap.set(ip, prev);
-    return true;
-  }
-  prev.push(now);
-  rateLimitMap.set(ip, prev);
-  return false;
+ const prev = (rateLimitMap.get(ip) || []).filter(ts => now - ts < windowMs);
+ if (prev.length >= maxReqs) {
+ rateLimitMap.set(ip, prev);
+ return true;
+ }
+ prev.push(now);
+ rateLimitMap.set(ip, prev);
+ return false;
 }
 
 // Clean up stale rate-limit entries every 5 minutes
 setInterval(() => {
-  const cutoff = Date.now() - 60_000;
-  for (const [ip, times] of rateLimitMap.entries()) {
-    const fresh = times.filter(ts => ts > cutoff);
-    if (fresh.length === 0) rateLimitMap.delete(ip);
-    else rateLimitMap.set(ip, fresh);
-  }
+ const cutoff = Date.now() - 60_000;
+ for (const [ip, times] of rateLimitMap.entries()) {
+ const fresh = times.filter(ts => ts > cutoff);
+ if (fresh.length === 0) rateLimitMap.delete(ip);
+ else rateLimitMap.set(ip, fresh);
+ }
 }, 5 * 60_000);
 
 // ── Middleware & Input validation ────────────────────────────────
@@ -48,19 +48,19 @@ const MAX_HISTORY_LEN = 20;
 const MAX_HISTORY_CONTENT_LEN = 1000;
 
 function validateInput(message, history) {
-  if (!message || typeof message !== 'string') {
-    return 'Message is required';
-  }
-  if (message.length > MAX_MESSAGE_LEN) {
-    return `Сообщение слишком длинное (максимум ${MAX_MESSAGE_LEN} символов)`;
-  }
-  if (history && !Array.isArray(history)) {
-    return 'History must be an array';
-  }
-  if (history && history.length > MAX_HISTORY_LEN) {
-    return `История слишком длинная (максимум ${MAX_HISTORY_LEN} сообщений)`;
-  }
-  return null;
+ if (!message || typeof message!== 'string') {
+ return 'Message is required';
+ }
+ if (message.length > MAX_MESSAGE_LEN) {
+ return `Сообщение слишком длинное (максимум ${MAX_MESSAGE_LEN} символов)`;
+ }
+ if (history &&!Array.isArray(history)) {
+ return 'History must be an array';
+ }
+ if (history && history.length > MAX_HISTORY_LEN) {
+ return `История слишком длинная (максимум ${MAX_HISTORY_LEN} сообщений)`;
+ }
+ return null;
 }
 
 app.use(cors());
@@ -69,113 +69,113 @@ app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // ── Helper: build knowledge context ─────────────────────────────
 function getKnowledgeContext(message) {
-  try {
-    const relevant = searchKnowledge(message);
-    if (relevant.length > 0) {
-      return '\n\nРелевантная информация из базы знаний:\n' +
-        relevant.map(item => `- ${item.content}`).join('\n');
-    }
-  } catch {
-    // storageService not critical
-  }
-  return '';
+ try {
+ const relevant = searchKnowledge(message);
+ if (relevant.length > 0) {
+ return '\n\nРелевантная информация из базы знаний:\n' +
+ relevant.map(item => `- ${item.content}`).join('\n');
+ }
+ } catch {
+ // storageService not critical
+ }
+ return '';
 }
 
 // ── POST /api/chat (non-streaming, legacy) ───────────────────────
 app.post('/api/chat', async (req, res) => {
-  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
-  if (isRateLimited(ip)) {
-    return res.status(429).json({ error: 'Слишком много запросов. Подождите минуту.' });
-  }
+ const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+ if (isRateLimited(ip)) {
+ return res.status(429).json({ error: 'Слишком много запросов. Подождите минуту.' });
+ }
 
-  try {
-    const { message, history = [], useKnowledge = true } = req.body;
+ try {
+ const { message, history = [], useKnowledge = true } = req.body;
 
-    const validationError = validateInput(message, history);
-    if (validationError) {
-      return res.status(400).json({ error: validationError });
-    }
+ const validationError = validateInput(message, history);
+ if (validationError) {
+ return res.status(400).json({ error: validationError });
+ }
 
-    const context = useKnowledge ? getKnowledgeContext(message) : '';
-    const response = await chatWithAI(message + context, history);
+ const context = useKnowledge? getKnowledgeContext(message): '';
+ const response = await chatWithAI(message + context, history);
 
-    res.json({ response, usedKnowledge: context.length > 0 });
-  } catch (error) {
-    console.error('Chat error:', error);
-    res.status(500).json({ error: 'Ошибка при обработке запроса', details: error.message });
-  }
+ res.json({ response, usedKnowledge: context.length > 0 });
+ } catch (error) {
+ console.error('Chat error:', error);
+ res.status(500).json({ error: 'Ошибка при обработке запроса', details: error.message });
+ }
 });
 
 // ── POST /api/chat/stream (SSE streaming) ───────────────────────
 app.post('/api/chat/stream', async (req, res) => {
-  const ip = req.ip || req.socket?.remoteAddress || 'unknown';
+ const ip = req.ip || req.socket?.remoteAddress || 'unknown';
 
-  if (isRateLimited(ip)) {
-    return res.status(429).json({ error: 'Слишком много запросов. Подождите минуту.' });
-  }
+ if (isRateLimited(ip)) {
+ return res.status(429).json({ error: 'Слишком много запросов. Подождите минуту.' });
+ }
 
-  const { message, history = [], useKnowledge = true } = req.body;
+ const { message, history = [], useKnowledge = true } = req.body;
 
-  const validationError = validateInput(message, history);
-  if (validationError) {
-    return res.status(400).json({ error: validationError });
-  }
+ const validationError = validateInput(message, history);
+ if (validationError) {
+ return res.status(400).json({ error: validationError });
+ }
 
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
-  res.flushHeaders();
+ res.setHeader('Content-Type', 'text/event-stream');
+ res.setHeader('Cache-Control', 'no-cache');
+ res.setHeader('Connection', 'keep-alive');
+ res.setHeader('X-Accel-Buffering', 'no');
+ res.flushHeaders();
 
-  const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
+ const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
-  try {
-    const context = useKnowledge ? getKnowledgeContext(message) : '';
-    await chatWithAIStream(message + context, history, (chunk) => send({ chunk }));
-    send({ done: true });
-  } catch (error) {
-    send({ error: error.message });
-  }
+ try {
+ const context = useKnowledge? getKnowledgeContext(message): '';
+ await chatWithAIStream(message + context, history, (chunk) => send({ chunk }));
+ send({ done: true });
+ } catch (error) {
+ send({ error: error.message });
+ }
 
-  res.end();
+ res.end();
 });
 
 // ── Knowledge API ────────────────────────────────────────────────
 app.get('/api/knowledge', (req, res) => {
-  try {
-    res.json({ knowledge: getKnowledge() });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+ try {
+ res.json({ knowledge: getKnowledge() });
+ } catch (error) {
+ res.status(500).json({ error: error.message });
+ }
 });
 
 app.post('/api/knowledge', (req, res) => {
-  try {
-    const { content, category, tags } = req.body;
-    if (!content) return res.status(400).json({ error: 'Content is required' });
-    res.json({ success: true, entry: addKnowledge(content, category, tags) });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+ try {
+ const { content, category, tags } = req.body;
+ if (!content) return res.status(400).json({ error: 'Content is required' });
+ res.json({ success: true, entry: addKnowledge(content, category, tags) });
+ } catch (error) {
+ res.status(500).json({ error: error.message });
+ }
 });
 
 // ── Health check ─────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    proxy: process.env.USE_PROXY === 'true' ? 'enabled' : 'disabled',
-    streaming: true,
-  });
+ res.json({
+ status: 'ok',
+ timestamp: new Date().toISOString(),
+ proxy: process.env.USE_PROXY === 'true'? 'enabled': 'disabled',
+ streaming: true,
+ });
 });
 
 // ── SPA fallback ─────────────────────────────────────────────────
 app.get('*', (_req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+ res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📊 Proxy: ${process.env.USE_PROXY === 'true' ? 'Enabled' : 'Disabled'}`);
-  console.log(`⚡ Streaming: enabled`);
+ console.log(` Server running on http://localhost:${PORT}`);
+ console.log(` Proxy: ${process.env.USE_PROXY === 'true'? 'Enabled': 'Disabled'}`);
+ console.log(` Streaming: enabled`);
 });

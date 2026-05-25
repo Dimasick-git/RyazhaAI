@@ -1,668 +1,668 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-        
-        .main-content {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .chat-section {
-            flex: 1;
-            min-width: 400px;
-        }
-        
-        .top-banner {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            border-radius: 10px;
-            margin: 0 auto 20px;
-            max-width: 1400px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px 10px 0 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header h1 {
-            color: #667eea;
-            font-size: 24px;
-            margin: 0;
-        }
-        
-        .settings-icon {
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-        
-        .settings-icon:hover {
-            transform: rotate(90deg);
-        }
-        
-        .chat-container {
-            background: white;
-            border-radius: 0 0 10px 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            height: 70vh;
-        }
-        
-        .messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        
-        .message {
-            margin-bottom: 15px;
-            padding: 10px 15px;
-            border-radius: 10px;
-            max-width: 80%;
-        }
-        
-        .message.user {
-            background: #667eea;
-            color: white;
-            margin-left: auto;
-        }
-        
-        .message.assistant {
-            background: #f0f0f0;
-            color: #333;
-        }
-        
-        .input-area {
-            padding: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 10px;
-        }
-        
-        input[type="text"] {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #667eea;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        
-        button {
-            padding: 12px 24px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        button:hover {
-            background: #5568d3;
-        }
-        
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        .settings {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            animation: slideDown 0.3s ease;
-        }
-        
-        .settings.active {
-            display: block;
-        }
-        
-        .settings h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .footer {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 20px auto;
-            max-width: 1400px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .footer h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-            font-size: 20px;
-        }
-        
-        .footer p {
-            color: #666;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        
-        .status {
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-        }
-        
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .guides-container {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            min-height: 400px;
-        }
-        
-        .guides-container h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 28px;
-        }
-        
-        .guide-item {
-            padding: 20px;
-            margin-bottom: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .guide-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-        
-        .guide-item h3 {
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 18px;
-        }
-        
-        .guide-item p {
-            color: #666;
-            font-size: 14px;
-            margin: 0;
-        }
-        
-        .guide-content {
-            display: none;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .guide-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .guide-content h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-        }
-        
-        .guide-content h3 {
-            color: #333;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-        
-        .guide-content p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-        
-        .guide-content ul {
-            margin-left: 20px;
-            margin-bottom: 15px;
-        }
-        
-        .guide-content li {
-            color: #666;
-            margin-bottom: 8px;
-            line-height: 1.6;
-        }
-        
-        .guide-content code {
-            background: #f8f9fa;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            color: #667eea;
-            font-size: 14px;
-        }
-        
-        .back-button {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: background 0.3s;
-        }
-        
-        .back-button:hover {
-            background: #5568d3;
-        }
-        
-        .download-link {
-            display: block;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .download-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .download-link a:hover {
-            text-decoration: underline;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .coming-soon {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.02);
-            }
-        }
-        
-        @media (max-width: 1024px) {
-            .container {
-                flex-direction: column;
-            }
-            
-            .chat-section {
-                min-width: 100%;
-            }
-        }
-    </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>AI Chat</title>
+ <style>
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }
+ 
+ body {
+ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ min-height: 100vh;
+ padding: 20px;
+ }
+ 
+.container {
+ max-width: 1400px;
+ margin: 0 auto;
+ display: flex;
+ gap: 20px;
+ align-items: flex-start;
+ }
+ 
+.main-content {
+ flex: 2;
+ display: flex;
+ flex-direction: column;
+ gap: 20px;
+ }
+ 
+.chat-section {
+ flex: 1;
+ min-width: 400px;
+ }
+ 
+.top-banner {
+ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ color: white;
+ padding: 15px;
+ text-align: center;
+ font-size: 24px;
+ font-weight: bold;
+ border-radius: 10px;
+ margin: 0 auto 20px;
+ max-width: 1400px;
+ box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+ }
+ 
+.header {
+ background: white;
+ padding: 20px;
+ border-radius: 10px 10px 0 0;
+ box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ }
+ 
+.header h1 {
+ color: #667eea;
+ font-size: 24px;
+ margin: 0;
+ }
+ 
+.settings-icon {
+ width: 32px;
+ height: 32px;
+ cursor: pointer;
+ transition: transform 0.3s;
+ }
+ 
+.settings-icon:hover {
+ transform: rotate(90deg);
+ }
+ 
+.chat-container {
+ background: white;
+ border-radius: 0 0 10px 10px;
+ box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+ display: flex;
+ flex-direction: column;
+ height: 70vh;
+ }
+ 
+.messages {
+ flex: 1;
+ padding: 20px;
+ overflow-y: auto;
+ }
+ 
+.message {
+ margin-bottom: 15px;
+ padding: 10px 15px;
+ border-radius: 10px;
+ max-width: 80%;
+ }
+ 
+.message.user {
+ background: #667eea;
+ color: white;
+ margin-left: auto;
+ }
+ 
+.message.assistant {
+ background: #f0f0f0;
+ color: #333;
+ }
+ 
+.input-area {
+ padding: 20px;
+ border-top: 1px solid #eee;
+ }
+ 
+.input-group {
+ display: flex;
+ gap: 10px;
+ }
+ 
+ input[type="text"] {
+ flex: 1;
+ padding: 12px;
+ border: 2px solid #667eea;
+ border-radius: 5px;
+ font-size: 16px;
+ }
+ 
+ button {
+ padding: 12px 24px;
+ background: #667eea;
+ color: white;
+ border: none;
+ border-radius: 5px;
+ font-size: 16px;
+ cursor: pointer;
+ transition: background 0.3s;
+ }
+ 
+ button:hover {
+ background: #5568d3;
+ }
+ 
+ button:disabled {
+ background: #ccc;
+ cursor: not-allowed;
+ }
+ 
+.settings {
+ display: none;
+ margin-top: 20px;
+ padding: 15px;
+ background: white;
+ border-radius: 10px;
+ box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+ animation: slideDown 0.3s ease;
+ }
+ 
+.settings.active {
+ display: block;
+ }
+ 
+.settings h3 {
+ color: #667eea;
+ margin-bottom: 10px;
+ }
+ 
+ @keyframes slideDown {
+ from {
+ opacity: 0;
+ transform: translateY(-10px);
+ }
+ to {
+ opacity: 1;
+ transform: translateY(0);
+ }
+ }
+ 
+.footer {
+ background: white;
+ padding: 20px;
+ border-radius: 10px;
+ text-align: center;
+ margin: 20px auto;
+ max-width: 1400px;
+ box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+ }
+ 
+.footer h3 {
+ color: #667eea;
+ margin-bottom: 10px;
+ font-size: 20px;
+ }
+ 
+.footer p {
+ color: #666;
+ margin: 5px 0;
+ font-size: 14px;
+ }
+ 
+.status {
+ padding: 10px;
+ margin-top: 10px;
+ border-radius: 5px;
+ font-size: 14px;
+ }
+ 
+.status.success {
+ background: #d4edda;
+ color: #155724;
+ }
+ 
+.status.error {
+ background: #f8d7da;
+ color: #721c24;
+ }
+ 
+.guides-container {
+ background: white;
+ padding: 30px;
+ border-radius: 10px;
+ box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+ min-height: 400px;
+ }
+ 
+.guides-container h2 {
+ color: #667eea;
+ margin-bottom: 20px;
+ font-size: 28px;
+ }
+ 
+.guide-item {
+ padding: 20px;
+ margin-bottom: 15px;
+ background: #f8f9fa;
+ border-radius: 8px;
+ border-left: 4px solid #667eea;
+ cursor: pointer;
+ transition: all 0.3s;
+ }
+ 
+.guide-item:hover {
+ background: #e9ecef;
+ transform: translateX(5px);
+ }
+ 
+.guide-item h3 {
+ color: #333;
+ margin-bottom: 8px;
+ font-size: 18px;
+ }
+ 
+.guide-item p {
+ color: #666;
+ font-size: 14px;
+ margin: 0;
+ }
+ 
+.guide-content {
+ display: none;
+ padding: 20px;
+ background: white;
+ border-radius: 10px;
+ box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+ }
+ 
+.guide-content.active {
+ display: block;
+ animation: fadeIn 0.3s ease;
+ }
+ 
+.guide-content h2 {
+ color: #667eea;
+ margin-bottom: 20px;
+ }
+ 
+.guide-content h3 {
+ color: #333;
+ margin-top: 20px;
+ margin-bottom: 10px;
+ }
+ 
+.guide-content p {
+ color: #666;
+ line-height: 1.6;
+ margin-bottom: 15px;
+ }
+ 
+.guide-content ul {
+ margin-left: 20px;
+ margin-bottom: 15px;
+ }
+ 
+.guide-content li {
+ color: #666;
+ margin-bottom: 8px;
+ line-height: 1.6;
+ }
+ 
+.guide-content code {
+ background: #f8f9fa;
+ padding: 2px 6px;
+ border-radius: 3px;
+ font-family: 'Courier New', monospace;
+ color: #667eea;
+ font-size: 14px;
+ }
+ 
+.back-button {
+ display: inline-block;
+ padding: 10px 20px;
+ background: #667eea;
+ color: white;
+ border: none;
+ border-radius: 5px;
+ cursor: pointer;
+ margin-bottom: 20px;
+ transition: background 0.3s;
+ }
+ 
+.back-button:hover {
+ background: #5568d3;
+ }
+ 
+.download-link {
+ display: block;
+ margin-top: 20px;
+ padding: 15px;
+ background: #f8f9fa;
+ border-radius: 8px;
+ border-left: 4px solid #667eea;
+ }
+ 
+.download-link a {
+ color: #667eea;
+ text-decoration: none;
+ font-weight: 600;
+ }
+ 
+.download-link a:hover {
+ text-decoration: underline;
+ }
+ 
+ @keyframes fadeIn {
+ from {
+ opacity: 0;
+ transform: translateY(10px);
+ }
+ to {
+ opacity: 1;
+ transform: translateY(0);
+ }
+ }
+ 
+.coming-soon {
+ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ color: white;
+ padding: 20px;
+ border-radius: 10px;
+ text-align: center;
+ font-size: 18px;
+ font-weight: 600;
+ box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+ animation: pulse 2s infinite;
+ }
+ 
+ @keyframes pulse {
+ 0%, 100% {
+ transform: scale(1);
+ }
+ 50% {
+ transform: scale(1.02);
+ }
+ }
+ 
+ @media (max-width: 1024px) {
+.container {
+ flex-direction: column;
+ }
+ 
+.chat-section {
+ min-width: 100%;
+ }
+ }
+ </style>
 </head>
 <body>
-    <!-- Верхний баннер -->
-    <div class="top-banner">
-        🤖 AiChat for Ryzhenka
-    </div>
-    
-    <div class="container">
-        <!-- Основной контент слева -->
-        <div class="main-content">
-            <!-- Список гайдов -->
-            <div class="guides-container" id="guidesList">
-                <h2>📚 Гайды и инструкции</h2>
-                
-                <div class="guide-item" onclick="showGuide('switch')">
-                    <h3>🎮 Установка на Nintendo Switch</h3>
-                    <p>Пошаговая инструкция по установке AI Chat на вашу консоль</p>
-                </div>
-                
-                <div class="guide-item" onclick="showGuide('problems')">
-                    <h3>🔧 Решение проблем</h3>
-                    <p>Частые вопросы и решения возможных проблем</p>
-                </div>
-            </div>
-            
-            <!-- Содержимое гайда: Установка на Switch -->
-            <div class="guide-content" id="guide-switch">
-                <button class="back-button" onclick="showGuidesList()">← Назад к гайдам</button>
-                <h2>🎮 Установка на Nintendo Switch</h2>
-                
-                <h3>Требования:</h3>
-                <ul>
-                    <li>Nintendo Switch с кастомной прошивкой (Atmosphere/Hekate)</li>
-                    <li>SD карта</li>
-                    <li>Подключение к интернету</li>
-                </ul>
-                
-                <h3>Шаг 1: Скачайте файл</h3>
-                <p>Скачайте файл ai-chat.nro с GitHub.</p>
-                
-                <h3>Шаг 2: Установка</h3>
-                <p>1. Скопируйте файл ai-chat.nro на SD карту Switch</p>
-                <p>2. Путь на SD карте: <code>/switch/ai-chat/ai-chat.nro</code></p>
-                <p>3. Вставьте SD карту в Switch</p>
-                
-                <h3>Шаг 3: Запуск</h3>
-                <p>1. Запустите Homebrew Menu (удерживайте R при запуске игры/альбома)</p>
-                <p>2. Найдите "AI Chat" в списке</p>
-                <p>3. Запустите приложение</p>
-                <p>4. Switch откроет браузер с AI чатом!</p>
-                
-                <div class="download-link">
-                    <strong>Ссылка на скачивание прошивки:</strong> <a href="https://github.com/Dimasick-git/Ryzhenka/releases" target="_blank">GitHub Releases</a>
-                </div>
-            </div>
-            
-            <!-- Содержимое гайда: Решение проблем -->
-            <div class="guide-content" id="guide-problems">
-                <button class="back-button" onclick="showGuidesList()">← Назад к гайдам</button>
-                <h2>🔧 Решение проблем</h2>
-                
-                <h3>Приложение не запускается на Switch</h3>
-                <p><strong>Решение:</strong></p>
-                <ul>
-                    <li>Убедитесь, что Switch имеет кастомную прошивку (Atmosphere)</li>
-                    <li>Проверьте путь к файлу: /switch/ai-chat/ai-chat.nro</li>
-                    <li>Попробуйте перезапустить Switch</li>
-                </ul>
-                
-                <h3>Браузер не открывается</h3>
-                <p><strong>Решение:</strong></p>
-                <ul>
-                    <li>Проверьте подключение к интернету</li>
-                    <li>Убедитесь, что DNS настроен правильно</li>
-                    <li>Попробуйте открыть браузер вручную через настройки</li>
-                </ul>
-                
-                <h3>AI не отвечает</h3>
-                <p><strong>Решение:</strong></p>
-                <ul>
-                    <li>Проверьте подключение к интернету</li>
-                    <li>Попробуйте обновить страницу</li>
-                    <li>Если проблема сохраняется - попробуйте другой API ключ</li>
-                </ul>
-                
-                <h3>Другие проблемы</h3>
-                <p>Если ваша проблема не решена, посетите наш GitHub репозиторий для получения помощи.</p>
-                
-                <div class="download-link">
-                    <strong>Ссылка на скачивание прошивки:</strong> <a href="https://github.com/Dimasick-git/Ryzhenka" target="_blank">GitHub Repository</a>
-                </div>
-            </div>
-            
-            <!-- Плашка "Скоро появятся" -->
-            <div class="coming-soon">
-                ✨ Новые гайды скоро появятся
-            </div>
-        </div>
-        
-        <!-- Чат справа -->
-        <div class="chat-section">
-            <div class="header">
-                <h1>🤖 AI Chat</h1>
-                <svg class="settings-icon" onclick="toggleSettings()" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M12 1v6m0 6v6m-9-9h6m6 0h6m-4.5-4.5l-1.5 1.5m-6 6l-1.5 1.5m12 0l-1.5-1.5m-6-6l-1.5-1.5"></path>
-                </svg>
-            </div>
-            
-            <div class="chat-container">
-                <div class="messages" id="messages">
-                    <div class="message assistant">
-                        Привет! Я AI ассистент. Задайте мне любой вопрос!
-                    </div>
-                </div>
-                
-                <div class="input-area">
-                    <div class="input-group">
-                        <input type="text" id="messageInput" placeholder="Введите сообщение..." />
-                        <button onclick="sendMessage()" id="sendBtn">Отправить</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="settings" id="settingsPanel">
-                <h3>⚙️ Настройки</h3>
-                <div class="input-group">
-                    <input type="text" id="apiKeyInput" placeholder="API ключ (уже настроен)" />
-                    <button onclick="saveApiKey()">Сохранить</button>
-                </div>
-                <div id="status"></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Футер с авторами -->
-    <div class="footer">
-        <h3>👥 Авторы</h3>
-        <p><strong>Разработчик:</strong> Ваше имя</p>
-        <p><strong>Дизайн:</strong> Ваше имя</p>
-        <p><strong>GitHub:</strong> <a href="https://github.com/Dimasick-git/Ryzhenka" target="_blank" style="color: #667eea; text-decoration: none;">Ryzhenka Project</a></p>
-    </div>
+ <!-- Верхний баннер -->
+ <div class="top-banner">
+ AiChat for Ryzhenka
+ </div>
+ 
+ <div class="container">
+ <!-- Основной контент слева -->
+ <div class="main-content">
+ <!-- Список гайдов -->
+ <div class="guides-container" id="guidesList">
+ <h2> Гайды и инструкции</h2>
+ 
+ <div class="guide-item" onclick="showGuide('switch')">
+ <h3> Установка на Nintendo Switch</h3>
+ <p>Пошаговая инструкция по установке AI Chat на вашу консоль</p>
+ </div>
+ 
+ <div class="guide-item" onclick="showGuide('problems')">
+ <h3> Решение проблем</h3>
+ <p>Частые вопросы и решения возможных проблем</p>
+ </div>
+ </div>
+ 
+ <!-- Содержимое гайда: Установка на Switch -->
+ <div class="guide-content" id="guide-switch">
+ <button class="back-button" onclick="showGuidesList()">← Назад к гайдам</button>
+ <h2> Установка на Nintendo Switch</h2>
+ 
+ <h3>Требования:</h3>
+ <ul>
+ <li>Nintendo Switch с кастомной прошивкой (Atmosphere/Hekate)</li>
+ <li>SD карта</li>
+ <li>Подключение к интернету</li>
+ </ul>
+ 
+ <h3>Шаг 1: Скачайте файл</h3>
+ <p>Скачайте файл ai-chat.nro с GitHub.</p>
+ 
+ <h3>Шаг 2: Установка</h3>
+ <p>1. Скопируйте файл ai-chat.nro на SD карту Switch</p>
+ <p>2. Путь на SD карте: <code>/switch/ai-chat/ai-chat.nro</code></p>
+ <p>3. Вставьте SD карту в Switch</p>
+ 
+ <h3>Шаг 3: Запуск</h3>
+ <p>1. Запустите Homebrew Menu (удерживайте R при запуске игры/альбома)</p>
+ <p>2. Найдите "AI Chat" в списке</p>
+ <p>3. Запустите приложение</p>
+ <p>4. Switch откроет браузер с AI чатом!</p>
+ 
+ <div class="download-link">
+ <strong>Ссылка на скачивание прошивки:</strong> <a href="https://github.com/Dimasick-git/Ryzhenka/releases" target="_blank">GitHub Releases</a>
+ </div>
+ </div>
+ 
+ <!-- Содержимое гайда: Решение проблем -->
+ <div class="guide-content" id="guide-problems">
+ <button class="back-button" onclick="showGuidesList()">← Назад к гайдам</button>
+ <h2> Решение проблем</h2>
+ 
+ <h3>Приложение не запускается на Switch</h3>
+ <p><strong>Решение:</strong></p>
+ <ul>
+ <li>Убедитесь, что Switch имеет кастомную прошивку (Atmosphere)</li>
+ <li>Проверьте путь к файлу: /switch/ai-chat/ai-chat.nro</li>
+ <li>Попробуйте перезапустить Switch</li>
+ </ul>
+ 
+ <h3>Браузер не открывается</h3>
+ <p><strong>Решение:</strong></p>
+ <ul>
+ <li>Проверьте подключение к интернету</li>
+ <li>Убедитесь, что DNS настроен правильно</li>
+ <li>Попробуйте открыть браузер вручную через настройки</li>
+ </ul>
+ 
+ <h3>AI не отвечает</h3>
+ <p><strong>Решение:</strong></p>
+ <ul>
+ <li>Проверьте подключение к интернету</li>
+ <li>Попробуйте обновить страницу</li>
+ <li>Если проблема сохраняется - попробуйте другой API ключ</li>
+ </ul>
+ 
+ <h3>Другие проблемы</h3>
+ <p>Если ваша проблема не решена, посетите наш GitHub репозиторий для получения помощи.</p>
+ 
+ <div class="download-link">
+ <strong>Ссылка на скачивание прошивки:</strong> <a href="https://github.com/Dimasick-git/Ryzhenka" target="_blank">GitHub Repository</a>
+ </div>
+ </div>
+ 
+ <!-- Плашка "Скоро появятся" -->
+ <div class="coming-soon">
+ Новые гайды скоро появятся
+ </div>
+ </div>
+ 
+ <!-- Чат справа -->
+ <div class="chat-section">
+ <div class="header">
+ <h1> AI Chat</h1>
+ <svg class="settings-icon" onclick="toggleSettings()" viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+ <circle cx="12" cy="12" r="3"></circle>
+ <path d="M12 1v6m0 6v6m-9-9h6m6 0h6m-4.5-4.5l-1.5 1.5m-6 6l-1.5 1.5m12 0l-1.5-1.5m-6-6l-1.5-1.5"></path>
+ </svg>
+ </div>
+ 
+ <div class="chat-container">
+ <div class="messages" id="messages">
+ <div class="message assistant">
+ Привет! Я AI ассистент. Задайте мне любой вопрос!
+ </div>
+ </div>
+ 
+ <div class="input-area">
+ <div class="input-group">
+ <input type="text" id="messageInput" placeholder="Введите сообщение..." />
+ <button onclick="sendMessage()" id="sendBtn">Отправить</button>
+ </div>
+ </div>
+ </div>
+ 
+ <div class="settings" id="settingsPanel">
+ <h3> Настройки</h3>
+ <div class="input-group">
+ <input type="text" id="apiKeyInput" placeholder="API ключ (уже настроен)" />
+ <button onclick="saveApiKey()">Сохранить</button>
+ </div>
+ <div id="status"></div>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- Футер с авторами -->
+ <div class="footer">
+ <h3> Авторы</h3>
+ <p><strong>Разработчик:</strong> Ваше имя</p>
+ <p><strong>Дизайн:</strong> Ваше имя</p>
+ <p><strong>GitHub:</strong> <a href="https://github.com/Dimasick-git/Ryzhenka" target="_blank" style="color: #667eea; text-decoration: none;">Ryzhenka Project</a></p>
+ </div>
 
-    <script>
-        // API ключ по умолчанию
-        const DEFAULT_API_KEY = 'sk-W3WuTHKVmxudeH6AqojJSm8RH50D9DKRuO6FVnbJufOVDnw4';
-        const API_URL = 'https://api.chatanywhere.tech/v1/chat/completions';
-        
-        // Инициализация
-        let apiKey = localStorage.getItem('apiKey') || DEFAULT_API_KEY;
-        
-        // Переключить настройки
-        function toggleSettings() {
-            const panel = document.getElementById('settingsPanel');
-            panel.classList.toggle('active');
-        }
-        
-        // Показать гайд
-        function showGuide(guideId) {
-            // Скрыть список гайдов
-            document.getElementById('guidesList').style.display = 'none';
-            
-            // Скрыть все гайды
-            document.querySelectorAll('.guide-content').forEach(guide => {
-                guide.classList.remove('active');
-            });
-            
-            // Показать выбранный гайд
-            document.getElementById('guide-' + guideId).classList.add('active');
-        }
-        
-        // Показать список гайдов
-        function showGuidesList() {
-            // Показать список
-            document.getElementById('guidesList').style.display = 'block';
-            
-            // Скрыть все гайды
-            document.querySelectorAll('.guide-content').forEach(guide => {
-                guide.classList.remove('active');
-            });
-        }
-        
-        // Сохранить ключ
-        function saveApiKey() {
-            const input = document.getElementById('apiKeyInput');
-            if (input.value.trim()) {
-                apiKey = input.value.trim();
-                localStorage.setItem('apiKey', apiKey);
-                showStatus('API ключ сохранен!', 'success');
-            }
-        }
-        
-        // Показать статус
-        function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = 'status ' + type;
-            setTimeout(() => {
-                status.textContent = '';
-                status.className = 'status';
-            }, 3000);
-        }
-        
-        // Добавить сообщение в чат
-        function addMessage(text, sender) {
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = 'message ' + sender;
-            messageDiv.textContent = text;
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-        
-        // Отправить сообщение
-        async function sendMessage() {
-            const input = document.getElementById('messageInput');
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            // Добавить сообщение пользователя
-            addMessage(message, 'user');
-            input.value = '';
-            
-            // Отключить кнопку
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = true;
-            sendBtn.textContent = 'Отправка...';
-            
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + apiKey
-                    },
-                    body: JSON.stringify({
-                        model: 'gpt-3.5-turbo',
-                        messages: [
-                            {
-                                role: 'user',
-                                content: message
-                            }
-                        ]
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Ошибка API: ' + response.status);
-                }
-                
-                const data = await response.json();
-                const reply = data.choices[0].message.content;
-                
-                // Добавить ответ AI
-                addMessage(reply, 'assistant');
-                
-            } catch (error) {
-                console.error('Error:', error);
-                addMessage('Ошибка: ' + error.message, 'assistant');
-            } finally {
-                sendBtn.disabled = false;
-                sendBtn.textContent = 'Отправить';
-            }
-        }
-        
-        // Enter для отправки
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-        
-        // Показать текущий статус
-        if (apiKey === DEFAULT_API_KEY) {
-            showStatus('Используется API ключ по умолчанию', 'success');
-        }
-    </script>
+ <script>
+ // API ключ по умолчанию
+ const DEFAULT_API_KEY = 'sk-W3WuTHKVmxudeH6AqojJSm8RH50D9DKRuO6FVnbJufOVDnw4';
+ const API_URL = 'https://api.chatanywhere.tech/v1/chat/completions';
+ 
+ // Инициализация
+ let apiKey = localStorage.getItem('apiKey') || DEFAULT_API_KEY;
+ 
+ // Переключить настройки
+ function toggleSettings() {
+ const panel = document.getElementById('settingsPanel');
+ panel.classList.toggle('active');
+ }
+ 
+ // Показать гайд
+ function showGuide(guideId) {
+ // Скрыть список гайдов
+ document.getElementById('guidesList').style.display = 'none';
+ 
+ // Скрыть все гайды
+ document.querySelectorAll('.guide-content').forEach(guide => {
+ guide.classList.remove('active');
+ });
+ 
+ // Показать выбранный гайд
+ document.getElementById('guide-' + guideId).classList.add('active');
+ }
+ 
+ // Показать список гайдов
+ function showGuidesList() {
+ // Показать список
+ document.getElementById('guidesList').style.display = 'block';
+ 
+ // Скрыть все гайды
+ document.querySelectorAll('.guide-content').forEach(guide => {
+ guide.classList.remove('active');
+ });
+ }
+ 
+ // Сохранить ключ
+ function saveApiKey() {
+ const input = document.getElementById('apiKeyInput');
+ if (input.value.trim()) {
+ apiKey = input.value.trim();
+ localStorage.setItem('apiKey', apiKey);
+ showStatus('API ключ сохранен!', 'success');
+ }
+ }
+ 
+ // Показать статус
+ function showStatus(message, type) {
+ const status = document.getElementById('status');
+ status.textContent = message;
+ status.className = 'status ' + type;
+ setTimeout(() => {
+ status.textContent = '';
+ status.className = 'status';
+ }, 3000);
+ }
+ 
+ // Добавить сообщение в чат
+ function addMessage(text, sender) {
+ const messagesDiv = document.getElementById('messages');
+ const messageDiv = document.createElement('div');
+ messageDiv.className = 'message ' + sender;
+ messageDiv.textContent = text;
+ messagesDiv.appendChild(messageDiv);
+ messagesDiv.scrollTop = messagesDiv.scrollHeight;
+ }
+ 
+ // Отправить сообщение
+ async function sendMessage() {
+ const input = document.getElementById('messageInput');
+ const message = input.value.trim();
+ 
+ if (!message) return;
+ 
+ // Добавить сообщение пользователя
+ addMessage(message, 'user');
+ input.value = '';
+ 
+ // Отключить кнопку
+ const sendBtn = document.getElementById('sendBtn');
+ sendBtn.disabled = true;
+ sendBtn.textContent = 'Отправка...';
+ 
+ try {
+ const response = await fetch(API_URL, {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ 'Authorization': 'Bearer ' + apiKey
+ },
+ body: JSON.stringify({
+ model: 'gpt-3.5-turbo',
+ messages: [
+ {
+ role: 'user',
+ content: message
+ }
+ ]
+ })
+ });
+ 
+ if (!response.ok) {
+ throw new Error('Ошибка API: ' + response.status);
+ }
+ 
+ const data = await response.json();
+ const reply = data.choices[0].message.content;
+ 
+ // Добавить ответ AI
+ addMessage(reply, 'assistant');
+ 
+ } catch (error) {
+ console.error('Error:', error);
+ addMessage('Ошибка: ' + error.message, 'assistant');
+ } finally {
+ sendBtn.disabled = false;
+ sendBtn.textContent = 'Отправить';
+ }
+ }
+ 
+ // Enter для отправки
+ document.getElementById('messageInput').addEventListener('keypress', function(e) {
+ if (e.key === 'Enter') {
+ sendMessage();
+ }
+ });
+ 
+ // Показать текущий статус
+ if (apiKey === DEFAULT_API_KEY) {
+ showStatus('Используется API ключ по умолчанию', 'success');
+ }
+ </script>
 </body>
 </html>

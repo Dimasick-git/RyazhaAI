@@ -4,12 +4,12 @@
 
 ## Возможности
 
-- 💬 AI чат с поддержкой базы знаний
-- 📚 Облачное хранилище данных
-- 🔒 HTTPS поддержка
-- 🌐 Обход блокировок API через прокси
-- 🎨 Современный UI с Tailwind CSS
-- ⚡ Быстрая работа на React + Vite
+- AI чат с поддержкой базы знаний
+- Облачное хранилище данных
+- HTTPS поддержка
+- Обход блокировок API через прокси
+- Современный UI с Tailwind CSS
+- Быстрая работа на React + Vite
 
 ## Установка
 
@@ -18,7 +18,7 @@
 npm install
 cd client
 npm install
-cd ..
+cd..
 ```
 
 2. Настройте `.env` файл:
@@ -53,15 +53,15 @@ ngrok http 3000
 
 ```
 website/
-├── server/          # Backend (Express)
-│   ├── index.js
-│   ├── proxyService.js
-│   ├── storageService.js
-│   └── data/
-└── client/          # Frontend (React)
-    └── src/
-        ├── App.jsx
-        └── components/
+├── server/ # Backend (Express)
+│ ├── index.js
+│ ├── proxyService.js
+│ ├── storageService.js
+│ └── data/
+└── client/ # Frontend (React)
+ └── src/
+ ├── App.jsx
+ └── components/
 ```
 
 ## API Endpoints
