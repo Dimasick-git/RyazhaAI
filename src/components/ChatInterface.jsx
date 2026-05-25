@@ -7,10 +7,17 @@ const INITIAL_MESSAGE = {
   role: 'assistant',
   content:
     '👋 Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\n🥛 Создан командой Ryazhenka специально для тебя!\n\n🎮 Могу помочь с:\n• Взломом Switch и установкой CFW\n• Ryazhenka прошивкой и настройкой\n• .nro приложениями и homebrew\n• Sigpatches, emuMMC, любыми Switch темами!\n\n💬 Задавай любые вопросы - отвечу умно и по делу! 🚀\n\n📱 Telegram: @Ryazhenkabestcfw\n🐙 GitHub: Dimasick-git/Ryzhenka',
+  ts: null,
 }
 
 function genMsgId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2)
+}
+
+function formatMsgTime(ts) {
+  if (!ts) return ''
+  const d = new Date(ts)
+  return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
 }
 
 const QUICK_QUESTIONS = [
@@ -402,17 +409,17 @@ function ChatInterface() {
         full += chunk
         setStreamText(full)
       })
-      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: full }])
+      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: full, ts: Date.now() }])
       setFollowups(getFollowupSuggestions(full))
     } catch {
       try {
         const response = await sendMessage(userMessage, history)
-        setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response }])
+        setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response, ts: Date.now() }])
         setFollowups(getFollowupSuggestions(response))
       } catch {
         setMessages((prev) => [
           ...prev,
-          { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!' },
+          { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!', ts: Date.now() },
         ])
       }
     } finally {
@@ -429,7 +436,7 @@ function ChatInterface() {
     setInput('')
     setShowQuickQ(false)
     setFollowups([])
-    setMessages((prev) => [...prev, { id: genMsgId(), role: 'user', content: userMessage }])
+    setMessages((prev) => [...prev, { id: genMsgId(), role: 'user', content: userMessage, ts: Date.now() }])
     setIsLoading(true)
     setStreamText('')
 
@@ -439,17 +446,17 @@ function ChatInterface() {
         full += chunk
         setStreamText(full)
       })
-      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: full }])
+      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: full, ts: Date.now() }])
       setFollowups(getFollowupSuggestions(full))
     } catch {
       try {
         const response = await sendMessage(userMessage, history)
-        setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response }])
+        setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response, ts: Date.now() }])
         setFollowups(getFollowupSuggestions(response))
       } catch {
         setMessages((prev) => [
           ...prev,
-          { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!' },
+          { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!', ts: Date.now() },
         ])
       }
     } finally {
@@ -553,6 +560,14 @@ function ChatInterface() {
                 <div className="flex items-center gap-1 pl-1">
                   <CopyButton text={message.content} />
                   <ReactionButtons msgId={message.id} reactions={reactions} onReact={handleReact} />
+                  {message.ts && (
+                    <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity ml-1">{formatMsgTime(message.ts)}</span>
+                  )}
+                </div>
+              )}
+              {message.role === 'user' && message.ts && (
+                <div className="flex justify-end pr-1">
+                  <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">{formatMsgTime(message.ts)}</span>
                 </div>
               )}
             </div>
@@ -656,7 +671,9 @@ function ChatInterface() {
               disabled={isLoading}
             />
             {input.length > 0 && (
-              <span className="absolute bottom-2 right-3 text-xs text-gray-600">{input.length}</span>
+              <span className={`absolute bottom-2 right-3 text-xs transition-colors ${
+                input.length > 1800 ? 'text-red-400 font-semibold' : input.length > 1400 ? 'text-yellow-500' : 'text-gray-600'
+              }`}>{input.length}/2000</span>
             )}
           </div>
           <VoiceButton onResult={handleVoiceResult} disabled={isLoading} />
