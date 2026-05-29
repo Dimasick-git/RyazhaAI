@@ -397,7 +397,7 @@ function ChatInterface() {
     const userMessage = messages[idx].content
     const history = messages.slice(0, idx)
 
-    const newMessages = messages.slice(0, idx + 1).filter((_, i) => i <= idx)
+    const newMessages = messages.slice(0, idx + 1)
     setMessages(newMessages)
     setIsLoading(true)
     setStreamText('')

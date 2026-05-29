@@ -92,6 +92,21 @@ export async function sendMessageStream(message, history = [], onChunk) {
   const decoder = new TextDecoder()
   let buf = ''
 
+  const processLine = (line) => {
+    if (!line.startsWith('data: ')) return false
+    const raw = line.slice(6).trim()
+    if (!raw) return false
+    try {
+      const data = JSON.parse(raw)
+      if (data.chunk) onChunk(data.chunk)
+      if (data.done) return true
+      if (data.error) throw new Error(data.error)
+    } catch (e) {
+      if (e.message && !e.message.includes('JSON')) throw e
+    }
+    return false
+  }
+
   while (true) {
     const { done, value } = await reader.read()
     if (done) break
@@ -101,19 +116,13 @@ export async function sendMessageStream(message, history = [], onChunk) {
     buf = lines.pop()
 
     for (const line of lines) {
-      if (!line.startsWith('data: ')) continue
-      const raw = line.slice(6).trim()
-      if (!raw) continue
-      try {
-        const data = JSON.parse(raw)
-        if (data.chunk) onChunk(data.chunk)
-        if (data.done) return
-        if (data.error) throw new Error(data.error)
-      } catch (e) {
-        if (e.message && !e.message.includes('JSON')) throw e
-      }
+      if (processLine(line)) return
     }
   }
+
+  // Flush decoder and process any remaining buffered data
+  buf += decoder.decode()
+  if (buf) processLine(buf)
 }
 
 export async function checkAPIStatus() {
