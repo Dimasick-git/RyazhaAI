@@ -11,6 +11,7 @@ const INITIAL_MESSAGE = {
 }
 
 function genMsgId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
   return Date.now().toString(36) + Math.random().toString(36).slice(2)
 }
 
@@ -250,6 +251,8 @@ function VoiceButton({ onResult, disabled }) {
   const supported = typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
 
+  useEffect(() => () => recognitionRef.current?.stop(), [])
+
   const toggle = useCallback(() => {
     if (!supported) return
 
@@ -397,31 +400,20 @@ function ChatInterface() {
     const userMessage = messages[idx].content
     const history = messages.slice(0, idx)
 
-    const newMessages = messages.slice(0, idx + 1)
-    setMessages(newMessages)
+    setMessages(messages.slice(0, idx + 1))
     setIsLoading(true)
     setStreamText('')
     setFollowups([])
 
     try {
-      let full = ''
-      await sendMessageStream(userMessage, history, (chunk) => {
-        full += chunk
-        setStreamText(full)
-      })
-      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: full, ts: Date.now() }])
-      setFollowups(getFollowupSuggestions(full))
+      const response = await callAI(userMessage, history)
+      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response, ts: Date.now() }])
+      setFollowups(getFollowupSuggestions(response))
     } catch {
-      try {
-        const response = await sendMessage(userMessage, history)
-        setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response, ts: Date.now() }])
-        setFollowups(getFollowupSuggestions(response))
-      } catch {
-        setMessages((prev) => [
-          ...prev,
-          { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!', ts: Date.now() },
-        ])
-      }
+      setMessages((prev) => [
+        ...prev,
+        { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!', ts: Date.now() },
+      ])
     } finally {
       setIsLoading(false)
       setStreamText('')
@@ -441,29 +433,19 @@ function ChatInterface() {
     setStreamText('')
 
     try {
-      let full = ''
-      await sendMessageStream(userMessage, history, (chunk) => {
-        full += chunk
-        setStreamText(full)
-      })
-      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: full, ts: Date.now() }])
-      setFollowups(getFollowupSuggestions(full))
+      const response = await callAI(userMessage, history)
+      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response, ts: Date.now() }])
+      setFollowups(getFollowupSuggestions(response))
     } catch {
-      try {
-        const response = await sendMessage(userMessage, history)
-        setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response, ts: Date.now() }])
-        setFollowups(getFollowupSuggestions(response))
-      } catch {
-        setMessages((prev) => [
-          ...prev,
-          { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!', ts: Date.now() },
-        ])
-      }
+      setMessages((prev) => [
+        ...prev,
+        { id: genMsgId(), role: 'assistant', content: '😔 Извини, произошла ошибка. Попробуй ещё раз!', ts: Date.now() },
+      ])
     } finally {
       setIsLoading(false)
       setStreamText('')
     }
-  }, [isLoading, messages])
+  }, [isLoading, messages, callAI])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -480,6 +462,19 @@ function ChatInterface() {
   const handleVoiceResult = useCallback((transcript) => {
     setInput((prev) => prev ? `${prev} ${transcript}` : transcript)
     inputRef.current?.focus()
+  }, [])
+
+  const callAI = useCallback(async (userMessage, history) => {
+    let full = ''
+    try {
+      await sendMessageStream(userMessage, history, (chunk) => {
+        full += chunk
+        setStreamText(full)
+      })
+      return full
+    } catch {
+      return await sendMessage(userMessage, history)
+    }
   }, [])
 
   const msgCount = messages.length - 1
@@ -670,9 +665,9 @@ function ChatInterface() {
               className="w-full bg-ryaha-card border border-ryaha-border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none overflow-hidden text-sm"
               disabled={isLoading}
             />
-            {input.length > 0 && (
+            {input.length > 1400 && (
               <span className={`absolute bottom-2 right-3 text-xs transition-colors ${
-                input.length > 1800 ? 'text-red-400 font-semibold' : input.length > 1400 ? 'text-yellow-500' : 'text-gray-600'
+                input.length > 1800 ? 'text-red-400 font-semibold' : 'text-yellow-500'
               }`}>{input.length}/2000</span>
             )}
           </div>

@@ -6,15 +6,29 @@ import FAQ from './components/FAQ'
 import Team from './components/Team'
 import Footer from './components/Footer'
 
+const TABS = [
+  { id: 'chat', label: 'AI Чат' },
+  { id: 'faq', label: 'FAQ Switch' },
+  { id: 'features', label: 'Возможности' },
+  { id: 'team', label: 'Команда' },
+]
+
 function App() {
   const [activeTab, setActiveTab] = useState('chat')
+
+  const tabClass = (id) =>
+    `px-6 py-3 rounded-lg font-semibold transition-all ${
+      activeTab === id
+        ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white glow-effect'
+        : 'bg-ryaha-card text-gray-400 hover:bg-ryaha-hover'
+    }`
 
   return (
     <div className="min-h-screen bg-ryaha-bg">
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/10 pointer-events-none" />
-      
+
       <Header />
-      
+
       <main className="relative">
         {/* Hero Section */}
         <section className="pt-32 pb-20 px-4">
@@ -30,49 +44,14 @@ function App() {
               <br />
               Создан командой Ryazhenka - лучшей прошивки для Switch!
             </p>
-            
+
             {/* Tab Navigation */}
             <div className="flex flex-wrap justify-center gap-3 mb-12">
-              <button
-                onClick={() => setActiveTab('chat')}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                  activeTab === 'chat'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white glow-effect'
-                    : 'bg-ryaha-card text-gray-400 hover:bg-ryaha-hover'
-                }`}
-              >
-                AI Чат
-              </button>
-              <button
-                onClick={() => setActiveTab('faq')}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                  activeTab === 'faq'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white glow-effect'
-                    : 'bg-ryaha-card text-gray-400 hover:bg-ryaha-hover'
-                }`}
-              >
-                FAQ Switch
-              </button>
-              <button
-                onClick={() => setActiveTab('features')}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                  activeTab === 'features'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white glow-effect'
-                    : 'bg-ryaha-card text-gray-400 hover:bg-ryaha-hover'
-                }`}
-              >
-                Возможности
-              </button>
-              <button
-                onClick={() => setActiveTab('team')}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                  activeTab === 'team'
-                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white glow-effect'
-                    : 'bg-ryaha-card text-gray-400 hover:bg-ryaha-hover'
-                }`}
-              >
-                Команда
-              </button>
+              {TABS.map(({ id, label }) => (
+                <button key={id} onClick={() => setActiveTab(id)} className={tabClass(id)}>
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
         </section>
