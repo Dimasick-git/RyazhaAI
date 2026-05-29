@@ -13,6 +13,10 @@ const AI_ENDPOINTS = [
   { url: 'https://api.chatanywhere.org/v1/chat/completions', model: 'gpt-4o-mini' },
 ];
 
+// Remember the last working endpoint index to try it first next time,
+// avoiding unnecessary failures when earlier endpoints are down.
+let _lastWorkingIdx = 0;
+
 const SYSTEM_PROMPT = `Ты RYAZHA AI - эксперт по прошитому Nintendo Switch в 2026 году, созданный командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01).
 
 ТВОЯ ЭКСПЕРТИЗА ПО ПРОШИТОМУ SWITCH 2026:
@@ -105,13 +109,21 @@ function buildMessages(message, history, context = '') {
   ];
 }
 
+function* _endpointOrder() {
+  const n = AI_ENDPOINTS.length;
+  for (let i = 0; i < n; i++) {
+    yield (_lastWorkingIdx + i) % n;
+  }
+}
+
 export async function chatWithAI(message, history = [], context = '') {
   const apiKey = getValidatedApiKey();
   const messages = buildMessages(message, history, context);
 
-  for (const endpoint of AI_ENDPOINTS) {
+  for (const idx of _endpointOrder()) {
+    const endpoint = AI_ENDPOINTS[idx];
     try {
-      console.log(`Trying ${endpoint.model} at ${endpoint.url}...`);
+      console.debug(`Trying ${endpoint.model}...`);
       const response = await axios.post(
         endpoint.url,
         buildRequestBody(endpoint, messages, false),
@@ -120,13 +132,14 @@ export async function chatWithAI(message, history = [], context = '') {
 
       const content = response.data?.choices?.[0]?.message?.content;
       if (content) {
-        console.log(`Success with ${endpoint.model}`);
+        _lastWorkingIdx = idx;
+        console.log(`AI response via ${endpoint.model}`);
         return content.trim();
       }
 
       throw new Error('Invalid response format');
     } catch (error) {
-      console.error(`Endpoint ${endpoint.model} failed:`, error.message);
+      console.warn(`Endpoint ${endpoint.model} failed:`, error.message);
     }
   }
 
@@ -137,9 +150,10 @@ export async function chatWithAIStream(message, history = [], onChunk, context =
   const apiKey = getValidatedApiKey();
   const messages = buildMessages(message, history, context);
 
-  for (const endpoint of AI_ENDPOINTS) {
+  for (const idx of _endpointOrder()) {
+    const endpoint = AI_ENDPOINTS[idx];
     try {
-      console.log(`[stream] Trying ${endpoint.model}...`);
+      console.debug(`[stream] Trying ${endpoint.model}...`);
       const response = await axios.post(
         endpoint.url,
         buildRequestBody(endpoint, messages, true),
@@ -181,13 +195,14 @@ export async function chatWithAIStream(message, history = [], onChunk, context =
       });
 
       if (fullContent) {
-        console.log(`[stream] Success with ${endpoint.model}`);
+        _lastWorkingIdx = idx;
+        console.log(`[stream] AI response via ${endpoint.model}`);
         return fullContent;
       }
 
       throw new Error('Empty stream response');
     } catch (error) {
-      console.error(`[stream] Endpoint ${endpoint.model} failed:`, error.message);
+      console.warn(`[stream] Endpoint ${endpoint.model} failed:`, error.message);
     }
   }
 

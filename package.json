@@ -17,7 +17,6 @@
   },
   "homepage": "https://dimasick-git.github.io/RyazhaAI",
   "dependencies": {
-    "axios": "^1.7.9",
     "js-yaml": "^4.1.1",
     "lucide-react": "^0.469.0",
     "react": "^18.3.1",

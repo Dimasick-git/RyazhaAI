@@ -1,5 +1,3 @@
-import axios from 'axios'
-
 // Determine the base URL for API calls.
 // In dev, Vite proxies /api → http://localhost:3001/api
 // In prod, VITE_API_URL must point to the deployed backend.
@@ -50,13 +48,18 @@ export async function sendMessage(message, history = []) {
   }
 
   try {
-    const response = await axios.post(
-      `${apiBase}/api/chat`,
-      { message, history },
-      { headers: { 'Content-Type': 'application/json' }, timeout: 30000 }
-    )
-
-    if (response.data?.response) return response.data.response
+    const controller = new AbortController()
+    const timerId = setTimeout(() => controller.abort(), 30000)
+    const response = await fetch(`${apiBase}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, history }),
+      signal: controller.signal,
+    })
+    clearTimeout(timerId)
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    const data = await response.json()
+    if (data?.response) return data.response
     throw new Error('Invalid response format')
   } catch (error) {
     console.error('API call failed:', error.message)
@@ -133,13 +136,19 @@ export async function checkAPIStatus() {
   }
 
   try {
-    const response = await axios.get(`${apiBase}/api/health`, { timeout: 5000 })
-    if (response.data?.status === 'ok') {
-      return {
-        status: 'online',
-        message: 'Бэкенд доступен',
-        streaming: response.data.streaming === true,
-        apis: ['backend'],
+    const controller = new AbortController()
+    const timerId = setTimeout(() => controller.abort(), 5000)
+    const response = await fetch(`${apiBase}/api/health`, { signal: controller.signal })
+    clearTimeout(timerId)
+    if (response.ok) {
+      const data = await response.json()
+      if (data?.status === 'ok') {
+        return {
+          status: 'online',
+          message: 'Бэкенд доступен',
+          streaming: data.streaming === true,
+          apis: ['backend'],
+        }
       }
     }
   } catch {
