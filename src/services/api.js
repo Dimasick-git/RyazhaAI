@@ -40,6 +40,34 @@ function getFallbackResponse(message) {
   return FALLBACK_RESPONSES.default
 }
 
+async function _fetchWithTimeout(url, options, timeoutMs = 30000) {
+  const controller = new AbortController()
+  const timerId = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal })
+    return response
+  } finally {
+    clearTimeout(timerId)
+  }
+}
+
+async function _retryFetch(url, options, { retries = 2, timeoutMs = 30000 } = {}) {
+  let lastError
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      if (attempt > 0) {
+        await new Promise((r) => setTimeout(r, Math.min(1000 * 2 ** (attempt - 1), 8000)))
+      }
+      const response = await _fetchWithTimeout(url, options, timeoutMs)
+      return response
+    } catch (err) {
+      lastError = err
+      if (err.name === 'AbortError') break // timeout — don't retry
+    }
+  }
+  throw lastError
+}
+
 export async function sendMessage(message, history = []) {
   const apiBase = getAPIBase()
 
@@ -48,15 +76,11 @@ export async function sendMessage(message, history = []) {
   }
 
   try {
-    const controller = new AbortController()
-    const timerId = setTimeout(() => controller.abort(), 30000)
-    const response = await fetch(`${apiBase}/api/chat`, {
+    const response = await _retryFetch(`${apiBase}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, history }),
-      signal: controller.signal,
     })
-    clearTimeout(timerId)
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const data = await response.json()
     if (data?.response) return data.response

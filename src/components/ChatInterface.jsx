@@ -420,6 +420,19 @@ function ChatInterface() {
     }
   }
 
+  const callAI = useCallback(async (userMessage, history) => {
+    let full = ''
+    try {
+      await sendMessageStream(userMessage, history, (chunk) => {
+        full += chunk
+        setStreamText(full)
+      })
+      return full
+    } catch {
+      return await sendMessage(userMessage, history)
+    }
+  }, [])
+
   const submitMessage = useCallback(async (text) => {
     const userMessage = text.trim()
     if (!userMessage || isLoading) return
@@ -462,19 +475,6 @@ function ChatInterface() {
   const handleVoiceResult = useCallback((transcript) => {
     setInput((prev) => prev ? `${prev} ${transcript}` : transcript)
     inputRef.current?.focus()
-  }, [])
-
-  const callAI = useCallback(async (userMessage, history) => {
-    let full = ''
-    try {
-      await sendMessageStream(userMessage, history, (chunk) => {
-        full += chunk
-        setStreamText(full)
-      })
-      return full
-    } catch {
-      return await sendMessage(userMessage, history)
-    }
   }, [])
 
   const msgCount = messages.length - 1
