@@ -63,13 +63,14 @@ function validateInput(message, history) {
  return null;
 }
 
+const _defaultOrigins = ['https://dimasick-git.github.io', 'http://localhost:3000', 'http://localhost:5173'];
+const allowedOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map(o => o.trim()).filter(Boolean)
+  : _defaultOrigins;
+
 app.set('trust proxy', 1);
 app.use(cors({
-  origin: [
-    'https://dimasick-git.github.io',
-    'http://localhost:3000',
-    'http://localhost:5173',
-  ],
+  origin: allowedOrigins,
   credentials: true,
 }));
 app.use(express.json({ limit: '2mb' }));
@@ -158,6 +159,13 @@ app.get('/api/knowledge', (req, res) => {
 });
 
 app.post('/api/knowledge', (req, res) => {
+ const knowledgeKey = process.env.KNOWLEDGE_API_KEY;
+ if (knowledgeKey) {
+   const provided = req.headers['x-api-key'];
+   if (!provided || provided !== knowledgeKey) {
+     return res.status(401).json({ error: 'Unauthorized' });
+   }
+ }
  try {
  const { content, category, tags } = req.body;
  if (!content) return res.status(400).json({ error: 'Content is required' });
