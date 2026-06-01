@@ -55,6 +55,7 @@ function getFollowupSuggestions(text) {
   return []
 }
 
+const MAX_MSG_LENGTH = 2000
 const STORAGE_KEY = 'ryazha-ai-messages'
 const REACTIONS_KEY = 'ryazha-ai-reactions'
 
@@ -439,6 +440,7 @@ function ChatInterface() {
   const submitMessage = useCallback(async (text) => {
     const userMessage = text.trim()
     if (!userMessage || isLoading) return
+    if (userMessage.length > MAX_MSG_LENGTH) return
 
     const history = messages
     setInput('')
