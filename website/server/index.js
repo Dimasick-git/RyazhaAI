@@ -48,13 +48,13 @@ const MAX_HISTORY_LEN = 20;
 const MAX_HISTORY_CONTENT_LEN = 1000;
 
 function validateInput(message, history) {
- if (!message || typeof message!== 'string') {
+ if (!message || typeof message !== 'string') {
  return 'Message is required';
  }
  if (message.length > MAX_MESSAGE_LEN) {
  return `Сообщение слишком длинное (максимум ${MAX_MESSAGE_LEN} символов)`;
  }
- if (history &&!Array.isArray(history)) {
+ if (history && !Array.isArray(history)) {
  return 'History must be an array';
  }
  if (history && history.length > MAX_HISTORY_LEN) {
@@ -180,7 +180,7 @@ app.get('/api/health', (_req, res) => {
  res.json({
  status: 'ok',
  timestamp: new Date().toISOString(),
- proxy: process.env.USE_PROXY === 'true'? 'enabled': 'disabled',
+ proxy: process.env.USE_PROXY === 'true' ? 'enabled' : 'disabled',
  streaming: true,
  });
 });
@@ -192,6 +192,6 @@ app.get('*', (_req, res) => {
 
 app.listen(PORT, () => {
  console.log(` Server running on http://localhost:${PORT}`);
- console.log(` Proxy: ${process.env.USE_PROXY === 'true'? 'Enabled': 'Disabled'}`);
+ console.log(` Proxy: ${process.env.USE_PROXY === 'true' ? 'Enabled' : 'Disabled'}`);
  console.log(` Streaming: enabled`);
 });
