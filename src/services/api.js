@@ -95,18 +95,18 @@ export async function sendMessage(message, history = []) {
  * Streaming version — calls onChunk(text) for each text piece as it arrives.
  * Throws on error so caller can fall back to sendMessage().
  */
-export async function sendMessageStream(message, history = [], onChunk) {
+export async function sendMessageStream(message, history = [], onChunk, timeoutMs = 30000) {
   const apiBase = getAPIBase()
 
   if (import.meta.env.PROD && apiBase === null) {
     throw new Error('URL бэкенда не настроен (VITE_API_URL)')
   }
 
-  const response = await fetch(`${apiBase}/api/chat/stream`, {
+  const response = await _fetchWithTimeout(`${apiBase}/api/chat/stream`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message, history }),
-  })
+  }, timeoutMs)
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}))

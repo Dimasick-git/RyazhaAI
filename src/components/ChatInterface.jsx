@@ -152,9 +152,11 @@ function MessageContent({ text }) {
   return <div className="space-y-0.5 text-sm">{elements}</div>
 }
 
+const INLINE_REGEX = /(\[[^\]]+\]\([^)]+\)|`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|__[^_]+__)/g
+
 function renderInline(text) {
   const parts = []
-  const regex = /(\[[^\]]+\]\([^)]+\)|`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|__[^_]+__)/g
+  const regex = new RegExp(INLINE_REGEX.source, 'g')
   let last = 0
   let match
 
@@ -429,6 +431,7 @@ function ChatInterface() {
       })
       return full
     } catch {
+      if (full) return full
       return await sendMessage(userMessage, history)
     }
   }, [])
