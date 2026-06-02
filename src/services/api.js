@@ -1,6 +1,11 @@
 // Determine the base URL for API calls.
 // In dev, Vite proxies /api → http://localhost:3001/api
 // In prod, VITE_API_URL must point to the deployed backend.
+//
+// Note: any module-level mutable state here (e.g. a cached last-working index)
+// would not be safe under concurrent server-side usage. This is intentionally
+// acceptable because this file runs exclusively in a single-user SPA context
+// where there is only one JS execution thread (the browser event loop).
 const getAPIBase = () => {
   if (import.meta.env.PROD) {
     if (!import.meta.env.VITE_API_URL) {
