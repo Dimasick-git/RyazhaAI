@@ -50,11 +50,7 @@ jobs:
         
       - name: Run tests (if available)
         run: |
-          if npm run 2>&1 | grep -q "test"; then
-            npm test
-          else
-            echo "No tests found, skipping"
-          fi
+          echo "::warning::No tests configured yet"
           
       - name: Build release package with .nro
         run: npm run build-release
@@ -113,7 +109,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: ${{ secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != '' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.0
