@@ -146,24 +146,44 @@ export async function chatWithAI(message, history = [], context = '') {
   throw new Error('Все AI эндпоинты недоступны. Попробуйте позже.');
 }
 
-export async function chatWithAIStream(message, history = [], onChunk, context = '') {
+export async function chatWithAIStream(message, history = [], onChunk, context = '', signal = null) {
   const apiKey = getValidatedApiKey();
   const messages = buildMessages(message, history, context);
 
   for (const idx of _endpointOrder()) {
+    if (signal?.aborted) break;
     const endpoint = AI_ENDPOINTS[idx];
     try {
       console.debug(`[stream] Trying ${endpoint.model}...`);
+      const cancelSource = axios.CancelToken.source();
+      if (signal) {
+        signal.addEventListener('abort', () => cancelSource.cancel('client disconnected'), { once: true });
+      }
+
+      const config = buildConfig(apiKey, true);
+      config.cancelToken = cancelSource.token;
+
       const response = await axios.post(
         endpoint.url,
         buildRequestBody(endpoint, messages, true),
-        buildConfig(apiKey, true)
+        config
       );
 
       let fullContent = '';
       let buffer = '';
 
       await new Promise((resolve, reject) => {
+        if (signal?.aborted) {
+          response.data.destroy();
+          return reject(Object.assign(new Error('client disconnected'), { name: 'AbortError' }));
+        }
+
+        const onAbort = () => {
+          response.data.destroy();
+          reject(Object.assign(new Error('client disconnected'), { name: 'AbortError' }));
+        };
+        signal?.addEventListener('abort', onAbort, { once: true });
+
         response.data.on('data', (chunk) => {
           buffer += chunk.toString();
           const lines = buffer.split('\n');
@@ -187,8 +207,12 @@ export async function chatWithAIStream(message, history = [], onChunk, context =
           }
         });
 
-        response.data.on('end', resolve);
+        response.data.on('end', () => {
+          signal?.removeEventListener('abort', onAbort);
+          resolve();
+        });
         response.data.on('error', (err) => {
+          signal?.removeEventListener('abort', onAbort);
           response.data.destroy();
           reject(err);
         });
@@ -202,6 +226,7 @@ export async function chatWithAIStream(message, history = [], onChunk, context =
 
       throw new Error('Empty stream response');
     } catch (error) {
+      if (error.name === 'AbortError' || axios.isCancel(error)) throw error;
       console.warn(`[stream] Endpoint ${endpoint.model} failed:`, error.message);
     }
   }

@@ -136,17 +136,22 @@ app.post('/api/chat/stream', async (req, res) => {
  res.setHeader('X-Accel-Buffering', 'no');
  res.flushHeaders();
 
- const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
+ const abortController = new AbortController();
+ req.on('close', () => abortController.abort());
+
+ const send = (data) => {
+   if (!res.writableEnded) res.write(`data: ${JSON.stringify(data)}\n\n`);
+ };
 
  try {
  const context = useKnowledge ? getKnowledgeContext(message) : '';
- await chatWithAIStream(message, history, (chunk) => send({ chunk }), context);
+ await chatWithAIStream(message, history, (chunk) => send({ chunk }), context, abortController.signal);
  send({ done: true });
  } catch (error) {
- send({ error: error.message });
+ if (error.name !== 'AbortError') send({ error: error.message });
  }
 
- res.end();
+ if (!res.writableEnded) res.end();
 });
 
 // ── Knowledge API ────────────────────────────────────────────────
