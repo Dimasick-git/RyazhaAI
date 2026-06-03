@@ -112,6 +112,8 @@ function ChatInterface() {
   const [followups, setFollowups] = useState([])
 
   const inputRef = useRef(null)
+  const messagesRef = useRef(messages)
+  useEffect(() => { messagesRef.current = messages }, [messages])
 
   useEffect(() => {
     try {
@@ -207,7 +209,7 @@ function ChatInterface() {
     if (!userMessage || isLoading) return
     if (userMessage.length > MAX_MSG_LENGTH) return
 
-    const history = messages
+    const history = messagesRef.current
     setInput('')
     setShowQuickQ(false)
     setFollowups([])
@@ -228,7 +230,7 @@ function ChatInterface() {
       setIsLoading(false)
       setStreamText('')
     }
-  }, [isLoading, messages, callAI])
+  }, [isLoading, callAI])
 
   const msgCount = messages.length - 1
   const hasAssistantAfterUser = messages.length >= 2 && messages[messages.length - 1]?.role === 'assistant'
