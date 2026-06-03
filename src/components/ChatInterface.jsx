@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bot, Trash2, Download, RefreshCw, Sparkles, Share2, Check } from 'lucide-react'
+import { Bot, Trash2, Download, RefreshCw, Sparkles, Share2, Check, Square } from 'lucide-react'
 import { sendMessageStream, sendMessage } from '../services/api'
 import MessageList from './chat/MessageList'
 import MessageInput from './chat/MessageInput'
@@ -113,6 +113,7 @@ function ChatInterface() {
 
   const inputRef = useRef(null)
   const messagesRef = useRef(messages)
+  const cancelStreamRef = useRef(null)
   useEffect(() => { messagesRef.current = messages }, [messages])
 
   useEffect(() => {
@@ -162,15 +163,24 @@ function ChatInterface() {
     URL.revokeObjectURL(url)
   }
 
+  const stopGeneration = useCallback(() => {
+    cancelStreamRef.current?.()
+    cancelStreamRef.current = null
+  }, [])
+
   const callAI = useCallback(async (userMessage, history) => {
     let full = ''
     try {
-      await sendMessageStream(userMessage, history, (chunk) => {
+      const { cancel, promise } = sendMessageStream(userMessage, history, (chunk) => {
         full += chunk
         setStreamText(full)
       })
+      cancelStreamRef.current = cancel
+      await promise
+      cancelStreamRef.current = null
       return full
     } catch {
+      cancelStreamRef.current = null
       if (full) return full
       return await sendMessage(userMessage, history)
     }
@@ -248,6 +258,16 @@ function ChatInterface() {
           <ProviderStatus />
         </div>
         <div className="flex items-center gap-1">
+          {isLoading && (
+            <button
+              onClick={stopGeneration}
+              className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10 border border-red-500/30"
+              title="Остановить генерацию"
+            >
+              <Square size={11} className="fill-red-400" />
+              <span>Стоп</span>
+            </button>
+          )}
           {hasAssistantAfterUser && !isLoading && (
             <button
               onClick={regenerateLast}

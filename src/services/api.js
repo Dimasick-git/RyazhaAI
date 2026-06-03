@@ -98,64 +98,91 @@ export async function sendMessage(message, history = []) {
 
 /**
  * Streaming version — calls onChunk(text) for each text piece as it arrives.
+ * Returns a cancel() function; call it to abort the stream early.
  * Throws on error so caller can fall back to sendMessage().
+ *
+ * @returns {{ cancel: () => void, promise: Promise<void> }}
  */
-export async function sendMessageStream(message, history = [], onChunk, timeoutMs = 30000) {
+export function sendMessageStream(message, history = [], onChunk, timeoutMs = 30000) {
   const apiBase = getAPIBase()
 
   if (import.meta.env.PROD && apiBase === null) {
-    throw new Error('URL бэкенда не настроен (VITE_API_URL)')
+    const err = new Error('URL бэкенда не настроен (VITE_API_URL)')
+    return { cancel: () => {}, promise: Promise.reject(err) }
   }
 
-  const response = await _fetchWithTimeout(`${apiBase}/api/chat/stream`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message, history }),
-  }, timeoutMs)
+  const controller = new AbortController()
+  const cancel = () => controller.abort()
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.error || `HTTP ${response.status}`)
-  }
-
-  if (!response.body) throw new Error('Streaming not supported by browser')
-
-  const reader = response.body.getReader()
-  const decoder = new TextDecoder()
-  let buf = ''
-
-  const processLine = (line) => {
-    if (!line.startsWith('data: ')) return false
-    const raw = line.slice(6).trim()
-    if (!raw) return false
+  const promise = (async () => {
+    const timerId = setTimeout(() => controller.abort(), timeoutMs)
+    let response
     try {
-      const data = JSON.parse(raw)
-      if (data.chunk) onChunk(data.chunk)
-      if (data.done) return true
-      if (data.error) throw new Error(data.error)
+      response = await fetch(`${apiBase}/api/chat/stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, history }),
+        signal: controller.signal,
+      })
+    } finally {
+      clearTimeout(timerId)
+    }
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      throw new Error(err.error || `HTTP ${response.status}`)
+    }
+
+    if (!response.body) throw new Error('Streaming not supported by browser')
+
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let buf = ''
+
+    const processLine = (line) => {
+      if (!line.startsWith('data: ')) return false
+      const raw = line.slice(6).trim()
+      if (!raw) return false
+      try {
+        const data = JSON.parse(raw)
+        if (data.chunk) onChunk(data.chunk)
+        if (data.done) return true
+        if (data.error) throw new Error(data.error)
+      } catch (e) {
+        if (e.message && !e.message.includes('JSON')) throw e
+      }
+      return false
+    }
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buf += decoder.decode(value, { stream: true })
+        const lines = buf.split('\n')
+        buf = lines.pop()
+
+        for (const line of lines) {
+          if (processLine(line)) return
+        }
+      }
+      // Flush decoder and process any remaining buffered data
+      buf += decoder.decode()
+      if (buf) processLine(buf)
     } catch (e) {
-      if (e.message && !e.message.includes('JSON')) throw e
+      // AbortError means the caller cancelled — not a real error
+      if (e.name === 'AbortError') return
+      throw e
     }
-    return false
-  }
+  })()
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-
-    buf += decoder.decode(value, { stream: true })
-    const lines = buf.split('\n')
-    buf = lines.pop()
-
-    for (const line of lines) {
-      if (processLine(line)) return
-    }
-  }
-
-  // Flush decoder and process any remaining buffered data
-  buf += decoder.decode()
-  if (buf) processLine(buf)
+  return { cancel, promise }
 }
+
+let _statusCache = null
+let _statusCacheTs = 0
+const STATUS_CACHE_TTL = 30_000 // recheck every 30 seconds
 
 export async function checkAPIStatus() {
   const apiBase = getAPIBase()
@@ -164,6 +191,12 @@ export async function checkAPIStatus() {
     return { status: 'offline', message: 'URL бэкенда не настроен (VITE_API_URL).', apis: [] }
   }
 
+  const now = Date.now()
+  if (_statusCache && now - _statusCacheTs < STATUS_CACHE_TTL) {
+    return _statusCache
+  }
+
+  let result
   try {
     const controller = new AbortController()
     const timerId = setTimeout(() => controller.abort(), 5000)
@@ -172,7 +205,7 @@ export async function checkAPIStatus() {
     if (response.ok) {
       const data = await response.json()
       if (data?.status === 'ok') {
-        return {
+        result = {
           status: 'online',
           message: 'Бэкенд доступен',
           streaming: data.streaming === true,
@@ -184,5 +217,8 @@ export async function checkAPIStatus() {
     // fall through
   }
 
-  return { status: 'offline', message: 'Бэкенд недоступен. Используется демо-режим.', apis: [] }
+  result ??= { status: 'offline', message: 'Бэкенд недоступен. Используется демо-режим.', apis: [] }
+  _statusCache = result
+  _statusCacheTs = now
+  return result
 }
