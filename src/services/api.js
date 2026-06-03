@@ -73,7 +73,7 @@ async function _retryFetch(url, options, { retries = 2, timeoutMs = 30000 } = {}
   throw lastError
 }
 
-export async function sendMessage(message, history = []) {
+export async function sendMessage(message, history = [], model) {
   const apiBase = getAPIBase()
 
   if (import.meta.env.PROD && apiBase === null) {
@@ -81,10 +81,12 @@ export async function sendMessage(message, history = []) {
   }
 
   try {
+    const body = { message, history }
+    if (model) body.model = model
     const response = await _retryFetch(`${apiBase}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, history }),
+      body: JSON.stringify(body),
     })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const data = await response.json()
@@ -103,7 +105,7 @@ export async function sendMessage(message, history = []) {
  *
  * @returns {{ cancel: () => void, promise: Promise<void> }}
  */
-export function sendMessageStream(message, history = [], onChunk, timeoutMs = 30000) {
+export function sendMessageStream(message, history = [], onChunk, timeoutMs = 30000, model) {
   const apiBase = getAPIBase()
 
   if (import.meta.env.PROD && apiBase === null) {
@@ -116,12 +118,14 @@ export function sendMessageStream(message, history = [], onChunk, timeoutMs = 30
 
   const promise = (async () => {
     const timerId = setTimeout(() => controller.abort(), timeoutMs)
+    const streamBody = { message, history }
+    if (model) streamBody.model = model
     let response
     try {
       response = await fetch(`${apiBase}/api/chat/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, history }),
+        body: JSON.stringify(streamBody),
         signal: controller.signal,
       })
     } finally {

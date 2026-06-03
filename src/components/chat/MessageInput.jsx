@@ -61,7 +61,7 @@ function MessageInput({ input, setInput, isLoading, onSubmit }) {
   const inputRef = useRef(null)
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter' && (e.ctrlKey || !e.shiftKey)) {
       e.preventDefault()
       onSubmit(input)
     }
@@ -88,7 +88,7 @@ function MessageInput({ input, setInput, isLoading, onSubmit }) {
               e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Задай свой вопрос… (Enter для отправки, Shift+Enter — новая строка)"
+            placeholder="Задай свой вопрос… (Shift+Enter — новая строка)"
             rows={1}
             className="w-full bg-ryaha-card border border-ryaha-border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none overflow-hidden text-sm"
             disabled={isLoading}
@@ -98,6 +98,7 @@ function MessageInput({ input, setInput, isLoading, onSubmit }) {
               input.length > 1800 ? 'text-red-400 font-semibold' : 'text-yellow-500'
             }`}>{input.length}/2000</span>
           )}
+          <p className="mt-1 text-xs text-gray-600 select-none">Ctrl+Enter для отправки</p>
         </div>
         <VoiceButton onResult={handleVoiceResult} disabled={isLoading} />
         <button

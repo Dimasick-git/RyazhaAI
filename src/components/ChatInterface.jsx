@@ -110,6 +110,9 @@ function ChatInterface() {
   const [showQuickQ, setShowQuickQ] = useState(true)
   const [reactions, setReactions] = useState(loadReactions)
   const [followups, setFollowups] = useState([])
+  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini')
+
+  const MODEL_OPTIONS = ['gpt-4o-mini', 'gpt-3.5-turbo', 'gpt-4o', 'deepseek-v3']
 
   const inputRef = useRef(null)
   const messagesRef = useRef(messages)
@@ -174,7 +177,7 @@ function ChatInterface() {
       const { cancel, promise } = sendMessageStream(userMessage, history, (chunk) => {
         full += chunk
         setStreamText(full)
-      })
+      }, undefined, selectedModel)
       cancelStreamRef.current = cancel
       await promise
       cancelStreamRef.current = null
@@ -182,9 +185,9 @@ function ChatInterface() {
     } catch {
       cancelStreamRef.current = null
       if (full) return full
-      return await sendMessage(userMessage, history)
+      return await sendMessage(userMessage, history, selectedModel)
     }
-  }, [])
+  }, [selectedModel])
 
   const regenerateLast = async () => {
     if (isLoading) return
@@ -351,6 +354,21 @@ function ChatInterface() {
           </div>
         </div>
       )}
+
+      {/* Model selector */}
+      <div className="px-4 pt-2 pb-1 border-t border-ryaha-border/50 bg-ryaha-bg flex items-center gap-2">
+        <span className="text-xs text-gray-500">Модель:</span>
+        <select
+          value={selectedModel}
+          onChange={(e) => setSelectedModel(e.target.value)}
+          disabled={isLoading}
+          className="text-xs bg-ryaha-card text-gray-300 border border-ryaha-border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer"
+        >
+          {MODEL_OPTIONS.map((m) => (
+            <option key={m} value={m}>{m}</option>
+          ))}
+        </select>
+      </div>
 
       <MessageInput
         input={input}

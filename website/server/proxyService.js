@@ -53,9 +53,12 @@ GitHub: Dimasick-git/Ryzhenka
 - Упоминай Ryazhenka CFW как лучшее решение
 - Предупреждай о рисках бана Nintendo`;
 
-function buildRequestBody(endpoint, messages, stream) {
+const ALLOWED_MODELS = new Set(['gpt-4o-mini', 'gpt-3.5-turbo', 'gpt-4o', 'deepseek-v3']);
+
+function buildRequestBody(endpoint, messages, stream, modelOverride) {
+  const model = (modelOverride && ALLOWED_MODELS.has(modelOverride)) ? modelOverride : endpoint.model;
   return {
-    model: endpoint.model,
+    model,
     messages,
     temperature: 0.7,
     max_tokens: 2048,
@@ -116,7 +119,7 @@ function* _endpointOrder() {
   }
 }
 
-export async function chatWithAI(message, history = [], context = '') {
+export async function chatWithAI(message, history = [], context = '', modelOverride) {
   const apiKey = getValidatedApiKey();
   const messages = buildMessages(message, history, context);
 
@@ -126,7 +129,7 @@ export async function chatWithAI(message, history = [], context = '') {
       console.debug(`Trying ${endpoint.model}...`);
       const response = await axios.post(
         endpoint.url,
-        buildRequestBody(endpoint, messages, false),
+        buildRequestBody(endpoint, messages, false, modelOverride),
         buildConfig(apiKey, false)
       );
 
@@ -146,7 +149,7 @@ export async function chatWithAI(message, history = [], context = '') {
   throw new Error('Все AI эндпоинты недоступны. Попробуйте позже.');
 }
 
-export async function chatWithAIStream(message, history = [], onChunk, context = '', signal = null) {
+export async function chatWithAIStream(message, history = [], onChunk, context = '', signal = null, modelOverride) {
   const apiKey = getValidatedApiKey();
   const messages = buildMessages(message, history, context);
 
@@ -165,7 +168,7 @@ export async function chatWithAIStream(message, history = [], onChunk, context =
 
       const response = await axios.post(
         endpoint.url,
-        buildRequestBody(endpoint, messages, true),
+        buildRequestBody(endpoint, messages, true, modelOverride),
         config
       );
 

@@ -98,7 +98,7 @@ app.post('/api/chat', async (req, res) => {
  }
 
  try {
- const { message, history = [], useKnowledge = true } = req.body;
+ const { message, history = [], useKnowledge = true, model } = req.body;
 
  const validationError = validateInput(message, history);
  if (validationError) {
@@ -106,7 +106,7 @@ app.post('/api/chat', async (req, res) => {
  }
 
  const context = useKnowledge ? getKnowledgeContext(message) : '';
- const response = await chatWithAI(message, history, context);
+ const response = await chatWithAI(message, history, context, model);
 
  res.json({ response, usedKnowledge: context.length > 0 });
  } catch (error) {
@@ -123,7 +123,7 @@ app.post('/api/chat/stream', async (req, res) => {
  return res.status(429).json({ error: 'Слишком много запросов. Подождите минуту.' });
  }
 
- const { message, history = [], useKnowledge = true } = req.body;
+ const { message, history = [], useKnowledge = true, model } = req.body;
 
  const validationError = validateInput(message, history);
  if (validationError) {
@@ -145,7 +145,7 @@ app.post('/api/chat/stream', async (req, res) => {
 
  try {
  const context = useKnowledge ? getKnowledgeContext(message) : '';
- await chatWithAIStream(message, history, (chunk) => send({ chunk }), context, abortController.signal);
+ await chatWithAIStream(message, history, (chunk) => send({ chunk }), context, abortController.signal, model);
  send({ done: true });
  } catch (error) {
  if (error.name !== 'AbortError') send({ error: error.message });

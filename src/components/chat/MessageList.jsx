@@ -1,6 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Bot, User, Copy, Check, ThumbsUp, ThumbsDown } from 'lucide-react'
 
+function sanitizeText(text) {
+  return String(text)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+}
+
 function formatMsgTime(ts) {
   if (!ts) return ''
   const d = new Date(ts)
@@ -207,7 +216,10 @@ function MessageList({ messages, isLoading, streamText, reactions, onReact }) {
               {message.role === 'assistant' ? (
                 <MessageContent text={message.content} />
               ) : (
-                <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>
+                <p
+                  className="whitespace-pre-wrap break-words text-sm"
+                  dangerouslySetInnerHTML={{ __html: sanitizeText(message.content) }}
+                />
               )}
             </div>
             {message.role === 'assistant' && (
