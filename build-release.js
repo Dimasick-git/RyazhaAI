@@ -37,43 +37,123 @@ fs.mkdirSync(nroDir, { recursive: true })
 fs.cpSync(distDir, path.join(nroDir, 'dist'), { recursive: true })
 
 // Создаем main.cpp для Switch (если нужно для компиляции)
-const mainCpp = `#include <switch.h>
-#include <iostream>
-#include <string>
-#include <fstream>
+const mainCpp = `#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-// Web app для RyazhaAI
-// Запускает встроенный браузер с dist/index.html
+#include <switch.h>
 
-int main(int argc, char* argv[]) {
- consoleInit();
- padConfigureInput(1, PADSTATE_DEFAULT_Touch, PADSTATE_DEFAULT_BUTTONS);
- 
- // Создаем окно браузера
- WebConfig web = {
-.url = "file://dist/index.html",
-.exit = false,
-.whitelist = nullptr
- };
- 
- consoleInit();
- printf(" RYAZHA AI - Nintendo Switch\\n");
- printf(" AI Assistant for Switch CFW\\n\\n");
- printf("Press + to exit\\n");
- 
- // Основной цикл
- while (appletMainLoop()) {
- padUpdate(&kdown);
- 
- if (kdown & HidNpadButton_Plus) {
- break;
- }
- 
- consoleUpdate(nullptr);
- }
- 
- consoleExit();
- return 0;
+// RYAZHA AI .nro — открывает веб-апплет со страницей AI на GitHub Pages
+
+int main(int argc, char* argv[])
+{
+    socketInitializeDefault();
+    nxlinkStdio();
+    consoleInit(NULL);
+
+    // Новый API libnx (>= 4.x): PadState вместо deprecated hidScanInput/hidKeysDown
+    PadState pad;
+    padConfigureInput(1, HidNpadStyleSet_NpadStandard);
+    padInitializeDefault(&pad);
+
+    printf("\\x1b[2J\\x1b[1;1H");
+
+    printf("\\x1b[36m");
+    printf("    +---------------------------------------+\\n");
+    printf("    |                                       |\\n");
+    printf("    |      RYAZHA AI for Switch             |\\n");
+    printf("    |                                       |\\n");
+    printf("    |  Умный помощник для Nintendo Switch!  |\\n");
+    printf("    |                                       |\\n");
+    printf("    +---------------------------------------+\\n");
+    printf("\\x1b[0m\\n");
+
+    printf("\\x1b[32m");
+    printf("  Возможности:\\n");
+    printf("     - AI помощник для Switch CFW\\n");
+    printf("     - Ответы на вопросы о Ryazhenka\\n");
+    printf("     - FAQ и помощь по взлому\\n");
+    printf("\\x1b[0m\\n");
+
+    printf("\\x1b[33m");
+    printf("  Требования:\\n");
+    printf("     - WiFi подключение\\n");
+    printf("     - Ryazhenka CFW или Atmosphere\\n");
+    printf("     - Homebrew Menu (hbmenu)\\n");
+    printf("\\x1b[0m\\n");
+
+    printf("\\x1b[35m");
+    printf("  Управление:\\n");
+    printf("     [A] - Открыть RYAZHA AI в браузере\\n");
+    printf("     [+] - Выход\\n");
+    printf("\\x1b[0m\\n");
+
+    printf("\\x1b[90m");
+    printf("  Создано командой Ryazhenka\\n");
+    printf("  Dimasick-git & Ryazhenka-Helper-01\\n");
+    printf("  v2.1.0 | github.com/Dimasick-git/RyazhaAI\\n");
+    printf("\\x1b[0m\\n");
+
+    const char* websiteUrl = "https://dimasick-git.github.io/RyazhaAI";
+
+    printf("\\n\\x1b[37m  Нажми [A] для запуска...\\x1b[0m\\n");
+
+    while (appletMainLoop())
+    {
+        padUpdate(&pad);
+        u64 kDown = padGetButtonsDown(&pad);
+
+        if (kDown & HidNpadButton_A)
+        {
+            printf("\\n\\x1b[36m  Запуск RYAZHA AI...\\x1b[0m\\n");
+            printf("\\x1b[33m  Открываем браузер Switch...\\x1b[0m\\n\\n");
+
+            WebCommonConfig config;
+            WebCommonReply reply;
+
+            Result rc = webPageCreate(&config, websiteUrl);
+
+            if (R_SUCCEEDED(rc))
+            {
+                webConfigSetWhitelist(&config, "^https?://");
+                webConfigSetFooter(&config, true);
+                webConfigSetPointer(&config, true);
+                webConfigSetKeyRepeatFrame(&config, 4, 8);
+
+                printf("\\x1b[32m  Загрузка интерфейса...\\x1b[0m\\n");
+                printf("\\x1b[90m  URL: %s\\x1b[0m\\n\\n", websiteUrl);
+
+                rc = webConfigShow(&config, &reply);
+
+                if (R_SUCCEEDED(rc)) {
+                    printf("\\x1b[32m  Веб-апплет закрыт\\x1b[0m\\n");
+                } else {
+                    printf("\\x1b[31m  Ошибка показа веб-страницы: 0x%x\\x1b[0m\\n", rc);
+                }
+            }
+            else
+            {
+                printf("\\x1b[31m  Ошибка создания веб-апплета: 0x%x\\x1b[0m\\n", rc);
+                printf("\\x1b[33m  Проверь подключение к интернету!\\x1b[0m\\n");
+            }
+
+            printf("\\n\\x1b[37m  Нажми [A] для повтора или [+] для выхода\\x1b[0m\\n");
+        }
+
+        if (kDown & HidNpadButton_Plus)
+            break;
+
+        consoleUpdate(NULL);
+    }
+
+    printf("\\n\\x1b[36m  До встречи в RYAZHA AI!\\x1b[0m\\n");
+    printf("\\x1b[35m  Спасибо что используешь Ryazhenka!\\x1b[0m\\n");
+    consoleUpdate(NULL);
+
+    consoleExit(NULL);
+    socketExit();
+
+    return 0;
 }
 `
 
@@ -214,19 +294,17 @@ fs.writeFileSync(path.join(releaseDir, 'README.md'), finalReadme)
 // Автоматически запускаем сборку.nro если есть devkitPro
 console.log(' Starting.nro compilation...')
 try {
- const { execSync } = require('child_process')
- 
  // Проверяем наличие devkitPro
  const devkitProCheck = process.env.DEVKITPRO || '/opt/devkitpro'
  if (fs.existsSync(devkitProCheck)) {
  console.log(' Found devkitPro, building.nro...')
- 
+
  // Выполняем сборку.nro
- execSync('chmod +x build-nro.sh &&./build-nro.sh', { 
+ execSync('chmod +x build-nro.sh &&./build-nro.sh', {
  cwd: releaseDir,
  stdio: 'inherit'
  })
- 
+
  console.log('.nro build completed successfully!')
  } else {
  console.log(' devkitPro not found, skipping.nro build')
@@ -234,7 +312,7 @@ try {
  }
 } catch (error) {
  console.log('.nro build failed:', error.message)
- console.log('� You can build.nro manually with: npm run build-nro')
+ console.log('You can build.nro manually with: npm run build-nro')
 }
 
 console.log(' Release package created successfully!')
