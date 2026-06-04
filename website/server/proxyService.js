@@ -15,7 +15,10 @@ const AI_ENDPOINTS = [
 
 // Remember the last working endpoint index to try it first next time,
 // avoiding unnecessary failures when earlier endpoints are down.
-let _lastWorkingIdx = 0;
+// Stored on an object so concurrent async callbacks share a single
+// reference and reads/writes are always consistent within Node's
+// single-threaded event loop (no interleaving within a sync expression).
+const _proxyState = { lastWorkingIdx: 0 };
 
 const SYSTEM_PROMPT = `Ты RYAZHA AI - эксперт по прошитому Nintendo Switch в 2026 году, созданный командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01).
 
@@ -115,7 +118,7 @@ function buildMessages(message, history, context = '') {
 function* _endpointOrder() {
   const n = AI_ENDPOINTS.length;
   for (let i = 0; i < n; i++) {
-    yield (_lastWorkingIdx + i) % n;
+    yield (_proxyState.lastWorkingIdx + i) % n;
   }
 }
 
@@ -135,7 +138,7 @@ export async function chatWithAI(message, history = [], context = '', modelOverr
 
       const content = response.data?.choices?.[0]?.message?.content;
       if (content) {
-        _lastWorkingIdx = idx;
+        _proxyState.lastWorkingIdx = idx;
         console.log(`AI response via ${endpoint.model}`);
         return content.trim();
       }
@@ -222,7 +225,7 @@ export async function chatWithAIStream(message, history = [], onChunk, context =
       });
 
       if (fullContent) {
-        _lastWorkingIdx = idx;
+        _proxyState.lastWorkingIdx = idx;
         console.log(`[stream] AI response via ${endpoint.model}`);
         return fullContent;
       }
