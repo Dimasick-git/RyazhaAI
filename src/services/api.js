@@ -16,33 +16,72 @@ const getAPIBase = () => {
   return '' // relative URL — Vite proxy handles it in dev
 }
 
-// Fallback ответы если все API не работают
-const FALLBACK_RESPONSES = {
-  greeting: 'ИИ-ассистент временно недоступен. Попробуйте позже.',
-  cfw: 'ИИ-ассистент временно недоступен. Попробуйте позже.',
-  ryazhenka: 'ИИ-ассистент временно недоступен. Попробуйте позже.',
-  team: 'ИИ-ассистент временно недоступен. Попробуйте позже.',
-  default: 'ИИ-ассистент временно недоступен. Попробуйте позже.'
-}
+// Статические знания о Ryazhenka CFW для оффлайн-режима
+const OFFLINE_KB = [
+  {
+    keywords: ['привет', 'hello', 'hi', 'здравствуй', 'начало'],
+    answer: 'Привет! Я RYAZHA AI — ассистент по Nintendo Switch CFW от команды Ryazhenka. Могу помочь с Atmosphere, Tesla overlay, RCU, установкой игр, emuNAND и другими Switch-темами. Что вас интересует?'
+  },
+  {
+    keywords: ['ryazhenka', 'ряженка', 'что это', 'что такое'],
+    answer: 'Ryazhenka — команда разработчиков Nintendo Switch CFW инструментов. Основные проекты: RCU (управление частотами CPU/GPU/RAM), Ryazhahand-Overlay (Tesla overlay с LED и аудио), AIO-Switch-Updater, ovlSysmodules, FPSLocker. GitHub: github.com/Dimasick-git'
+  },
+  {
+    keywords: ['rcu', 'частот', 'клок', 'clock', 'cpu', 'gpu', 'ram', 'разгон'],
+    answer: 'RCU (Ryazha Clock Utility) — sysmodule + Tesla overlay для управления частотами CPU/GPU/RAM на Nintendo Switch. Поддерживает профили по приложениям и FPS-aware VRR. Устанавливается в /atmosphere/contents/. Управление через Tesla Menu (L+DDOWN+RS).'
+  },
+  {
+    keywords: ['tesla', 'overlay', 'меню', 'ryazhahand', 'ultrahand'],
+    answer: 'Tesla Menu — система overlay для Nintendo Switch (открывается L+DDOWN+RS). Ryazhahand-Overlay — форк Ultrahand с поддержкой LED, аудио-паков, PNG-обоев. Файлы хранятся в /config/ryazhahand/. Требует nx-ovlloader.'
+  },
+  {
+    keywords: ['emunand', 'emummc', 'эмунанд', 'эмумс', 'нанд'],
+    answer: 'emuNAND (emummc) — эмулированная копия NAND Switch на microSD. Безопасна для использования CFW: если Nintendo заблокирует аккаунт, sysNAND (оригинальная память) останется чистой. Создаётся через Hekate → emuMMC → Create (SD File). Рекомендуется всегда использовать emuNAND для CFW.'
+  },
+  {
+    keywords: ['atmosphere', 'атмосфера', 'cfw', 'прошивк', 'кастом'],
+    answer: 'Atmosphere — основная кастомная прошивка для Nintendo Switch от Team Neptune. Устанавливается на microSD поверх официальной прошивки. Обновляйте через AIO-Switch-Updater или вручную с GitHub releases. Всегда обновляйте sigpatches вместе с Atmosphere.'
+  },
+  {
+    keywords: ['sigpatch', 'сигпатч', 'подпись', 'signature'],
+    answer: 'Sigpatches — патчи подписи, позволяющие Atmosphere запускать неподписанный homebrew-код и установленные игры. Скачиваются отдельно (обычно с sigmapatches.coomer.party или через AIO-Switch-Updater). Обновляйте при каждом обновлении Atmosphere.'
+  },
+  {
+    keywords: ['hekate', 'хекате', 'boot', 'загрузч'],
+    answer: 'Hekate — bootloader для Nintendo Switch. Запускается через Fusée (USB-A to USB-C с RCM jig) или автозапуском. Используется для создания emuNAND, бэкапов NAND, разметки microSD (Hekate → Tools → Partition SD). Файл hekate_ctcaer_X.X.X.bin размещается в корне microSD.'
+  },
+  {
+    keywords: ['ban', 'бан', 'онлайн', 'nintendo', 'нинтендо'],
+    answer: 'Для защиты от бана: используйте emuNAND для CFW, sysNAND держите чистым и не ходите онлайн с CFW. Включите 90DNS (DNS-блокировка серверов Nintendo) в emuNAND. Не используйте пиратские игры онлайн. Sys-botbase и читы в онлайне — гарантированный бан.'
+  },
+  {
+    keywords: ['tinfoil', 'goldleaf', 'awoo', 'установ', 'nsp', 'nsz', 'xci'],
+    answer: 'Установщики игр: Tinfoil (мощный, поддерживает NSP/NSZ/XCI, прямые URL, Filebrother), Goldleaf (простой, через Quark на ПК), DBI (универсальный менеджер + USB-установка). Форматы: NSP — установка в NAND/SD, XCI — образ картриджа, NSZ — сжатый NSP.'
+  },
+  {
+    keywords: ['fps', 'фпс', 'fpslocker', 'блокировк'],
+    answer: 'FPSLocker — overlay для ограничения FPS в играх Switch. Работает через Tesla Menu. Поддерживает патчи для снятия ограничений движка (custom patches). Полезен для равномерного геймплея в играх с нестабильным FPS.'
+  },
+  {
+    keywords: ['aio', 'updater', 'обновл', 'update'],
+    answer: 'AIO-Switch-Updater — homebrew для автоматического обновления CFW компонентов: Atmosphere, Hekate, sigpatches, overlay\'s и других. Запускается из hbmenu (Album → R). Умеет скачивать с GitHub releases напрямую на Switch.'
+  },
+]
 
-// Умные fallback ответы по ключевым словам
 function getFallbackResponse(message) {
   const lower = message.toLowerCase()
 
-  if (lower.includes('привет') || lower.includes('hello') || lower.includes('hi')) {
-    return FALLBACK_RESPONSES.greeting
-  }
-  if (lower.includes('cfw') || lower.includes('взлом') || lower.includes('прошивк')) {
-    return FALLBACK_RESPONSES.cfw
-  }
-  if (lower.includes('ryazhenka') || lower.includes('ряженка')) {
-    return FALLBACK_RESPONSES.ryazhenka
-  }
-  if (lower.includes('команда') || lower.includes('кто') || lower.includes('автор')) {
-    return FALLBACK_RESPONSES.team
+  for (const entry of OFFLINE_KB) {
+    if (entry.keywords.some((kw) => lower.includes(kw))) {
+      return entry.answer
+    }
   }
 
-  return FALLBACK_RESPONSES.default
+  return (
+    'Бэкенд RYAZHA AI временно недоступен. ' +
+    'Я могу ответить на вопросы об Atmosphere, emuNAND, Tesla overlay, RCU, FPSLocker, установке игр и других Switch CFW темах — просто спросите! ' +
+    'Также загляните на GitHub: github.com/Dimasick-git'
+  )
 }
 
 async function _fetchWithTimeout(url, options, timeoutMs = 30000) {
