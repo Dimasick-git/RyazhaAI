@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 3001;
 
 // ── Rate limiter: 15 requests per minute per IP ─────────────────
 const rateLimitMap = new Map();
+const RATE_LIMIT_MAX_ENTRIES = 10_000;
 
 function isRateLimited(ip) {
  const now = Date.now();
@@ -29,6 +30,17 @@ function isRateLimited(ip) {
  }
  prev.push(now);
  rateLimitMap.set(ip, prev);
+
+ // Cap the map size: when exceeded, evict the oldest 20% of entries
+ if (rateLimitMap.size > RATE_LIMIT_MAX_ENTRIES) {
+  const evictCount = Math.ceil(RATE_LIMIT_MAX_ENTRIES * 0.2);
+  let evicted = 0;
+  for (const key of rateLimitMap.keys()) {
+   rateLimitMap.delete(key);
+   if (++evicted >= evictCount) break;
+  }
+ }
+
  return false;
 }
 

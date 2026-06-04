@@ -18,11 +18,11 @@ const getAPIBase = () => {
 
 // Fallback ответы если все API не работают
 const FALLBACK_RESPONSES = {
-  greeting: 'Привет! Я RYAZHA AI - умный помощник для Nintendo Switch CFW!\n\nСоздан командой Ryazhenka (Dimasick-git & Ryazhenka-Helper-01)\nСпециализируюсь на Switch, CFW, homebrew\nЗадавай любые вопросы!\n\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka',
-  cfw: 'Для взлома Nintendo Switch 2026:\n\n1. Проверь серийник на уязвимость\n2. Подготовь SD карту (128GB+)\n3. Скачай Ryazhenka CFW\n4. Установи через RCM/ModChip\n\nRyazhenka - лучшая CFW с автонастройкой!\ngithub.com/Dimasick-git/Ryzhenka',
-  ryazhenka: 'Ryazhenka CFW - лучшая прошивка для Switch 2026!\n\nОсобенности:\n• Автонастройка за 5 минут\n• Atmosphere 1.8.0+ и Hekate 6.4.0+\n• Свежие sigpatches из коробки\n• Уникальные модули команды\n• Красивые темы и UI\n\nСоздатель: Dimasick-git\nИдея: Ryazhenka-Helper-01\n\nСкачать: github.com/Dimasick-git/Ryzhenka',
-  team: 'Команда RYAZHA AI:\n\nDimasick-git - главный разработчик\nRyazhenka-Helper-01 - идейный вдохновитель\n\nСоздатели Ryazhenka CFW для Switch!\n\nСвязь:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\nСделано для Switch комьюнити!',
-  default: 'AI временно перегружен, но скоро вернётся!\n\nПока что могу помочь с базовыми вопросами:\n\nRyazhenka CFW - лучшая прошивка для Switch 2026\nRYAZHA AI - твой умный помощник для CFW\nПомощь с взломом, играми, модами, homebrew\n\nСвязь с командой:\nTelegram: @Ryazhenkabestcfw\nGitHub: Dimasick-git/Ryzhenka\n\nAI перезагружается... попробуй через минуту!'
+  greeting: 'ИИ-ассистент временно недоступен. Попробуйте позже.',
+  cfw: 'ИИ-ассистент временно недоступен. Попробуйте позже.',
+  ryazhenka: 'ИИ-ассистент временно недоступен. Попробуйте позже.',
+  team: 'ИИ-ассистент временно недоступен. Попробуйте позже.',
+  default: 'ИИ-ассистент временно недоступен. Попробуйте позже.'
 }
 
 // Умные fallback ответы по ключевым словам
