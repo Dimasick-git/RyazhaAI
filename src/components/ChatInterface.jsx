@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Bot, Trash2, Download, RefreshCw, Sparkles, Share2, Check, Square } from 'lucide-react'
-import { sendMessageStream, sendMessage } from '../services/api'
+import { sendMessage as sendAIMessage } from '../services/aiClient'
 import MessageList from './chat/MessageList'
 import MessageInput from './chat/MessageInput'
 import ProviderStatus from './chat/ProviderStatus'
@@ -172,20 +172,25 @@ function ChatInterface() {
   }, [])
 
   const callAI = useCallback(async (userMessage, history) => {
-    let full = ''
+    let accumulated = ''
+    const { cancel, promise } = sendAIMessage(
+      userMessage,
+      history,
+      selectedModel,
+      (chunk) => {
+        accumulated += chunk
+        setStreamText(accumulated)
+      },
+    )
+    cancelStreamRef.current = cancel
     try {
-      const { cancel, promise } = sendMessageStream(userMessage, history, (chunk) => {
-        full += chunk
-        setStreamText(full)
-      }, undefined, selectedModel)
-      cancelStreamRef.current = cancel
-      await promise
+      const result = await promise
       cancelStreamRef.current = null
-      return full
+      return result
     } catch {
       cancelStreamRef.current = null
-      if (full) return full
-      return await sendMessage(userMessage, history, selectedModel)
+      if (accumulated) return accumulated
+      throw new Error('AI request failed')
     }
   }, [selectedModel])
 
@@ -356,7 +361,7 @@ function ChatInterface() {
       )}
 
       {/* Model selector */}
-      <div className="px-4 pt-2 pb-1 border-t border-ryaha-border/50 bg-ryaha-bg flex items-center gap-2">
+      <div className="px-4 pt-2 pb-1 border-t border-ryaha-border/50 bg-ryaha-bg flex flex-wrap items-center gap-2">
         <span className="text-xs text-gray-500">Модель:</span>
         <select
           value={selectedModel}
@@ -368,6 +373,9 @@ function ChatInterface() {
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
+        <span className="text-xs text-yellow-500/70 ml-auto">
+          ⚠️ API ключ хранится в localStorage браузера. Не используйте ключи с широкими правами.
+        </span>
       </div>
 
       <MessageInput
