@@ -102,6 +102,8 @@ function ShareButton({ messages }) {
   )
 }
 
+const MODEL_OPTIONS = ['gpt-4o-mini', 'gpt-3.5-turbo', 'gpt-4o', 'deepseek-v3']
+
 function ChatInterface() {
   const [messages, setMessages] = useState(loadMessages)
   const [input, setInput] = useState('')
@@ -111,8 +113,6 @@ function ChatInterface() {
   const [reactions, setReactions] = useState(loadReactions)
   const [followups, setFollowups] = useState([])
   const [selectedModel, setSelectedModel] = useState('gpt-4o-mini')
-
-  const MODEL_OPTIONS = ['gpt-4o-mini', 'gpt-3.5-turbo', 'gpt-4o', 'deepseek-v3']
 
   const inputRef = useRef(null)
   const messagesRef = useRef(messages)
@@ -162,8 +162,10 @@ function ChatInterface() {
     const a = document.createElement('a')
     a.href = url
     a.download = `ryazha-ai-chat-${new Date().toISOString().slice(0, 10)}.txt`
+    document.body.appendChild(a)
     a.click()
-    URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 100)
   }
 
   const stopGeneration = useCallback(() => {
