@@ -66,6 +66,58 @@ const OFFLINE_KB = [
     keywords: ['aio', 'updater', 'обновл', 'update'],
     answer: 'AIO-Switch-Updater — homebrew для автоматического обновления CFW компонентов: Atmosphere, Hekate, sigpatches, overlay\'s и других. Запускается из hbmenu (Album → R). Умеет скачивать с GitHub releases напрямую на Switch.'
   },
+  {
+    keywords: ['ryazhatune', 'тюн', 'tune', 'аудио', 'audio', 'звук'],
+    answer: 'RyazhaTune — sysmodule от команды Ryazhenka для тонкой настройки аудиосистемы Nintendo Switch. Позволяет менять параметры аудиовыхода и компенсировать задержку. Устанавливается в /atmosphere/contents/ как фоновый сервис.'
+  },
+  {
+    keywords: ['status monitor', 'мониторинг', 'ryazha-status', 'температура', 'нагрев', 'hardware', 'железо'],
+    answer: 'Ryazha-Status-Monitor — Tesla overlay для мониторинга железа Switch в реальном времени. Показывает нагрузку на каждое ядро CPU, GPU, RAM, температуру SoC/PCB/корпуса, скорость вентилятора, заряд батареи и FPS. Режимы: Full/Mini/Micro. Зависит от SaltyNX для FPS-данных.'
+  },
+  {
+    keywords: ['mission control', 'контроллер', 'геймпад', 'bluetooth', 'ps4', 'ps5', 'xbox', 'joycon'],
+    answer: 'Mission-Control — sysmodule для подключения сторонних Bluetooth-контроллеров к Nintendo Switch (PS4, PS5, Xbox, Pro Controller и другие). Форк команды Ryazhenka с доработками. Устанавливается в /atmosphere/contents/. Не требует патчей прошивки.'
+  },
+  {
+    keywords: ['edizon', 'save', 'чит', 'cheat', 'сейв', 'сохранен'],
+    answer: 'EdiZon — редактор сохранений и читкод-менеджер для Nintendo Switch. Форк Ryazhenka с улучшениями. Позволяет редактировать сохранения игр, применять читы (CHEATS/*.txt), делать бэкап сохранений. Запускается из Tesla Menu или hbmenu.'
+  },
+  {
+    keywords: ['fizeau', 'цвет', 'color', 'гамма', 'gamma', 'яркость', 'экран'],
+    answer: 'Fizeau — Tesla overlay для коррекции цветопередачи экрана Nintendo Switch. Форк Ryazhenka. Позволяет настраивать гамму, цветовую температуру и применять ночной режим. Управление через Tesla Menu. Настройки сохраняются между перезагрузками.'
+  },
+  {
+    keywords: ['libryazhahand', 'libtesla', 'libultrahand', 'tesla library', 'overlay lib'],
+    answer: 'libryazhahand — библиотека для разработки Tesla overlay под Nintendo Switch. Форк libultrahand+libtesla от команды Ryazhenka. Использует namespace /config/ryazhahand/. Основа для Ryazhahand-Overlay, RCU, ovlSysmodules и других overlay-проектов Ryazhenka.'
+  },
+  {
+    keywords: ['ovlsysmodules', 'sysmodule', 'сисмодул', 'фоновый сервис', 'background'],
+    answer: 'ovlSysmodules — Tesla overlay для управления sysmodule\'s на Nintendo Switch. Форк Ryazhenka. Позволяет включать/выключать фоновые сервисы (RCU, Mission-Control, SaltyNX и др.) через Tesla Menu без перезагрузки. Управление через /config/ryazhahand/.'
+  },
+  {
+    keywords: ['rcm', 'recovery', 'jig', 'fusee', 'fusée', 'инжект', 'inject', 'payload'],
+    answer: 'RCM (Recovery Mode) — режим восстановления Nintendo Switch для запуска кастомных payload\'ов. Активируется замыканием контактов в правом joycon-рельсе (RCM jig) и зажатием Vol+ + Power. Затем подключите USB-C к ПК и используйте TegraRcmGUI или Web Fusée (webrcm.app) для загрузки Hekate.'
+  },
+  {
+    keywords: ['nx-ovlloader', 'ovlloader', 'tesla loader', 'загрузчик оверлея'],
+    answer: 'nx-ovlloader — sysmodule-загрузчик Tesla overlay меню для Nintendo Switch. Ryazha-edition форк ppkantorski/nx-ovlloader. Обрабатывает нажатие L+DDOWN+RS для открытия overlay. Устанавливается в /atmosphere/contents/. Требуется для всех Tesla overlay-приложений.'
+  },
+  {
+    keywords: ['lockpick', 'ключи', 'keys', 'prod.keys', 'title.keys', 'дамп ключей'],
+    answer: 'Lockpick_RCM — homebrew для дампа ключей шифрования Nintendo Switch (prod.keys, title.keys). Запускается как payload через Hekate или как homebrew. Ключи нужны для конвертации XCI/NSZ, работы эмуляторов (Yuzu/Ryujinx). Храните ключи в безопасности — они уникальны для вашей консоли.'
+  },
+  {
+    keywords: ['90dns', 'dns', 'блокировка', 'nintendoservers', ' nintendoдns'],
+    answer: '90DNS — DNS-сервер, блокирующий соединения с серверами Nintendo для защиты от бана в emuNAND. Настройка: WiFi → Изменить DNS → Основной: 207.246.121.77, Дополнительный: 163.172.141.219. Проверить работу: test.90dns.org. Включайте только в emuNAND, в sysNAND лучше не использовать.'
+  },
+  {
+    keywords: ['microsd', 'карта памяти', 'sd card', 'форматировать', 'fat32', 'exfat'],
+    answer: 'Для Nintendo Switch рекомендуется microSD от Samsung или SanDisk (не Kingston). Формат: FAT32 или exFAT (exFAT быстрее, но FAT32 надёжнее). Форматировать через Hekate: Tools → Partition SD. Минимум 64GB для emuNAND, рекомендую 256GB+. SDXC карты работают с обоими форматами.'
+  },
+  {
+    keywords: ['ppsspp', 'psp', 'эмулятор', 'emulator', 'playstation portable'],
+    answer: 'PPSSPP для Nintendo Switch — перекомпилированный Dimasick-git под HorizonOS 21+. Запускается как homebrew NRO из hbmenu. Поддерживает большинство PSP игр в ISO/CSO форматах. Скачать: github.com/Dimasick-git/PPSSPP. Игры размещайте в /switch/ppsspp/PSP/GAME/.'
+  },
 ]
 
 function getFallbackResponse(message) {
