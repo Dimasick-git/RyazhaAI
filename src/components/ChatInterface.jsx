@@ -105,7 +105,7 @@ function ShareButton({ messages }) {
   )
 }
 
-const MODEL_OPTIONS = ['gpt-4o-mini', 'gpt-3.5-turbo', 'gpt-4o', 'deepseek-v3']
+const MODEL_OPTIONS = ['gpt-4o-mini', 'gpt-4o', 'deepseek-v3', 'deepseek-r1']
 
 function ChatInterface() {
   const [messages, setMessages] = useState(loadMessages)
@@ -115,7 +115,7 @@ function ChatInterface() {
   const [showQuickQ, setShowQuickQ] = useState(true)
   const [reactions, setReactions] = useState(loadReactions)
   const [followups, setFollowups] = useState([])
-  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini')
+  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0])
 
   const inputRef = useRef(null)
   const messagesRef = useRef(messages)

@@ -118,16 +118,27 @@ const OFFLINE_KB = [
     keywords: ['ppsspp', 'psp', 'эмулятор', 'emulator', 'playstation portable'],
     answer: 'PPSSPP для Nintendo Switch — перекомпилированный Dimasick-git под HorizonOS 21+. Запускается как homebrew NRO из hbmenu. Поддерживает большинство PSP игр в ISO/CSO форматах. Скачать: github.com/Dimasick-git/PPSSPP. Игры размещайте в /switch/ppsspp/PSP/GAME/.'
   },
+  {
+    keywords: ['ryazha-cheker', 'cheker', 'checker', 'мониторинг репо', 'мониторинг репозитор', 'github actions monitor', 'уведомлен', 'нотификац'],
+    answer: 'Ryazha-cheker — GitHub Actions монитор репозиториев от команды Ryazhenka. Отслеживает коммиты, релизы, PR и workflow-runs и отправляет уведомления в Telegram. Поддерживает --dry-run, --summary, --weekly, --trending режимы, фильтрацию по дате (--since). Настраивается через переменные окружения G_TOKEN, G_USERNAME, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID. GitHub: github.com/Dimasick-git/Ryazha-cheker'
+  },
 ]
 
 function getFallbackResponse(message) {
   const lower = message.toLowerCase()
 
+  let bestEntry = null
+  let bestScore = 0
+
   for (const entry of OFFLINE_KB) {
-    if (entry.keywords.some((kw) => lower.includes(kw))) {
-      return entry.answer
+    const score = entry.keywords.reduce((acc, kw) => acc + (lower.includes(kw) ? 1 : 0), 0)
+    if (score > bestScore) {
+      bestScore = score
+      bestEntry = entry
     }
   }
+
+  if (bestEntry) return bestEntry.answer
 
   return (
     'Бэкенд RYAZHA AI временно недоступен. ' +

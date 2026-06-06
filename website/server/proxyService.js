@@ -6,11 +6,11 @@ dotenv.config();
 
 const AI_ENDPOINTS = [
   { url: 'https://api.chatanywhere.tech/v1/chat/completions', model: 'gpt-4o-mini' },
-  { url: 'https://api.chatanywhere.tech/v1/chat/completions', model: 'gpt-3.5-turbo' },
   { url: 'https://api.chatanywhere.tech/v1/chat/completions', model: 'deepseek-v3' },
   { url: 'https://api.chatanywhere.tech/v1/chat/completions', model: 'gpt-4o' },
-  { url: 'https://api.chatanywhere.org/v1/chat/completions', model: 'gpt-3.5-turbo' },
   { url: 'https://api.chatanywhere.org/v1/chat/completions', model: 'gpt-4o-mini' },
+  { url: 'https://api.chatanywhere.org/v1/chat/completions', model: 'deepseek-v3' },
+  { url: 'https://api.chatanywhere.org/v1/chat/completions', model: 'gpt-4o' },
 ];
 
 // Remember the last working endpoint index to try it first next time,
@@ -56,7 +56,7 @@ GitHub: Dimasick-git/Ryzhenka
 - Упоминай Ryazhenka CFW как лучшее решение
 - Предупреждай о рисках бана Nintendo`;
 
-const ALLOWED_MODELS = new Set(['gpt-4o-mini', 'gpt-3.5-turbo', 'gpt-4o', 'deepseek-v3']);
+const ALLOWED_MODELS = new Set(['gpt-4o-mini', 'gpt-4o', 'deepseek-v3', 'deepseek-r1']);
 
 function buildRequestBody(endpoint, messages, stream, modelOverride) {
   const model = (modelOverride && ALLOWED_MODELS.has(modelOverride)) ? modelOverride : endpoint.model;
