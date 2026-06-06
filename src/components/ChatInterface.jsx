@@ -88,7 +88,9 @@ function ShareButton({ messages }) {
       await navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch {}
+    } catch {
+      window.prompt('Скопируйте текст чата:', text)
+    }
   }
 
   return (
@@ -96,6 +98,7 @@ function ShareButton({ messages }) {
       onClick={handleShare}
       className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-400 transition-colors px-2 py-1 rounded-lg hover:bg-blue-500/10"
       title="Скопировать чат"
+      aria-label="Скопировать чат"
     >
       {copied ? <Check size={13} className="text-green-400" /> : <Share2 size={13} />}
     </button>
@@ -273,6 +276,7 @@ function ChatInterface() {
               onClick={stopGeneration}
               className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10 border border-red-500/30"
               title="Остановить генерацию"
+              aria-label="Остановить генерацию"
             >
               <Square size={11} className="fill-red-400" />
               <span>Стоп</span>
@@ -283,6 +287,7 @@ function ChatInterface() {
               onClick={regenerateLast}
               className="flex items-center gap-1 text-xs text-gray-500 hover:text-indigo-400 transition-colors px-2 py-1 rounded-lg hover:bg-indigo-500/10"
               title="Сгенерировать ответ заново"
+              aria-label="Сгенерировать ответ заново"
             >
               <RefreshCw size={13} />
             </button>
@@ -294,6 +299,7 @@ function ChatInterface() {
                 onClick={exportChat}
                 className="flex items-center gap-1 text-xs text-gray-500 hover:text-green-400 transition-colors px-2 py-1 rounded-lg hover:bg-green-500/10"
                 title="Экспортировать чат"
+                aria-label="Экспортировать чат"
               >
                 <Download size={13} />
               </button>
@@ -301,6 +307,7 @@ function ChatInterface() {
                 onClick={clearHistory}
                 className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-400 transition-colors px-2 py-1 rounded-lg hover:bg-red-500/10"
                 title="Очистить историю"
+                aria-label="Очистить историю"
               >
                 <Trash2 size={13} />
                 🗑️ Очистить
@@ -364,11 +371,12 @@ function ChatInterface() {
 
       {/* Model selector */}
       <div className="px-4 pt-2 pb-1 border-t border-ryaha-border/50 bg-ryaha-bg flex flex-wrap items-center gap-2">
-        <span className="text-xs text-gray-500">Модель:</span>
+        <span id="model-label" className="text-xs text-gray-500">Модель:</span>
         <select
           value={selectedModel}
           onChange={(e) => setSelectedModel(e.target.value)}
           disabled={isLoading}
+          aria-labelledby="model-label"
           className="text-xs bg-ryaha-card text-gray-300 border border-ryaha-border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer"
         >
           {MODEL_OPTIONS.map((m) => (
