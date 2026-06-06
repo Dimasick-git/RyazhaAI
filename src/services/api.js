@@ -127,18 +127,36 @@ const OFFLINE_KB = [
 function getFallbackResponse(message) {
   const lower = message.toLowerCase()
 
+  // Tokenise query into words for partial-word matching
+  const queryWords = lower.match(/[a-zа-яё0-9]+/g) || []
+
   let bestEntry = null
   let bestScore = 0
 
   for (const entry of OFFLINE_KB) {
-    const score = entry.keywords.reduce((acc, kw) => acc + (lower.includes(kw) ? 1 : 0), 0)
+    let score = 0
+    for (const kw of entry.keywords) {
+      if (lower.includes(kw)) {
+        // Longer keyword matches are more specific — weight by length
+        score += 1 + Math.min(kw.length / 8, 2)
+      } else {
+        // Partial: reward if any query word starts with the keyword (or vice versa)
+        for (const word of queryWords) {
+          if (word.length >= 3 && (word.startsWith(kw) || kw.startsWith(word))) {
+            score += 0.4
+            break
+          }
+        }
+      }
+    }
     if (score > bestScore) {
       bestScore = score
       bestEntry = entry
     }
   }
 
-  if (bestEntry) return bestEntry.answer
+  // Only use the fallback entry if the match is meaningful (score > 0.5)
+  if (bestEntry && bestScore >= 0.5) return bestEntry.answer
 
   return (
     'Бэкенд RYAZHA AI временно недоступен. ' +
