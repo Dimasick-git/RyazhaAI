@@ -52,6 +52,7 @@ function getFollowupSuggestions(text) {
 }
 
 const MAX_MSG_LENGTH = 2000
+const MAX_HISTORY_FOR_AI = 20
 const STORAGE_KEY = 'ryazha_chat_history'
 const REACTIONS_KEY = 'ryazha-ai-reactions'
 
@@ -205,7 +206,7 @@ function ChatInterface() {
     if (lastUserIdx === -1) return
     const idx = messages.length - 1 - lastUserIdx
     const userMessage = messages[idx].content
-    const history = messages.slice(0, idx)
+    const history = messages.slice(0, idx).slice(-MAX_HISTORY_FOR_AI)
 
     setMessages(messages.slice(0, idx + 1))
     setIsLoading(true)
@@ -232,7 +233,7 @@ function ChatInterface() {
     if (!userMessage || isLoading) return
     if (userMessage.length > MAX_MSG_LENGTH) return
 
-    const history = messagesRef.current
+    const history = messagesRef.current.slice(-MAX_HISTORY_FOR_AI)
     setInput('')
     setShowQuickQ(false)
     setFollowups([])
@@ -383,8 +384,8 @@ function ChatInterface() {
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
-        <span className="text-xs text-yellow-500/70 ml-auto">
-          ⚠️ API ключ хранится в localStorage браузера. Не используйте ключи с широкими правами.
+        <span className="text-xs text-gray-600 ml-auto">
+          {messages.length > MAX_HISTORY_FOR_AI + 1 && `· Отправляется ${MAX_HISTORY_FOR_AI} последних сообщений`}
         </span>
       </div>
 
