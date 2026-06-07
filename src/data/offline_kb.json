@@ -25,7 +25,7 @@
   },
   {
     "keywords": ["sigpatch", "сигпатч", "подпись", "signature"],
-    "answer": "Sigpatches — патчи подписи, позволяющие Atmosphere запускать неподписанный homebrew-код и установленные игры. Скачиваются отдельно (обычно с sigmapatches.coomer.party или через AIO-Switch-Updater). Обновляйте при каждом обновлении Atmosphere."
+    "answer": "Sigpatches — патчи подписи, позволяющие Atmosphere запускать неподписанный homebrew-код и установленные игры. Обновляйте через AIO-Switch-Updater (рекомендуется — устанавливает автоматически) или скачайте вручную с официального источника sigmapatches. Обновляйте при каждом обновлении Atmosphere."
   },
   {
     "keywords": ["hekate", "хекате", "boot", "загрузч"],
@@ -48,8 +48,8 @@
     "answer": "AIO-Switch-Updater — homebrew для автоматического обновления CFW компонентов: Atmosphere, Hekate, sigpatches, overlay's и других. Запускается из hbmenu (Album → R). Умеет скачивать с GitHub releases напрямую на Switch."
   },
   {
-    "keywords": ["ryazhatune", "тюн", "tune", "аудио", "audio", "звук"],
-    "answer": "RyazhaTune — sysmodule от команды Ryazhenka для тонкой настройки аудиосистемы Nintendo Switch. Позволяет менять параметры аудиовыхода и компенсировать задержку. Устанавливается в /atmosphere/contents/ как фоновый сервис."
+    "keywords": ["ryazhatune", "тюн", "tune", "аудио", "audio", "звук", "музык", "плейлист", "mp3", "flac"],
+    "answer": "RyazhaTune — фоновый музыкальный плеер для Nintendo Switch (форк sys-tune). Воспроизводит MP3, FLAC, WAV во время игры. Управление через Tesla overlay (L+DDOWN+RS). Поддерживает постоянные плейлисты, автозапуск, режимы Whitelist/Blacklist по Title ID и per-title Focus-политики. Устанавливается в /atmosphere/contents/."
   },
   {
     "keywords": ["status monitor", "мониторинг", "ryazha-status", "температура", "нагрев", "hardware", "железо"],
@@ -102,5 +102,25 @@
   {
     "keywords": ["ryazha-cheker", "cheker", "checker", "мониторинг репо", "мониторинг репозитор", "github actions monitor", "уведомлен", "нотификац"],
     "answer": "Ryazha-cheker — GitHub Actions монитор репозиториев от команды Ryazhenka. Отслеживает коммиты, релизы, PR и workflow-runs и отправляет уведомления в Telegram. Поддерживает --dry-run, --summary, --weekly, --trending режимы, фильтрацию по дате (--since). Настраивается через переменные окружения G_TOKEN, G_USERNAME, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID. GitHub: github.com/Dimasick-git/Ryazha-cheker"
+  },
+  {
+    "keywords": ["ryazhenka bot", "ryazhenka_bot", "телеграм бот", "бот switch", "telegram bot", "гайд бот"],
+    "answer": "Ryazhenka_Bot — Telegram бот от команды Ryazhenka для Nintendo Switch CFW. Команды: /guide <тема> (поиск гайдов с BM25+fuzzy), /aiguide (AI-поиск), /ask (вопрос AI по Switch), /releases (последние релизы Ryazhenka), /quiz (тест знаний), /digest, /compare, /fav. Поиск по базе гайдов с AI-ответом если гайд не найден. Telegram: @Ryazhenkacfw"
+  },
+  {
+    "keywords": ["ryazha ai", "ryazhaai", "ai ассистент", "ai помощник", "ии помощник", "этот бот", "кто ты"],
+    "answer": "RYAZHA AI — умный AI-ассистент по Nintendo Switch CFW от команды Ryazhenka. Отвечает на вопросы об Atmosphere, emuNAND, Tesla overlay, RCU, установке игр, homebrew и других Switch-темах. Поддерживает 12+ AI-провайдеров (GPT-4o, DeepSeek и др.) с автофолбэком на оффлайн-режим. GitHub: github.com/Dimasick-git/RyazhaAI"
+  },
+  {
+    "keywords": ["atmosphere-ryz", "atmosphere ryz", "ryazhenka atmosphere", "форк atmosphere", "кастом atmosphere"],
+    "answer": "Atmosphere-RYZ — кастомный форк Atmosphere CFW от команды Ryazhenka с дополнительными патчами и настройками под экосистему Ryazhenka. Включает pre-configured файлы для работы с Ryazhahand, RCU и другими Ryazhenka-модулями. Обновляется синхронно с upstream Atmosphere. GitHub: github.com/Dimasick-git/Atmosphere-RYZ"
+  },
+  {
+    "keywords": ["switchwave", "switch wave", "waves", "волны"],
+    "answer": "SwitchWave — утилита от команды Ryazhenka для Nintendo Switch. Форк с доработками под экосистему Ryazhenka. Устанавливается через /atmosphere/contents/. GitHub: github.com/Dimasick-git/SwitchWave"
+  },
+  {
+    "keywords": ["reversenx", "reverse nx", "dock режим", "handheld режим", "режим консоли"],
+    "answer": "ReverseNX-RT — sysmodule для принудительного переключения Nintendo Switch в Docked или Handheld режим независимо от физического подключения. Форк Ryazhenka. Позволяет играть в Docked-режиме (более высокие частоты) без TV. Управление через Tesla overlay или конфиг."
   }
 ]
