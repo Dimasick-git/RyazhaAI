@@ -52,6 +52,37 @@ function renderInline(text) {
   return parts.length > 0 ? parts : text
 }
 
+function CodeBlock({ lang, code }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {}
+  }
+
+  return (
+    <div className="my-2 rounded-lg border border-ryaha-border overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-black/60 border-b border-ryaha-border">
+        <span className="text-xs text-gray-500 font-mono">{lang || 'code'}</span>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1 text-xs text-gray-500 hover:text-emerald-400 transition-colors px-1.5 py-0.5 rounded hover:bg-emerald-500/10"
+          title="Скопировать код"
+        >
+          {copied ? <Check size={11} className="text-emerald-400" /> : <Copy size={11} />}
+          <span>{copied ? 'Скопировано' : 'Копировать'}</span>
+        </button>
+      </div>
+      <pre className="bg-black/40 p-3 overflow-x-auto text-sm font-mono text-emerald-300 whitespace-pre">
+        {code}
+      </pre>
+    </div>
+  )
+}
+
 function MessageContent({ text }) {
   const lines = text.split('\n')
   const elements = []
@@ -69,10 +100,7 @@ function MessageContent({ text }) {
         i++
       }
       elements.push(
-        <pre key={i} className="bg-black/40 border border-ryaha-border rounded-lg p-3 my-2 overflow-x-auto text-sm font-mono text-emerald-300 whitespace-pre">
-          {lang && <div className="text-gray-500 text-xs mb-1">{lang}</div>}
-          {codeLines.join('\n')}
-        </pre>
+        <CodeBlock key={i} lang={lang} code={codeLines.join('\n')} />
       )
       i++
       continue
