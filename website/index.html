@@ -524,18 +524,16 @@
  <!-- Футер с авторами -->
  <div class="footer">
  <h3> Авторы</h3>
- <p><strong>Разработчик:</strong> Ваше имя</p>
- <p><strong>Дизайн:</strong> Ваше имя</p>
+ <p><strong>Разработчик:</strong> Dimasick-git</p>
+ <p><strong>Дизайн:</strong> Ryazhenka Team</p>
  <p><strong>GitHub:</strong> <a href="https://github.com/Dimasick-git/Ryzhenka" target="_blank" style="color: #667eea; text-decoration: none;">Ryzhenka Project</a></p>
  </div>
 
  <script>
- // API ключ по умолчанию
- const DEFAULT_API_KEY = 'sk-W3WuTHKVmxudeH6AqojJSm8RH50D9DKRuO6FVnbJufOVDnw4';
  const API_URL = 'https://api.chatanywhere.tech/v1/chat/completions';
- 
- // Инициализация
- let apiKey = localStorage.getItem('apiKey') || DEFAULT_API_KEY;
+
+ // Ключ хранится только в localStorage — пользователь вводит его сам
+ let apiKey = localStorage.getItem('apiKey') || '';
  
  // Переключить настройки
  function toggleSettings() {
@@ -605,6 +603,11 @@
  const message = input.value.trim();
  
  if (!message) return;
+
+ if (!apiKey) {
+ showStatus('Введите API ключ в настройках', 'error');
+ return;
+ }
  
  // Добавить сообщение пользователя
  addMessage(message, 'user');
@@ -660,8 +663,8 @@
  });
  
  // Показать текущий статус
- if (apiKey === DEFAULT_API_KEY) {
- showStatus('Используется API ключ по умолчанию', 'success');
+ if (!apiKey) {
+ showStatus('Введите API ключ в настройках для начала работы', 'error');
  }
  </script>
 </body>

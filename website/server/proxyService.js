@@ -161,13 +161,13 @@ export async function chatWithAIStream(message, history = [], onChunk, context =
     const endpoint = AI_ENDPOINTS[idx];
     try {
       console.debug(`[stream] Trying ${endpoint.model}...`);
-      const cancelSource = axios.CancelToken.source();
+      const ac = new AbortController();
       if (signal) {
-        signal.addEventListener('abort', () => cancelSource.cancel('client disconnected'), { once: true });
+        signal.addEventListener('abort', () => ac.abort(), { once: true });
       }
 
       const config = buildConfig(apiKey, true);
-      config.cancelToken = cancelSource.token;
+      config.signal = ac.signal;
 
       const response = await axios.post(
         endpoint.url,
@@ -232,7 +232,7 @@ export async function chatWithAIStream(message, history = [], onChunk, context =
 
       throw new Error('Empty stream response');
     } catch (error) {
-      if (error.name === 'AbortError' || axios.isCancel(error)) throw error;
+      if (error.name === 'AbortError' || error.name === 'CanceledError') throw error;
       console.warn(`[stream] Endpoint ${endpoint.model} failed:`, error.message);
     }
   }
