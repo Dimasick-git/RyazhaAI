@@ -89,9 +89,9 @@ app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // ── Helper: build knowledge context ─────────────────────────────
-function getKnowledgeContext(message) {
+async function getKnowledgeContext(message) {
  try {
- const relevant = searchKnowledge(message);
+ const relevant = await searchKnowledge(message);
  if (relevant.length > 0) {
  return '\n\nРелевантная информация из базы знаний:\n' +
  relevant.map(item => `- ${item.content}`).join('\n');
@@ -117,7 +117,7 @@ app.post('/api/chat', async (req, res) => {
  return res.status(400).json({ error: validationError });
  }
 
- const context = useKnowledge ? getKnowledgeContext(message) : '';
+ const context = useKnowledge ? await getKnowledgeContext(message) : '';
  const response = await chatWithAI(message, history, context, model);
 
  res.json({ response, usedKnowledge: context.length > 0 });
@@ -156,7 +156,7 @@ app.post('/api/chat/stream', async (req, res) => {
  };
 
  try {
- const context = useKnowledge ? getKnowledgeContext(message) : '';
+ const context = useKnowledge ? await getKnowledgeContext(message) : '';
  await chatWithAIStream(message, history, (chunk) => send({ chunk }), context, abortController.signal, model);
  send({ done: true });
  } catch (error) {
@@ -167,15 +167,15 @@ app.post('/api/chat/stream', async (req, res) => {
 });
 
 // ── Knowledge API ────────────────────────────────────────────────
-app.get('/api/knowledge', (req, res) => {
+app.get('/api/knowledge', async (_req, res) => {
  try {
- res.json({ knowledge: getKnowledge() });
+ res.json({ knowledge: await getKnowledge() });
  } catch (error) {
  res.status(500).json({ error: error.message });
  }
 });
 
-app.post('/api/knowledge', (req, res) => {
+app.post('/api/knowledge', async (req, res) => {
  const knowledgeKey = process.env.KNOWLEDGE_API_KEY;
  if (knowledgeKey) {
    const provided = req.headers['x-api-key'];
@@ -185,8 +185,14 @@ app.post('/api/knowledge', (req, res) => {
  }
  try {
  const { content, category, tags } = req.body;
- if (!content) return res.status(400).json({ error: 'Content is required' });
- res.json({ success: true, entry: addKnowledge(content, category, tags) });
+ if (!content || typeof content !== 'string') {
+   return res.status(400).json({ error: 'Content is required and must be a string' });
+ }
+ if (content.length > 2000) {
+   return res.status(400).json({ error: 'Content too long (max 2000 characters)' });
+ }
+ const entry = await addKnowledge(content.trim(), category, tags);
+ res.json({ success: true, entry });
  } catch (error) {
  res.status(500).json({ error: error.message });
  }
@@ -197,8 +203,6 @@ app.get('/api/health', (_req, res) => {
  res.json({
  status: 'ok',
  timestamp: new Date().toISOString(),
- proxy: process.env.USE_PROXY === 'true' ? 'enabled' : 'disabled',
- streaming: true,
  });
 });
 

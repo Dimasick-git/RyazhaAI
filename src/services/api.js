@@ -51,8 +51,9 @@ function getFallbackResponse(message) {
     }
   }
 
-  // Only use the fallback entry if the match is meaningful (score > 0.5)
-  if (bestEntry && bestScore >= 0.5) return bestEntry.answer
+  // Threshold of 1.5 requires at least one solid keyword match (length ≥ 4 scores
+  // 1 + 4/8 = 1.5) to avoid returning a wrong "best" answer for vague queries.
+  if (bestEntry && bestScore >= 1.5) return bestEntry.answer
 
   return (
     'Бэкенд RYAZHA AI временно недоступен. ' +

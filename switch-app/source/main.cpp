@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
             if (R_SUCCEEDED(rc))
             {
-                webConfigSetWhitelist(&config, "^https?://");
+                webConfigSetWhitelist(&config, "^https://dimasick-git\\.github\\.io/");
                 webConfigSetFooter(&config, true);
                 webConfigSetPointer(&config, true);
                 webConfigSetKeyRepeatFrame(&config, 4, 8);
