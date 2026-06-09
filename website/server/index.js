@@ -72,6 +72,9 @@ function validateInput(message, history) {
  if (history && history.length > MAX_HISTORY_LEN) {
  return `История слишком длинная (максимум ${MAX_HISTORY_LEN} сообщений)`;
  }
+ if (history && history.some(m => typeof m.content === 'string' && m.content.length > MAX_HISTORY_CONTENT_LEN)) {
+ return `Элемент истории слишком длинный (максимум ${MAX_HISTORY_CONTENT_LEN} символов)`;
+ }
  return null;
 }
 

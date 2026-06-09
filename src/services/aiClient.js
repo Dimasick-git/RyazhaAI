@@ -25,8 +25,7 @@ import { sendMessageStream as _sendMessageStream, sendMessage as _sendMessage } 
  *   `promise` resolves to an object with the full response text and an offline flag.
  */
 export function sendMessage(message, history = [], model, onChunk) {
-  let cancelled = false
-  let innerCancel = () => { cancelled = true }
+  let innerCancel = () => {}
 
   const promise = (async () => {
     let full = ''
@@ -48,7 +47,7 @@ export function sendMessage(message, history = [], model, onChunk) {
       await streamPromise
       return { text: full, isOffline: false }
     } catch {
-      innerCancel = () => { cancelled = true }
+      innerCancel = () => {}
       if (full) return { text: full, isOffline: false }
       // Fallback to non-streaming request
       return await _sendMessage(message, history, model)
