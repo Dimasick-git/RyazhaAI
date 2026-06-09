@@ -94,7 +94,7 @@ export async function sendMessage(message, history = [], model) {
   const apiBase = getAPIBase()
 
   if (import.meta.env.PROD && apiBase === null) {
-    return 'Ошибка конфигурации: URL бэкенда не задан (VITE_API_URL не установлен). Обратитесь к администратору.'
+    return { text: 'Ошибка конфигурации: URL бэкенда не задан (VITE_API_URL не установлен). Обратитесь к администратору.', isOffline: false }
   }
 
   try {
@@ -107,11 +107,11 @@ export async function sendMessage(message, history = [], model) {
     })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const data = await response.json()
-    if (data?.response) return data.response
+    if (data?.response) return { text: data.response, isOffline: false }
     throw new Error('Invalid response format')
   } catch (error) {
     console.error('API call failed:', error.message)
-    return getFallbackResponse(message)
+    return { text: getFallbackResponse(message), isOffline: true }
   }
 }
 

@@ -250,6 +250,9 @@ function MessageList({ messages, isLoading, streamText, reactions, onReact }) {
                 />
               )}
             </div>
+            {message.role === 'assistant' && message.isOffline && (
+              <span className="text-xs text-yellow-400/70 mt-1 block">⚡ Офлайн-режим</span>
+            )}
             {message.role === 'assistant' && (
               <div className="flex items-center gap-1 pl-1">
                 <CopyButton text={message.content} />

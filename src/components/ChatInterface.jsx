@@ -195,7 +195,7 @@ function ChatInterface() {
       return result
     } catch {
       cancelStreamRef.current = null
-      if (accumulated) return accumulated
+      if (accumulated) return { text: accumulated, isOffline: false }
       throw new Error('AI request failed')
     }
   }, [selectedModel])
@@ -214,9 +214,9 @@ function ChatInterface() {
     setFollowups([])
 
     try {
-      const response = await callAI(userMessage, history)
-      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response, ts: Date.now() }])
-      setFollowups(getFollowupSuggestions(response))
+      const result = await callAI(userMessage, history)
+      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: result.text, isOffline: result.isOffline, ts: Date.now() }])
+      setFollowups(getFollowupSuggestions(result.text))
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -242,9 +242,9 @@ function ChatInterface() {
     setStreamText('')
 
     try {
-      const response = await callAI(userMessage, history)
-      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: response, ts: Date.now() }])
-      setFollowups(getFollowupSuggestions(response))
+      const result = await callAI(userMessage, history)
+      setMessages((prev) => [...prev, { id: genMsgId(), role: 'assistant', content: result.text, isOffline: result.isOffline, ts: Date.now() }])
+      setFollowups(getFollowupSuggestions(result.text))
     } catch {
       setMessages((prev) => [
         ...prev,

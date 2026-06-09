@@ -20,9 +20,9 @@ import { sendMessageStream as _sendMessageStream, sendMessage as _sendMessage } 
  * @param {Function} [onChunk]      Called with each streaming text chunk.
  *                                  If omitted, streaming is still attempted but
  *                                  the full text is returned only on completion.
- * @returns {{ cancel: () => void, promise: Promise<string> }}
+ * @returns {{ cancel: () => void, promise: Promise<{ text: string, isOffline: boolean }> }}
  *   `cancel()` aborts an in-progress stream.
- *   `promise` resolves to the full response string.
+ *   `promise` resolves to an object with the full response text and an offline flag.
  */
 export function sendMessage(message, history = [], model, onChunk) {
   let cancelled = false
@@ -46,10 +46,10 @@ export function sendMessage(message, history = [], model, onChunk) {
       )
       innerCancel = cancel
       await streamPromise
-      return full
+      return { text: full, isOffline: false }
     } catch {
       innerCancel = () => { cancelled = true }
-      if (full) return full
+      if (full) return { text: full, isOffline: false }
       // Fallback to non-streaming request
       return await _sendMessage(message, history, model)
     }
