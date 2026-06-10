@@ -106,7 +106,14 @@ function ShareButton({ messages }) {
   )
 }
 
-const MODEL_OPTIONS = ['gpt-4o-mini', 'gpt-4o', 'deepseek-v3', 'deepseek-r1']
+const MODEL_OPTIONS = [
+  'gpt-4o-mini',
+  'gpt-4o',
+  'deepseek-v3',
+  'deepseek-r1',
+  'claude-haiku-4-5-20251001',
+  'claude-sonnet-4-6',
+]
 
 function ChatInterface() {
   const [messages, setMessages] = useState(loadMessages)

@@ -139,6 +139,70 @@ function MessageContent({ text }) {
       continue
     }
 
+    if (/^>[ \t]?/.test(line)) {
+      const quoteLines = []
+      while (i < lines.length && /^>[ \t]?/.test(lines[i])) {
+        quoteLines.push(lines[i].replace(/^>[ \t]?/, ''))
+        i++
+      }
+      elements.push(
+        <blockquote key={`bq-${i}`} className="border-l-2 border-indigo-500/50 pl-3 my-1 text-gray-400 italic">
+          {quoteLines.map((ql, qi) => (
+            <p key={qi}>{renderInline(ql)}</p>
+          ))}
+        </blockquote>
+      )
+      continue
+    }
+
+    if (/^\|.+\|/.test(line)) {
+      const tableRows = []
+      while (i < lines.length && /^\|.+\|/.test(lines[i])) {
+        tableRows.push(lines[i])
+        i++
+      }
+      const rows = tableRows.filter((r) => !/^\|[-: |]+\|$/.test(r.trim()))
+      if (rows.length > 0) {
+        const header = rows[0].split('|').filter((c) => c.trim() !== '')
+        const body = rows.slice(1)
+        elements.push(
+          <div key={`tbl-${i}`} className="my-2 overflow-x-auto">
+            <table className="text-xs border-collapse w-full">
+              <thead>
+                <tr>
+                  {header.map((h, hi) => (
+                    <th key={hi} className="px-2 py-1 border border-ryaha-border bg-black/40 text-left font-semibold text-gray-300">
+                      {renderInline(h.trim())}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {body.map((row, ri) => {
+                  const cells = row.split('|').filter((c) => c.trim() !== '')
+                  return (
+                    <tr key={ri} className={ri % 2 === 0 ? 'bg-black/20' : ''}>
+                      {cells.map((cell, ci) => (
+                        <td key={ci} className="px-2 py-1 border border-ryaha-border text-gray-300">
+                          {renderInline(cell.trim())}
+                        </td>
+                      ))}
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )
+      }
+      continue
+    }
+
+    if (/^---+$/.test(line.trim())) {
+      elements.push(<hr key={i} className="border-ryaha-border my-2" />)
+      i++; continue
+    }
+
     if (line.trim() === '') {
       elements.push(<div key={i} className="h-1" />)
       i++; continue
