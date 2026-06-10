@@ -204,8 +204,9 @@ app.post('/api/knowledge', async (req, res) => {
 // ── Health check ─────────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
  res.json({
- status: 'ok',
- timestamp: new Date().toISOString(),
+  status: 'ok',
+  streaming: true,
+  timestamp: new Date().toISOString(),
  });
 });
 

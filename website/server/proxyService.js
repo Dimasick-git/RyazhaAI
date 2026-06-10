@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Anthropic from '@anthropic-ai/sdk';
 import { HttpsProxyAgent } from 'https-proxy-agent';
 import dotenv from 'dotenv';
 
@@ -56,7 +57,8 @@ GitHub: Dimasick-git/Ryzhenka
 - Упоминай Ryazhenka CFW как лучшее решение
 - Предупреждай о рисках бана Nintendo`;
 
-const ALLOWED_MODELS = new Set(['gpt-4o-mini', 'gpt-4o', 'deepseek-v3', 'deepseek-r1']);
+const CLAUDE_MODELS = new Set(['claude-haiku-4-5-20251001', 'claude-haiku-4-5', 'claude-sonnet-4-6', 'claude-opus-4-8']);
+const ALLOWED_MODELS = new Set(['gpt-4o-mini', 'gpt-4o', 'deepseek-v3', 'deepseek-r1', ...CLAUDE_MODELS]);
 
 function buildRequestBody(endpoint, messages, stream, modelOverride) {
   const model = (modelOverride && ALLOWED_MODELS.has(modelOverride)) ? modelOverride : endpoint.model;
@@ -122,7 +124,72 @@ function* _endpointOrder() {
   }
 }
 
+function buildAnthropicMessages(message, history) {
+  return [
+    ...(history || [])
+      .slice(-20)
+      .filter(m => m && ALLOWED_ROLES.has(m.role) && typeof m.content === 'string')
+      .map(m => ({ role: m.role, content: m.content.slice(0, MAX_CONTENT_LEN) })),
+    { role: 'user', content: message },
+  ];
+}
+
+async function chatWithClaudeAI(message, history, context, model) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY не настроен. Добавьте ключ в .env для использования Claude моделей.');
+
+  const client = new Anthropic({ apiKey });
+  const systemContent = context ? `${SYSTEM_PROMPT}\n\n${context}` : SYSTEM_PROMPT;
+
+  const response = await client.messages.create({
+    model,
+    max_tokens: 2048,
+    system: systemContent,
+    messages: buildAnthropicMessages(message, history),
+  });
+
+  const text = response.content[0]?.text?.trim();
+  if (!text) throw new Error('Пустой ответ от Claude');
+  return text;
+}
+
+async function chatWithClaudeAIStream(message, history, onChunk, context, signal, model) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('ANTHROPIC_API_KEY не настроен. Добавьте ключ в .env для использования Claude моделей.');
+
+  const client = new Anthropic({ apiKey });
+  const systemContent = context ? `${SYSTEM_PROMPT}\n\n${context}` : SYSTEM_PROMPT;
+
+  const stream = client.messages.stream({
+    model,
+    max_tokens: 2048,
+    system: systemContent,
+    messages: buildAnthropicMessages(message, history),
+  });
+
+  if (signal) {
+    signal.addEventListener('abort', () => stream.abort(), { once: true });
+  }
+
+  let fullContent = '';
+  for await (const event of stream) {
+    if (signal?.aborted) break;
+    if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+      const text = event.delta.text;
+      fullContent += text;
+      onChunk(text);
+    }
+  }
+
+  if (!fullContent) throw new Error('Пустой стриминг-ответ от Claude');
+  return fullContent;
+}
+
 export async function chatWithAI(message, history = [], context = '', modelOverride) {
+  if (modelOverride && CLAUDE_MODELS.has(modelOverride)) {
+    return chatWithClaudeAI(message, history, context, modelOverride);
+  }
+
   const apiKey = getValidatedApiKey();
   const messages = buildMessages(message, history, context);
 
@@ -153,6 +220,10 @@ export async function chatWithAI(message, history = [], context = '', modelOverr
 }
 
 export async function chatWithAIStream(message, history = [], onChunk, context = '', signal = null, modelOverride) {
+  if (modelOverride && CLAUDE_MODELS.has(modelOverride)) {
+    return chatWithClaudeAIStream(message, history, onChunk, context, signal, modelOverride);
+  }
+
   const apiKey = getValidatedApiKey();
   const messages = buildMessages(message, history, context);
 

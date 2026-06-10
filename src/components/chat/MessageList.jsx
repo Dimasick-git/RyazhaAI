@@ -1,14 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, memo, useMemo } from 'react'
 import { Bot, User, Copy, Check, ThumbsUp, ThumbsDown } from 'lucide-react'
-
-function sanitizeText(text) {
-  return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-}
 
 function formatMsgTime(ts) {
   if (!ts) return ''
@@ -273,6 +264,61 @@ function BounceDots() {
   )
 }
 
+const MessageItem = memo(function MessageItem({ message, reactions, onReact }) {
+  return (
+    <div
+      className={`flex gap-3 group ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+    >
+      {message.role === 'assistant' && (
+        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <Bot size={17} />
+        </div>
+      )}
+
+      <div className="flex flex-col gap-1 max-w-[82%]">
+        <div
+          className={`rounded-2xl px-4 py-3 ${
+            message.role === 'user'
+              ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+              : 'bg-ryaha-hover border border-ryaha-border text-gray-200'
+          }`}
+        >
+          {message.role === 'assistant' ? (
+            <MessageContent text={message.content} />
+          ) : (
+            <p className="whitespace-pre-wrap break-words text-sm">
+              {message.content}
+            </p>
+          )}
+        </div>
+        {message.role === 'assistant' && message.isOffline && (
+          <span className="text-xs text-yellow-400/70 mt-1 block">⚡ Офлайн-режим</span>
+        )}
+        {message.role === 'assistant' && (
+          <div className="flex items-center gap-1 pl-1">
+            <CopyButton text={message.content} />
+            <ReactionButtons msgId={message.id} reactions={reactions} onReact={onReact} />
+            {message.ts && (
+              <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity ml-1">{formatMsgTime(message.ts)}</span>
+            )}
+          </div>
+        )}
+        {message.role === 'user' && message.ts && (
+          <div className="flex justify-end pr-1">
+            <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">{formatMsgTime(message.ts)}</span>
+          </div>
+        )}
+      </div>
+
+      {message.role === 'user' && (
+        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <User size={17} />
+        </div>
+      )}
+    </div>
+  )
+})
+
 function MessageList({ messages, isLoading, streamText, reactions, onReact }) {
   const messagesEndRef = useRef(null)
 
@@ -284,62 +330,16 @@ function MessageList({ messages, isLoading, streamText, reactions, onReact }) {
     scrollToBottom()
   }, [messages, streamText, scrollToBottom])
 
+  const renderedMessages = useMemo(
+    () => messages.map((message) => (
+      <MessageItem key={message.id} message={message} reactions={reactions} onReact={onReact} />
+    )),
+    [messages, reactions, onReact],
+  )
+
   return (
     <div className="h-[440px] overflow-y-auto p-6 space-y-4">
-      {messages.map((message) => (
-        <div
-          key={message.id}
-          className={`flex gap-3 group ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-        >
-          {message.role === 'assistant' && (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Bot size={17} />
-            </div>
-          )}
-
-          <div className="flex flex-col gap-1 max-w-[82%]">
-            <div
-              className={`rounded-2xl px-4 py-3 ${
-                message.role === 'user'
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
-                  : 'bg-ryaha-hover border border-ryaha-border text-gray-200'
-              }`}
-            >
-              {message.role === 'assistant' ? (
-                <MessageContent text={message.content} />
-              ) : (
-                <p
-                  className="whitespace-pre-wrap break-words text-sm"
-                  dangerouslySetInnerHTML={{ __html: sanitizeText(message.content) }}
-                />
-              )}
-            </div>
-            {message.role === 'assistant' && message.isOffline && (
-              <span className="text-xs text-yellow-400/70 mt-1 block">⚡ Офлайн-режим</span>
-            )}
-            {message.role === 'assistant' && (
-              <div className="flex items-center gap-1 pl-1">
-                <CopyButton text={message.content} />
-                <ReactionButtons msgId={message.id} reactions={reactions} onReact={onReact} />
-                {message.ts && (
-                  <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity ml-1">{formatMsgTime(message.ts)}</span>
-                )}
-              </div>
-            )}
-            {message.role === 'user' && message.ts && (
-              <div className="flex justify-end pr-1">
-                <span className="text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">{formatMsgTime(message.ts)}</span>
-              </div>
-            )}
-          </div>
-
-          {message.role === 'user' && (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <User size={17} />
-            </div>
-          )}
-        </div>
-      ))}
+      {renderedMessages}
 
       {isLoading && streamText && (
         <div className="flex gap-3 justify-start">
@@ -369,4 +369,4 @@ function MessageList({ messages, isLoading, streamText, reactions, onReact }) {
   )
 }
 
-export default MessageList
+export default memo(MessageList)

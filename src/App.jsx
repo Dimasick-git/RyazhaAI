@@ -1,46 +1,11 @@
-import { useState, Component } from 'react'
+import { useState } from 'react'
 import Header from './components/Header'
 import ChatInterface from './components/ChatInterface'
 import Features from './components/Features'
 import FAQ from './components/FAQ'
 import Team from './components/Team'
 import Footer from './components/Footer'
-
-class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props)
-    this.state = { hasError: false }
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true }
-  }
-
-  componentDidCatch(error, info) {
-    console.error('App error:', error, info)
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen bg-ryaha-bg flex items-center justify-center">
-          <div className="text-center p-8">
-            <p className="text-3xl mb-4">😔</p>
-            <p className="text-xl text-red-400 mb-2">Что-то пошло не так</p>
-            <p className="text-gray-500 text-sm mb-6">Попробуйте перезагрузить страницу</p>
-            <button
-              onClick={() => this.setState({ hasError: false })}
-              className="px-6 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
-            >
-              Попробовать снова
-            </button>
-          </div>
-        </div>
-      )
-    }
-    return this.props.children
-  }
-}
+import ErrorBoundary from './components/ErrorBoundary'
 
 const TABS = [
   { id: 'chat', label: 'AI Чат' },

@@ -61,14 +61,22 @@ function Features() {
       {/* Special Card for Nintendo Switch */}
       <div className="md:col-span-2 lg:col-span-3 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl border border-ryaha-border p-8 text-center">
         <h3 className="text-3xl font-bold mb-4">
-          <span className="gradient-text">🎮 Скоро на Nintendo Switch!</span>
+          <span className="gradient-text">🎮 Доступно на Nintendo Switch!</span>
         </h3>
         <p className="text-gray-300 text-lg mb-4">
-          Работаем над .nro приложением для доступа к AI RYAHA прямо с твоего взломанного Switch!
+          .nro приложение для запуска RYAZHA AI прямо с взломанного Switch уже доступно в Releases!
         </p>
-        <p className="text-gray-400">
+        <p className="text-gray-400 mb-6">
           Совместимо с Ryazhenka CFW и другими прошивками на базе Atmosphere
         </p>
+        <a
+          href="https://github.com/Dimasick-git/RyazhaAI/releases/latest"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity text-sm"
+        >
+          ⬇ Скачать .nro
+        </a>
       </div>
     </div>
   )
