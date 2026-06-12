@@ -107,12 +107,14 @@ function ShareButton({ messages }) {
 }
 
 const MODEL_OPTIONS = [
-  'gpt-4o-mini',
-  'gpt-4o',
-  'deepseek-v3',
-  'deepseek-r1',
-  'claude-haiku-4-5-20251001',
-  'claude-sonnet-4-6',
+  { id: 'gpt-4o-mini',              label: 'GPT-4o Mini',       group: 'OpenAI' },
+  { id: 'gpt-4o',                   label: 'GPT-4o',            group: 'OpenAI' },
+  { id: 'deepseek-v3',              label: 'DeepSeek V3',       group: 'DeepSeek' },
+  { id: 'deepseek-r1',              label: 'DeepSeek R1',       group: 'DeepSeek' },
+  { id: 'claude-haiku-4-5-20251001',label: 'Claude Haiku 4.5',  group: 'Anthropic' },
+  { id: 'claude-sonnet-4-6',        label: 'Claude Sonnet 4.6', group: 'Anthropic' },
+  { id: 'claude-opus-4-8',          label: 'Claude Opus 4.8',   group: 'Anthropic' },
+  { id: 'claude-fable-5',           label: 'Claude Fable 5',    group: 'Anthropic' },
 ]
 
 function ChatInterface() {
@@ -123,7 +125,7 @@ function ChatInterface() {
   const [showQuickQ, setShowQuickQ] = useState(true)
   const [reactions, setReactions] = useState(loadReactions)
   const [followups, setFollowups] = useState([])
-  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0])
+  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0].id)
 
   const inputRef = useRef(null)
   const messagesRef = useRef(messages)
@@ -165,14 +167,21 @@ function ChatInterface() {
   }
 
   const exportChat = () => {
-    const text = messages
-      .map((m) => `[${m.role === 'user' ? 'Вы' : 'RYAZHA AI'}]\n${m.content}`)
-      .join('\n\n---\n\n')
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+    const date = new Date().toISOString().slice(0, 10)
+    const exportData = {
+      exported_at: new Date().toISOString(),
+      model: selectedModel,
+      messages: messages.map((m) => ({
+        role: m.role,
+        content: m.content,
+        ts: m.ts ? new Date(m.ts).toISOString() : null,
+      })),
+    }
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `ryazha-ai-chat-${new Date().toISOString().slice(0, 10)}.txt`
+    a.download = `ryazha-ai-chat-${date}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -387,8 +396,17 @@ function ChatInterface() {
           aria-labelledby="model-label"
           className="text-xs bg-ryaha-card text-gray-300 border border-ryaha-border rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50 cursor-pointer"
         >
-          {MODEL_OPTIONS.map((m) => (
-            <option key={m} value={m}>{m}</option>
+          {Object.entries(
+            MODEL_OPTIONS.reduce((acc, m) => {
+              (acc[m.group] = acc[m.group] || []).push(m)
+              return acc
+            }, {})
+          ).map(([group, models]) => (
+            <optgroup key={group} label={group}>
+              {models.map((m) => (
+                <option key={m.id} value={m.id}>{m.label}</option>
+              ))}
+            </optgroup>
           ))}
         </select>
         <span className="text-xs text-gray-600 ml-auto">
