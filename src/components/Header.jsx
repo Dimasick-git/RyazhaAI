@@ -7,7 +7,7 @@ function Header() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-3xl">RYAZHA</span>
-            <h1 className="text-xl font-bold gradient-text">RYAZHA AI</h1>
+            <span className="text-xl font-bold gradient-text">RYAZHA AI</span>
           </div>
           
           <nav className="flex items-center gap-4">
