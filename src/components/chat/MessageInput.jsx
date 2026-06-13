@@ -26,8 +26,8 @@ function VoiceButton({ onResult, disabled }) {
     rec.maxAlternatives = 1
 
     rec.onresult = (e) => {
-      const transcript = e.results[0][0].transcript
-      onResult(transcript)
+      const transcript = e.results[0][0].transcript.trim()
+      if (transcript) onResult(transcript)
       setIsListening(false)
     }
     rec.onerror = () => setIsListening(false)

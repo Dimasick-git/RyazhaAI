@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react'
 import { checkAPIStatus } from '../../services/api'
 
+const POLL_INTERVAL = 60_000
+
 function ProviderStatus() {
   const [status, setStatus] = useState(null)
 
   useEffect(() => {
-    checkAPIStatus().then(setStatus)
+    let cancelled = false
+    const check = () => checkAPIStatus().then((s) => { if (!cancelled) setStatus(s) })
+    check()
+    const id = setInterval(check, POLL_INTERVAL)
+    return () => { cancelled = true; clearInterval(id) }
   }, [])
 
   if (!status) return null
