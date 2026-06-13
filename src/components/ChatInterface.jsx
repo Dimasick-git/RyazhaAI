@@ -20,13 +20,17 @@ function genMsgId() {
 
 const QUICK_QUESTIONS = [
   '🎮 Как взломать Switch?',
-  '📦 Что такое Ryazhenka?',
+  '📦 Что такое Ryazhenka CFW?',
   '💾 Как установить sigpatches?',
   '🗂️ Что такое emuMMC?',
-  '🔧 Как обновить CFW?',
-  '🎵 Как установить темы?',
-  '🎛️ Что такое Tesla overlay?',
-  '🛡️ Как не получить бан?',
+  '🔧 Как обновить Atmosphere?',
+  '🎵 Как настроить RyazhaTune?',
+  '🎛️ Как открыть Tesla overlay?',
+  '🛡️ Как избежать бана Nintendo?',
+  '⚡ Что такое RCU и как его настроить?',
+  '📊 Как установить Ryazha-Status-Monitor?',
+  '🕹️ Как подключить PS5 контроллер?',
+  '🔒 Как залочить FPS в игре?',
 ]
 
 const FOLLOWUP_RULES = [
@@ -60,6 +64,15 @@ const FOLLOWUP_RULES = [
   { keywords: ['ppsspp', 'psp', 'эмулятор', 'emulator'], questions: ['Как запустить PSP игры на Switch?', 'Какие форматы ROM поддерживает PPSSPP?', 'Как настроить управление в PPSSPP?'] },
   { keywords: ['microsd', 'карта памяти', 'sd card', 'fat32', 'exfat'], questions: ['Как форматировать SD карту?', 'Какой объём SD карты нужен?', 'Какие SD карты подходят для Switch?'] },
   { keywords: ['ovlsysmodules', 'sysmodule', 'сисмодул'], questions: ['Как включить/выключить sysmodule?', 'Какие sysmodules нужны?', 'Почему sysmodule не запускается?'] },
+  { keywords: ['switchwave', 'switch wave', 'аудио плагин'], questions: ['Как установить SwitchWave?', 'Какие аудио форматы поддерживает SwitchWave?', 'Как совместить SwitchWave с RyazhaTune?'] },
+  { keywords: ['rcu', 'ryazha clock', 'частота', 'разгон', 'vvr'], questions: ['Как настроить профили RCU по играм?', 'Что такое FPS-aware VRR ladder?', 'В чём отличие RCU от sys-clk?'] },
+  { keywords: ['ryazha-status', 'status monitor', 'saltynx', 'температур', 'нагрев'], questions: ['Как установить Ryazha-Status-Monitor?', 'Зачем нужен SaltyNX для мониторинга?', 'Как переключить режим отображения (Full/Mini/Micro)?'] },
+  { keywords: ['libryazhahand', 'ultrahand', 'tesla lib', 'оверлей библ'], questions: ['В чём отличие libryazhahand от libtesla?', 'Как разработать свой Tesla overlay?', 'Что такое namespace /config/ryazhahand/?'] },
+  { keywords: ['nx-ovlloader', 'ovlloader', 'загрузчик оверлей'], questions: ['Как обновить nx-ovlloader?', 'Почему Tesla overlay не открывается?', 'Какие версии nx-ovlloader совместимы?'] },
+  { keywords: ['atmosphere-ryz', 'atmosphere ryz', 'ryazha atmosphere', 'preconf'], questions: ['Чем Atmosphere-RYZ отличается от оригинала?', 'Какие настройки pre-configured в Atmosphere-RYZ?', 'Безопасно ли обновлять Atmosphere-RYZ?'] },
+  { keywords: ['hekate', 'загрузчик', 'bootloader', 'nyx'], questions: ['Как настроить Hekate bootloader?', 'Как создать emuMMC через Hekate?', 'Что такое Hekate Nyx?'] },
+  { keywords: ['ryazha ai', 'ryazhaai', 'ai помощник', '.nro', 'homebrew ai'], questions: ['Как запустить RyazhaAI на Switch?', 'Какие AI модели доступны в RyazhaAI?', 'Как работает оффлайн-режим RyazhaAI?'] },
+  { keywords: ['aio', 'aio-switch-updater', 'обновлятор', 'автообновлен'], questions: ['Что обновляет AIO-Switch-Updater?', 'Безопасно ли использовать AIO для обновления?', 'Как добавить свой источник в AIO?'] },
 ]
 
 function getFollowupSuggestions(text) {
@@ -129,14 +142,17 @@ function ShareButton({ messages }) {
 }
 
 const MODEL_OPTIONS = [
-  { id: 'gpt-4o-mini',              label: 'GPT-4o Mini',       group: 'OpenAI' },
-  { id: 'gpt-4o',                   label: 'GPT-4o',            group: 'OpenAI' },
-  { id: 'deepseek-v3',              label: 'DeepSeek V3',       group: 'DeepSeek' },
-  { id: 'deepseek-r1',              label: 'DeepSeek R1',       group: 'DeepSeek' },
-  { id: 'claude-haiku-4-5-20251001',label: 'Claude Haiku 4.5',  group: 'Anthropic' },
-  { id: 'claude-sonnet-4-6',        label: 'Claude Sonnet 4.6', group: 'Anthropic' },
-  { id: 'claude-opus-4-8',          label: 'Claude Opus 4.8',   group: 'Anthropic' },
-  { id: 'claude-fable-5',           label: 'Claude Fable 5',    group: 'Anthropic' },
+  { id: 'gpt-4o-mini',              label: 'GPT-4o Mini',         group: 'OpenAI' },
+  { id: 'gpt-4o',                   label: 'GPT-4o',              group: 'OpenAI' },
+  { id: 'o4-mini',                  label: 'o4-mini (reasoning)', group: 'OpenAI' },
+  { id: 'deepseek-v3',              label: 'DeepSeek V3',         group: 'DeepSeek' },
+  { id: 'deepseek-r1',              label: 'DeepSeek R1',         group: 'DeepSeek' },
+  { id: 'gemini-2.0-flash',         label: 'Gemini 2.0 Flash',    group: 'Google' },
+  { id: 'gemini-2.5-pro',           label: 'Gemini 2.5 Pro',      group: 'Google' },
+  { id: 'claude-haiku-4-5-20251001',label: 'Claude Haiku 4.5',    group: 'Anthropic' },
+  { id: 'claude-sonnet-4-6',        label: 'Claude Sonnet 4.6',   group: 'Anthropic' },
+  { id: 'claude-opus-4-8',          label: 'Claude Opus 4.8',     group: 'Anthropic' },
+  { id: 'claude-fable-5',           label: 'Claude Fable 5',      group: 'Anthropic' },
 ]
 
 function ChatInterface() {
