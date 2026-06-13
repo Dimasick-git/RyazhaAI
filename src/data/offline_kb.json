@@ -1,126 +1,430 @@
 [
   {
-    "keywords": ["привет", "hello", "hi", "здравствуй", "начало"],
+    "keywords": [
+      "привет",
+      "hello",
+      "hi",
+      "здравствуй",
+      "начало"
+    ],
     "answer": "Привет! Я RYAZHA AI — ассистент по Nintendo Switch CFW от команды Ryazhenka. Могу помочь с Atmosphere, Tesla overlay, RCU, установкой игр, emuNAND и другими Switch-темами. Что вас интересует?"
   },
   {
-    "keywords": ["ryazhenka", "ряженка", "что это", "что такое"],
+    "keywords": [
+      "ryazhenka",
+      "ряженка",
+      "что это",
+      "что такое"
+    ],
     "answer": "Ryazhenka — команда разработчиков Nintendo Switch CFW инструментов. Основные проекты: RCU (управление частотами CPU/GPU/RAM), Ryazhahand-Overlay (Tesla overlay с LED и аудио), AIO-Switch-Updater, ovlSysmodules, FPSLocker. GitHub: github.com/Dimasick-git"
   },
   {
-    "keywords": ["rcu", "частот", "клок", "clock", "cpu", "gpu", "ram", "разгон"],
+    "keywords": [
+      "rcu",
+      "частот",
+      "клок",
+      "clock",
+      "cpu",
+      "gpu",
+      "ram",
+      "разгон"
+    ],
     "answer": "RCU (Ryazha Clock Utility) — sysmodule + Tesla overlay для управления частотами CPU/GPU/RAM на Nintendo Switch. Поддерживает профили по приложениям и FPS-aware VRR. Устанавливается в /atmosphere/contents/. Управление через Tesla Menu (L+DDOWN+RS)."
   },
   {
-    "keywords": ["tesla", "overlay", "меню", "ryazhahand", "ultrahand"],
+    "keywords": [
+      "tesla",
+      "overlay",
+      "меню",
+      "ryazhahand",
+      "ultrahand"
+    ],
     "answer": "Tesla Menu — система overlay для Nintendo Switch (открывается L+DDOWN+RS). Ryazhahand-Overlay — форк Ultrahand с поддержкой LED, аудио-паков, PNG-обоев. Файлы хранятся в /config/ryazhahand/. Требует nx-ovlloader."
   },
   {
-    "keywords": ["emunand", "emummc", "эмунанд", "эмумс", "нанд"],
+    "keywords": [
+      "emunand",
+      "emummc",
+      "эмунанд",
+      "эмумс",
+      "нанд"
+    ],
     "answer": "emuNAND (emummc) — эмулированная копия NAND Switch на microSD. Безопасна для использования CFW: если Nintendo заблокирует аккаунт, sysNAND (оригинальная память) останется чистой. Создаётся через Hekate → emuMMC → Create (SD File). Рекомендуется всегда использовать emuNAND для CFW."
   },
   {
-    "keywords": ["atmosphere", "атмосфера", "cfw", "прошивк", "кастом"],
+    "keywords": [
+      "atmosphere",
+      "атмосфера",
+      "cfw",
+      "прошивк",
+      "кастом"
+    ],
     "answer": "Atmosphere — основная кастомная прошивка для Nintendo Switch от Team Neptune. Устанавливается на microSD поверх официальной прошивки. Обновляйте через AIO-Switch-Updater или вручную с GitHub releases. Всегда обновляйте sigpatches вместе с Atmosphere."
   },
   {
-    "keywords": ["sigpatch", "сигпатч", "подпись", "signature"],
+    "keywords": [
+      "sigpatch",
+      "сигпатч",
+      "подпись",
+      "signature"
+    ],
     "answer": "Sigpatches — патчи подписи, позволяющие Atmosphere запускать неподписанный homebrew-код и установленные игры. Обновляйте через AIO-Switch-Updater (рекомендуется — устанавливает автоматически) или скачайте вручную с официального источника sigmapatches. Обновляйте при каждом обновлении Atmosphere."
   },
   {
-    "keywords": ["hekate", "хекате", "boot", "загрузч"],
+    "keywords": [
+      "hekate",
+      "хекате",
+      "boot",
+      "загрузч"
+    ],
     "answer": "Hekate — bootloader для Nintendo Switch. Запускается через Fusée (USB-A to USB-C с RCM jig) или автозапуском. Используется для создания emuNAND, бэкапов NAND, разметки microSD (Hekate → Tools → Partition SD). Файл hekate_ctcaer_X.X.X.bin размещается в корне microSD."
   },
   {
-    "keywords": ["ban", "бан", "онлайн", "nintendo", "нинтендо"],
+    "keywords": [
+      "ban",
+      "бан",
+      "онлайн",
+      "nintendo",
+      "нинтендо"
+    ],
     "answer": "Для защиты от бана: используйте emuNAND для CFW, sysNAND держите чистым и не ходите онлайн с CFW. Включите 90DNS (DNS-блокировка серверов Nintendo) в emuNAND. Не используйте пиратские игры онлайн. Sys-botbase и читы в онлайне — гарантированный бан."
   },
   {
-    "keywords": ["tinfoil", "goldleaf", "awoo", "установ", "nsp", "nsz", "xci"],
+    "keywords": [
+      "tinfoil",
+      "goldleaf",
+      "awoo",
+      "установ",
+      "nsp",
+      "nsz",
+      "xci"
+    ],
     "answer": "Установщики игр: Tinfoil (мощный, поддерживает NSP/NSZ/XCI, прямые URL, Filebrother), Goldleaf (простой, через Quark на ПК), DBI (универсальный менеджер + USB-установка). Форматы: NSP — установка в NAND/SD, XCI — образ картриджа, NSZ — сжатый NSP."
   },
   {
-    "keywords": ["fps", "фпс", "fpslocker", "блокировк"],
+    "keywords": [
+      "fps",
+      "фпс",
+      "fpslocker",
+      "блокировк"
+    ],
     "answer": "FPSLocker — overlay для ограничения FPS в играх Switch. Работает через Tesla Menu. Поддерживает патчи для снятия ограничений движка (custom patches). Полезен для равномерного геймплея в играх с нестабильным FPS."
   },
   {
-    "keywords": ["aio", "updater", "обновл", "update"],
+    "keywords": [
+      "aio",
+      "updater",
+      "обновл",
+      "update"
+    ],
     "answer": "AIO-Switch-Updater — homebrew для автоматического обновления CFW компонентов: Atmosphere, Hekate, sigpatches, overlay's и других. Запускается из hbmenu (Album → R). Умеет скачивать с GitHub releases напрямую на Switch."
   },
   {
-    "keywords": ["ryazhatune", "тюн", "tune", "аудио", "audio", "звук", "музык", "плейлист", "mp3", "flac"],
+    "keywords": [
+      "ryazhatune",
+      "тюн",
+      "tune",
+      "аудио",
+      "audio",
+      "звук",
+      "музык",
+      "плейлист",
+      "mp3",
+      "flac"
+    ],
     "answer": "RyazhaTune — фоновый музыкальный плеер для Nintendo Switch (форк sys-tune). Воспроизводит MP3, FLAC, WAV во время игры. Управление через Tesla overlay (L+DDOWN+RS). Поддерживает постоянные плейлисты, автозапуск, режимы Whitelist/Blacklist по Title ID и per-title Focus-политики. Устанавливается в /atmosphere/contents/."
   },
   {
-    "keywords": ["status monitor", "мониторинг", "ryazha-status", "температура", "нагрев", "hardware", "железо"],
+    "keywords": [
+      "status monitor",
+      "мониторинг",
+      "ryazha-status",
+      "температура",
+      "нагрев",
+      "hardware",
+      "железо"
+    ],
     "answer": "Ryazha-Status-Monitor — Tesla overlay для мониторинга железа Switch в реальном времени. Показывает нагрузку на каждое ядро CPU, GPU, RAM, температуру SoC/PCB/корпуса, скорость вентилятора, заряд батареи и FPS. Режимы: Full/Mini/Micro. Зависит от SaltyNX для FPS-данных."
   },
   {
-    "keywords": ["mission control", "контроллер", "геймпад", "bluetooth", "ps4", "ps5", "xbox", "joycon"],
+    "keywords": [
+      "mission control",
+      "контроллер",
+      "геймпад",
+      "bluetooth",
+      "ps4",
+      "ps5",
+      "xbox",
+      "joycon"
+    ],
     "answer": "Mission-Control — sysmodule для подключения сторонних Bluetooth-контроллеров к Nintendo Switch (PS4, PS5, Xbox, Pro Controller и другие). Форк команды Ryazhenka с доработками. Устанавливается в /atmosphere/contents/. Не требует патчей прошивки."
   },
   {
-    "keywords": ["edizon", "save", "чит", "cheat", "сейв", "сохранен"],
+    "keywords": [
+      "edizon",
+      "save",
+      "чит",
+      "cheat",
+      "сейв",
+      "сохранен"
+    ],
     "answer": "EdiZon — редактор сохранений и читкод-менеджер для Nintendo Switch. Форк Ryazhenka с улучшениями. Позволяет редактировать сохранения игр, применять читы (CHEATS/*.txt), делать бэкап сохранений. Запускается из Tesla Menu или hbmenu."
   },
   {
-    "keywords": ["fizeau", "цвет", "color", "гамма", "gamma", "яркость", "экран"],
+    "keywords": [
+      "fizeau",
+      "цвет",
+      "color",
+      "гамма",
+      "gamma",
+      "яркость",
+      "экран"
+    ],
     "answer": "Fizeau — Tesla overlay для коррекции цветопередачи экрана Nintendo Switch. Форк Ryazhenka. Позволяет настраивать гамму, цветовую температуру и применять ночной режим. Управление через Tesla Menu. Настройки сохраняются между перезагрузками."
   },
   {
-    "keywords": ["libryazhahand", "libtesla", "libultrahand", "tesla library", "overlay lib"],
+    "keywords": [
+      "libryazhahand",
+      "libtesla",
+      "libultrahand",
+      "tesla library",
+      "overlay lib"
+    ],
     "answer": "libryazhahand — библиотека для разработки Tesla overlay под Nintendo Switch. Форк libultrahand+libtesla от команды Ryazhenka. Использует namespace /config/ryazhahand/. Основа для Ryazhahand-Overlay, RCU, ovlSysmodules и других overlay-проектов Ryazhenka."
   },
   {
-    "keywords": ["ovlsysmodules", "sysmodule", "сисмодул", "фоновый сервис", "background"],
+    "keywords": [
+      "ovlsysmodules",
+      "sysmodule",
+      "сисмодул",
+      "фоновый сервис",
+      "background"
+    ],
     "answer": "ovlSysmodules — Tesla overlay для управления sysmodule's на Nintendo Switch. Форк Ryazhenka. Позволяет включать/выключать фоновые сервисы (RCU, Mission-Control, SaltyNX и др.) через Tesla Menu без перезагрузки. Управление через /config/ryazhahand/."
   },
   {
-    "keywords": ["rcm", "recovery", "jig", "fusee", "fusée", "инжект", "inject", "payload"],
+    "keywords": [
+      "rcm",
+      "recovery",
+      "jig",
+      "fusee",
+      "fusée",
+      "инжект",
+      "inject",
+      "payload"
+    ],
     "answer": "RCM (Recovery Mode) — режим восстановления Nintendo Switch для запуска кастомных payload'ов. Активируется замыканием контактов в правом joycon-рельсе (RCM jig) и зажатием Vol+ + Power. Затем подключите USB-C к ПК и используйте TegraRcmGUI или Web Fusée (webrcm.app) для загрузки Hekate."
   },
   {
-    "keywords": ["nx-ovlloader", "ovlloader", "tesla loader", "загрузчик оверлея"],
+    "keywords": [
+      "nx-ovlloader",
+      "ovlloader",
+      "tesla loader",
+      "загрузчик оверлея"
+    ],
     "answer": "nx-ovlloader — sysmodule-загрузчик Tesla overlay меню для Nintendo Switch. Ryazha-edition форк ppkantorski/nx-ovlloader. Обрабатывает нажатие L+DDOWN+RS для открытия overlay. Устанавливается в /atmosphere/contents/. Требуется для всех Tesla overlay-приложений."
   },
   {
-    "keywords": ["lockpick", "ключи", "keys", "prod.keys", "title.keys", "дамп ключей"],
+    "keywords": [
+      "lockpick",
+      "ключи",
+      "keys",
+      "prod.keys",
+      "title.keys",
+      "дамп ключей"
+    ],
     "answer": "Lockpick_RCM — homebrew для дампа ключей шифрования Nintendo Switch (prod.keys, title.keys). Запускается как payload через Hekate или как homebrew. Ключи нужны для конвертации XCI/NSZ, работы эмуляторов (Yuzu/Ryujinx). Храните ключи в безопасности — они уникальны для вашей консоли."
   },
   {
-    "keywords": ["90dns", "dns", "блокировка", "nintendoservers", " nintendoдns"],
+    "keywords": [
+      "90dns",
+      "dns",
+      "блокировка",
+      "nintendoservers",
+      " nintendoдns"
+    ],
     "answer": "90DNS — DNS-сервер, блокирующий соединения с серверами Nintendo для защиты от бана в emuNAND. Настройка: WiFi → Изменить DNS → Основной: 207.246.121.77, Дополнительный: 163.172.141.219. Проверить работу: test.90dns.org. Включайте только в emuNAND, в sysNAND лучше не использовать."
   },
   {
-    "keywords": ["microsd", "карта памяти", "sd card", "форматировать", "fat32", "exfat"],
+    "keywords": [
+      "microsd",
+      "карта памяти",
+      "sd card",
+      "форматировать",
+      "fat32",
+      "exfat"
+    ],
     "answer": "Для Nintendo Switch рекомендуется microSD от Samsung или SanDisk (не Kingston). Формат: FAT32 или exFAT (exFAT быстрее, но FAT32 надёжнее). Форматировать через Hekate: Tools → Partition SD. Минимум 64GB для emuNAND, рекомендую 256GB+. SDXC карты работают с обоими форматами."
   },
   {
-    "keywords": ["ppsspp", "psp", "эмулятор", "emulator", "playstation portable"],
+    "keywords": [
+      "ppsspp",
+      "psp",
+      "эмулятор",
+      "emulator",
+      "playstation portable"
+    ],
     "answer": "PPSSPP для Nintendo Switch — перекомпилированный Dimasick-git под HorizonOS 21+. Запускается как homebrew NRO из hbmenu. Поддерживает большинство PSP игр в ISO/CSO форматах. Скачать: github.com/Dimasick-git/PPSSPP. Игры размещайте в /switch/ppsspp/PSP/GAME/."
   },
   {
-    "keywords": ["ryazha-cheker", "cheker", "checker", "мониторинг репо", "мониторинг репозитор", "github actions monitor", "уведомлен", "нотификац"],
+    "keywords": [
+      "ryazha-cheker",
+      "cheker",
+      "checker",
+      "мониторинг репо",
+      "мониторинг репозитор",
+      "github actions monitor",
+      "уведомлен",
+      "нотификац"
+    ],
     "answer": "Ryazha-cheker — GitHub Actions монитор репозиториев от команды Ryazhenka. Отслеживает коммиты, релизы, PR и workflow-runs и отправляет уведомления в Telegram. Поддерживает --dry-run, --summary, --weekly, --trending режимы, фильтрацию по дате (--since). Настраивается через переменные окружения G_TOKEN, G_USERNAME, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID. GitHub: github.com/Dimasick-git/Ryazha-cheker"
   },
   {
-    "keywords": ["ryazhenka bot", "ryazhenka_bot", "телеграм бот", "бот switch", "telegram bot", "гайд бот"],
+    "keywords": [
+      "ryazhenka bot",
+      "ryazhenka_bot",
+      "телеграм бот",
+      "бот switch",
+      "telegram bot",
+      "гайд бот"
+    ],
     "answer": "Ryazhenka_Bot — Telegram бот от команды Ryazhenka для Nintendo Switch CFW. Команды: /guide <тема> (поиск гайдов с BM25+fuzzy), /aiguide (AI-поиск), /ask (вопрос AI по Switch), /releases (последние релизы Ryazhenka), /quiz (тест знаний), /digest, /compare, /fav. Поиск по базе гайдов с AI-ответом если гайд не найден. Telegram: @Ryazhenkacfw"
   },
   {
-    "keywords": ["ryazha ai", "ryazhaai", "ai ассистент", "ai помощник", "ии помощник", "этот бот", "кто ты"],
+    "keywords": [
+      "ryazha ai",
+      "ryazhaai",
+      "ai ассистент",
+      "ai помощник",
+      "ии помощник",
+      "этот бот",
+      "кто ты"
+    ],
     "answer": "RYAZHA AI — умный AI-ассистент по Nintendo Switch CFW от команды Ryazhenka. Отвечает на вопросы об Atmosphere, emuNAND, Tesla overlay, RCU, установке игр, homebrew и других Switch-темах. Поддерживает 12+ AI-провайдеров (GPT-4o, DeepSeek и др.) с автофолбэком на оффлайн-режим. GitHub: github.com/Dimasick-git/RyazhaAI"
   },
   {
-    "keywords": ["atmosphere-ryz", "atmosphere ryz", "ryazhenka atmosphere", "форк atmosphere", "кастом atmosphere"],
+    "keywords": [
+      "atmosphere-ryz",
+      "atmosphere ryz",
+      "ryazhenka atmosphere",
+      "форк atmosphere",
+      "кастом atmosphere"
+    ],
     "answer": "Atmosphere-RYZ — кастомный форк Atmosphere CFW от команды Ryazhenka с дополнительными патчами и настройками под экосистему Ryazhenka. Включает pre-configured файлы для работы с Ryazhahand, RCU и другими Ryazhenka-модулями. Обновляется синхронно с upstream Atmosphere. GitHub: github.com/Dimasick-git/Atmosphere-RYZ"
   },
   {
-    "keywords": ["switchwave", "switch wave", "waves", "волны"],
+    "keywords": [
+      "switchwave",
+      "switch wave",
+      "waves",
+      "волны"
+    ],
     "answer": "SwitchWave — утилита от команды Ryazhenka для Nintendo Switch. Форк с доработками под экосистему Ryazhenka. Устанавливается через /atmosphere/contents/. GitHub: github.com/Dimasick-git/SwitchWave"
   },
   {
-    "keywords": ["reversenx", "reverse nx", "dock режим", "handheld режим", "режим консоли"],
+    "keywords": [
+      "reversenx",
+      "reverse nx",
+      "dock режим",
+      "handheld режим",
+      "режим консоли"
+    ],
     "answer": "ReverseNX-RT — sysmodule для принудительного переключения Nintendo Switch в Docked или Handheld режим независимо от физического подключения. Форк Ryazhenka. Позволяет играть в Docked-режиме (более высокие частоты) без TV. Управление через Tesla overlay или конфиг."
+  },
+  {
+    "keywords": [
+      "backup",
+      "бекап",
+      "nand backup",
+      "бэкап",
+      "резервная копия"
+    ],
+    "answer": "NAND backup — создание резервной копии встроенной памяти Switch. Делается через Hekate → Tools → Backup eMMC. Занимает ~30 минут, нужно 32+ ГБ на SD. Обязателен перед установкой CFW — позволяет восстановить консоль если что-то пойдёт не так."
+  },
+  {
+    "keywords": [
+      "dbi",
+      "файловый менеджер",
+      "file manager",
+      "менеджер файлов"
+    ],
+    "answer": "DBI (DBI Installer) — мощный файловый менеджер и установщик для Nintendo Switch CFW. Поддерживает установку NSP/XCI/NSZ игр, управление сохранениями, FTP, MTP-режим. Запускается как .nro из Homebrew Menu. Один из лучших инструментов для управления Switch."
+  },
+  {
+    "keywords": [
+      "picofly",
+      "модчип",
+      "modchip",
+      "chip"
+    ],
+    "answer": "Picofly — популярный modchip на базе RP2040 для Nintendo Switch (Erista и Mariko). Позволяет запускать CFW без физического jig-джига, работает на любом Switch. Установка требует пайки и технических навыков. После установки — автоматический запуск Hekate при включении."
+  },
+  {
+    "keywords": [
+      "saltynx",
+      "salty",
+      "перехват",
+      "syscall"
+    ],
+    "answer": "SaltyNX — sysmodule для перехвата системных вызовов Nintendo Switch. Необходим для работы Ryazha-Status-Monitor (мониторинг нагрузки ядер CPU/GPU, FPS). Устанавливается в /atmosphere/contents/. Совместим с Atmosphere 1.x+."
+  },
+  {
+    "keywords": [
+      "sys-botbase",
+      "botbase",
+      "автоматизация",
+      "automation",
+      "remote"
+    ],
+    "answer": "sys-botbase — sysmodule для удалённого управления Nintendo Switch. Открывает TCP-сокет для выполнения команд (чтение/запись памяти, нажатие кнопок). Используется для автоматизации игровых задач через Python-боты (Switch-Fightstick, SysBotRemote и др.)."
+  },
+  {
+    "keywords": [
+      "ldn_mitm",
+      "lan play",
+      "ldn",
+      "локальная сеть",
+      "online emulation"
+    ],
+    "answer": "ldn_mitm — sysmodule, который перенаправляет локальное соединение Switch через интернет. Позволяет играть в 'локальные' мультиплеер-игры с друзьями онлайн без Nintendo Switch Online. Работает через LAN Play сервера (lanplayio.com и другие)."
+  },
+  {
+    "keywords": [
+      "тема",
+      "theme",
+      "nxthemes",
+      "nx themes",
+      "темы"
+    ],
+    "answer": "Темы для Nintendo Switch устанавливаются через NXThemes Installer (.nxtheme файлы). Темы меняют иконки, фон меню, шрифты. Скачать можно на ThemeZer.net. Для установки нужен CFW (Atmosphere). Создать свою тему можно через LayoutEditor."
+  },
+  {
+    "keywords": [
+      "ryazhahand",
+      "ryazha overlay",
+      "overlay меню"
+    ],
+    "answer": "Ryazhahand-Overlay — Tesla overlay меню для Nintendo Switch, форк Ultrahand-Overlay от команды Ryazhenka. Особенности: поддержка LED-подсветки Joy-Con, аудио-паки, PNG-обои, namespace /config/ryazhahand/. Открывается через L+DDOWN+RS. Конфиги в /config/ryazhahand/."
+  },
+  {
+    "keywords": [
+      "sysnand",
+      "sysmmc",
+      "sys nand",
+      "оригинальный nand",
+      "системный nand"
+    ],
+    "answer": "sysNAND (системная NAND) — встроенная память Switch с оригинальной прошивкой. Использование CFW на sysNAND несёт риск бана Nintendo, если есть онлайн. Рекомендуется использовать emuNAND для CFW, а sysNAND держать чистым для официального онлайна."
+  },
+  {
+    "keywords": [
+      "установить игру",
+      "nsp",
+      "xci",
+      "nsz",
+      "install game",
+      "игры"
+    ],
+    "answer": "Установка игр на Switch CFW: NSP/XCI/NSZ файлы устанавливаются через DBI, Tinfoil или Awoo Installer. DBI поддерживает MTP (перетаскивание с PC), USB, FTP. Нужны актуальные sigpatches. Форматы: NSP — eShop игры, XCI — картриджи, NSZ — сжатый NSP."
   }
 ]
