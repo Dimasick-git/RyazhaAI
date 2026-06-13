@@ -1,5 +1,8 @@
 # Dockerfile для RyazhaAI
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
+
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 
 # Устанавливаем рабочую директорию
 WORKDIR /app

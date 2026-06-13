@@ -216,15 +216,16 @@ function ChatInterface() {
     }
   }, [selectedModel])
 
-  const regenerateLast = async () => {
+  const regenerateLast = useCallback(async () => {
     if (isLoading) return
-    const lastUserIdx = [...messages].reverse().findIndex((m) => m.role === 'user')
+    const msgs = messagesRef.current
+    const lastUserIdx = [...msgs].reverse().findIndex((m) => m.role === 'user')
     if (lastUserIdx === -1) return
-    const idx = messages.length - 1 - lastUserIdx
-    const userMessage = messages[idx].content
-    const history = messages.slice(0, idx).slice(-MAX_HISTORY_FOR_AI)
+    const idx = msgs.length - 1 - lastUserIdx
+    const userMessage = msgs[idx].content
+    const history = msgs.slice(0, idx).slice(-MAX_HISTORY_FOR_AI)
 
-    setMessages(messages.slice(0, idx + 1))
+    setMessages((prev) => prev.slice(0, idx + 1))
     setIsLoading(true)
     setStreamText('')
     setFollowups([])
@@ -242,7 +243,7 @@ function ChatInterface() {
       setIsLoading(false)
       setStreamText('')
     }
-  }
+  }, [isLoading, callAI])
 
   const submitMessage = useCallback(async (text) => {
     const userMessage = text.trim()
