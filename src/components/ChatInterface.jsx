@@ -25,6 +25,8 @@ const QUICK_QUESTIONS = [
   '🗂️ Что такое emuMMC?',
   '🔧 Как обновить CFW?',
   '🎵 Как установить темы?',
+  '🎛️ Что такое Tesla overlay?',
+  '🛡️ Как не получить бан?',
 ]
 
 const FOLLOWUP_RULES = [
@@ -38,6 +40,26 @@ const FOLLOWUP_RULES = [
   { keywords: ['modchip', 'моддчип', 'picofly'], questions: ['Как установить modchip?', 'Что такое Picofly?', 'Чем отличается modchip от RCM?'] },
   { keywords: ['banning', 'ban', 'бан'], questions: ['Как избежать бана?', 'Что такое 90DNS?', 'Безопасно ли играть онлайн?'] },
   { keywords: ['ryazhenka', 'ряженка'], questions: ['Что нового в Ryazhenka?', 'Как установить Ryazhenka?', 'Что входит в Ryazhenka?'] },
+  { keywords: ['tesla', 'overlay', 'ryazhahand', 'оверлей'], questions: ['Как открыть Tesla меню?', 'Как установить Ryazhahand?', 'Какие есть overlay плагины?'] },
+  { keywords: ['rcu', 'частот', 'clock', 'клок'], questions: ['Как разогнать Switch?', 'Что такое FPS-aware VRR?', 'Как настроить частоты по играм?'] },
+  { keywords: ['fpslocker', 'fps', 'фпс', 'блокировк'], questions: ['Как заблокировать FPS в игре?', 'Какие игры поддерживает FPSLocker?', 'Что такое FPS VRR ladder?'] },
+  { keywords: ['ryazhatune', 'tune', 'музык', 'плеер', 'audio'], questions: ['Как добавить музыку в RyazhaTune?', 'Какие форматы поддерживает RyazhaTune?', 'Как создать плейлист?'] },
+  { keywords: ['status monitor', 'мониторинг', 'температур', 'нагрев', 'hardware'], questions: ['Как установить Status Monitor?', 'Что нужен SaltyNX?', 'Какие режимы отображения?'] },
+  { keywords: ['dbi', 'файловый менеджер', 'file manager'], questions: ['Как установить игры через DBI?', 'Как подключить Switch по USB?', 'Чем DBI лучше Tinfoil?'] },
+  { keywords: ['tinfoil', 'goldleaf', 'установ', 'nsp', 'xci', 'nsz'], questions: ['Как установить NSP файл?', 'Чем отличается NSP от XCI?', 'Как использовать Filebrowser в Tinfoil?'] },
+  { keywords: ['backup', 'бекап', 'nand backup', 'резервн'], questions: ['Как сделать NAND backup?', 'Зачем нужен бекап?', 'Как восстановить из бекапа?'] },
+  { keywords: ['lockpick', 'ключи', 'keys', 'prod.keys'], questions: ['Как сдампить ключи Switch?', 'Для чего нужны prod.keys?', 'Где хранить ключи?'] },
+  { keywords: ['mission control', 'контроллер', 'геймпад', 'bluetooth', 'ps4', 'ps5'], questions: ['Как подключить PS4/PS5 контроллер?', 'Какие контроллеры поддерживаются?', 'Как настроить Mission-Control?'] },
+  { keywords: ['edizon', 'чит', 'cheat', 'сейв', 'сохранен'], questions: ['Как использовать читкоды?', 'Как редактировать сохранения?', 'Где найти читкоды для игр?'] },
+  { keywords: ['fizeau', 'цвет', 'color', 'гамма', 'яркость'], questions: ['Как настроить цвет экрана?', 'Что такое коррекция гаммы?', 'Как убрать синий свет?'] },
+  { keywords: ['reversenx', 'dock режим', 'handheld'], questions: ['Как принудительно включить Dock режим?', 'Как повысить производительность?', 'Что такое ReverseNX-RT?'] },
+  { keywords: ['saltynx', 'salty', 'syscall'], questions: ['Зачем нужен SaltyNX?', 'Как установить SaltyNX?', 'С какими плагинами работает SaltyNX?'] },
+  { keywords: ['aio', 'updater', 'обновлят'], questions: ['Как обновить CFW через AIO?', 'Какие компоненты обновляет AIO?', 'Безопасно ли обновлять через AIO?'] },
+  { keywords: ['picofly', 'модчип', 'modchip', 'чип'], questions: ['Как установить Picofly?', 'Какие Switch поддерживает Picofly?', 'Picofly vs RCM — что лучше?'] },
+  { keywords: ['90dns', 'dns', 'nintendoservers'], questions: ['Как настроить 90DNS?', 'Что такое DNS-блокировка?', 'Как проверить работу 90DNS?'] },
+  { keywords: ['ppsspp', 'psp', 'эмулятор', 'emulator'], questions: ['Как запустить PSP игры на Switch?', 'Какие форматы ROM поддерживает PPSSPP?', 'Как настроить управление в PPSSPP?'] },
+  { keywords: ['microsd', 'карта памяти', 'sd card', 'fat32', 'exfat'], questions: ['Как форматировать SD карту?', 'Какой объём SD карты нужен?', 'Какие SD карты подходят для Switch?'] },
+  { keywords: ['ovlsysmodules', 'sysmodule', 'сисмодул'], questions: ['Как включить/выключить sysmodule?', 'Какие sysmodules нужны?', 'Почему sysmodule не запускается?'] },
 ]
 
 function getFollowupSuggestions(text) {

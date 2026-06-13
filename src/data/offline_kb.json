@@ -426,5 +426,82 @@
       "игры"
     ],
     "answer": "Установка игр на Switch CFW: NSP/XCI/NSZ файлы устанавливаются через DBI, Tinfoil или Awoo Installer. DBI поддерживает MTP (перетаскивание с PC), USB, FTP. Нужны актуальные sigpatches. Форматы: NSP — eShop игры, XCI — картриджи, NSZ — сжатый NSP."
+  },
+  {
+    "keywords": [
+      "обновить switch",
+      "обновить firmware",
+      "прошивка switch",
+      "horizon os",
+      "system update",
+      "версия прошивки"
+    ],
+    "answer": "Обновлять Switch CFW надо осторожно: сначала проверьте совместимость Atmosphere с новой версией HorizonOS на AtmosphereNX.ru или GitHub. Обновляйте в таком порядке: 1) Hekate, 2) Atmosphere + sigpatches, 3) системную прошивку (в emuNAND). Никогда не обновляйте sysNAND с CFW без проверки совместимости."
+  },
+  {
+    "keywords": [
+      "как взломать",
+      "взлом switch",
+      "cfw setup",
+      "установить cfw",
+      "первый раз",
+      "начать",
+      "гайд по взлому"
+    ],
+    "answer": "Пошаговый взлом Nintendo Switch: 1) Определите ревизию консоли (V1 Erista = jig+RCM, Mariko/Lite = только modchip). 2) Создайте NAND backup через Hekate. 3) Создайте emuNAND. 4) Установите Atmosphere + sigpatches. 5) Настройте 90DNS в emuNAND. Подробные гайды: @Ryazhenkacfw в Telegram."
+  },
+  {
+    "keywords": [
+      "не запускается",
+      "ошибка",
+      "crash",
+      "вылет",
+      "черный экран",
+      "не работает"
+    ],
+    "answer": "Типичные проблемы Switch CFW: 1) Черный экран — проверьте sigpatches, обновите Atmosphere. 2) Игры не запускаются — устаревшие sigpatches, обновите через AIO. 3) Tesla не открывается — проверьте nx-ovlloader в /atmosphere/contents/. 4) emuNAND не создается — форматируйте SD через Hekate Tools. 5) Overlay не работает — нужен Ryazhahand + libryazhahand."
+  },
+  {
+    "keywords": [
+      "jaiku",
+      "ryujinx",
+      "yuzu",
+      "эмулятор switch",
+      "emulator pc",
+      "играть на пк"
+    ],
+    "answer": "Эмуляторы Nintendo Switch для ПК: Ryujinx (стабильный, хорошая совместимость), Yuzu (разработка остановлена после судебного иска, используйте форки). Для запуска нужны prod.keys и title.keys (дамп с вашей консоли через Lockpick_RCM). Эмуляция Switch требует мощного ПК: 8+ ГБ RAM, современный CPU/GPU."
+  },
+  {
+    "keywords": [
+      "hbmenu",
+      "homebrew menu",
+      "альбом",
+      "album",
+      "homebrew launcher",
+      "запуск homebrew"
+    ],
+    "answer": "Homebrew Menu (hbmenu) на Switch CFW запускается через: Album → нажмите R при открытии (для полного доступа к системным ресурсам). Или запустите игру с зажатым R для замены на hbmenu. .nro файлы размещайте в /switch/. hbmenu показывает все .nro из /switch/ и позволяет запускать homebrew приложения."
+  },
+  {
+    "keywords": [
+      "jig",
+      "rjg",
+      "клипса",
+      "jig clip",
+      "контакты",
+      "pin 10"
+    ],
+    "answer": "RCM jig — приспособление для замыкания контактов в правом рельсе Joy-Con для перевода Switch V1 в режим RCM. Можно купить готовый (~$2) или сделать самостоятельно (скрепка в позицию pin 10). Для Mariko/Lite jig не работает — нужен modchip (Picofly)."
+  },
+  {
+    "keywords": [
+      "cheats",
+      "читы",
+      "коды читов",
+      "cheat engine",
+      "cheat code"
+    ],
+    "answer": "Читкоды для Nintendo Switch: 1) Через EdiZon — управление через Tesla overlay, файлы CHEATS/*.txt. 2) Через DBI — встроенный чит-менеджер. 3) Файлы читов размещайте в /atmosphere/contents/<TitleID>/cheats/. Источники читов: GBAtemp, GitHub-репозитории с читами. Включение: в Atmosphere откройте приложение, нажмите L+DDOWN+RS (Tesla), найдите Cheats."
   }
 ]
