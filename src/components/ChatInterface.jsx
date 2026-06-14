@@ -146,14 +146,28 @@ const MODEL_OPTIONS = [
   { id: 'gpt-4o',                   label: 'GPT-4o',              group: 'OpenAI' },
   { id: 'o4-mini',                  label: 'o4-mini (reasoning)', group: 'OpenAI' },
   { id: 'deepseek-v3',              label: 'DeepSeek V3',         group: 'DeepSeek' },
-  { id: 'deepseek-r1',              label: 'DeepSeek R1',         group: 'DeepSeek' },
+  { id: 'deepseek-r1',              label: 'DeepSeek R1 (reasoning)', group: 'DeepSeek' },
   { id: 'gemini-2.0-flash',         label: 'Gemini 2.0 Flash',    group: 'Google' },
   { id: 'gemini-2.5-pro',           label: 'Gemini 2.5 Pro',      group: 'Google' },
   { id: 'claude-haiku-4-5-20251001',label: 'Claude Haiku 4.5',    group: 'Anthropic' },
   { id: 'claude-sonnet-4-6',        label: 'Claude Sonnet 4.6',   group: 'Anthropic' },
   { id: 'claude-opus-4-8',          label: 'Claude Opus 4.8',     group: 'Anthropic' },
   { id: 'claude-fable-5',           label: 'Claude Fable 5',      group: 'Anthropic' },
+  { id: 'grok-3',                   label: 'Grok 3',              group: 'xAI' },
+  { id: 'grok-3-mini',              label: 'Grok 3 Mini',         group: 'xAI' },
+  { id: 'llama-3.3-70b-instruct',   label: 'Llama 3.3 70B',       group: 'Meta' },
+  { id: 'mistral-large-latest',     label: 'Mistral Large',       group: 'Mistral' },
 ]
+
+const MODEL_KEY = 'ryazha_selected_model'
+
+function loadSavedModel() {
+  try {
+    const saved = localStorage.getItem(MODEL_KEY)
+    if (saved && MODEL_OPTIONS.some((m) => m.id === saved)) return saved
+  } catch {}
+  return MODEL_OPTIONS[0].id
+}
 
 function ChatInterface() {
   const [messages, setMessages] = useState(loadMessages)
@@ -163,7 +177,7 @@ function ChatInterface() {
   const [showQuickQ, setShowQuickQ] = useState(true)
   const [reactions, setReactions] = useState(loadReactions)
   const [followups, setFollowups] = useState([])
-  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0].id)
+  const [selectedModel, setSelectedModel] = useState(loadSavedModel)
 
   const inputRef = useRef(null)
   const messagesRef = useRef(messages)
@@ -181,6 +195,12 @@ function ChatInterface() {
       localStorage.setItem(REACTIONS_KEY, JSON.stringify(reactions))
     } catch {}
   }, [reactions])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(MODEL_KEY, selectedModel)
+    } catch {}
+  }, [selectedModel])
 
   const handleReact = useCallback((msgId, type) => {
     setReactions((prev) => {
@@ -220,6 +240,30 @@ function ChatInterface() {
     const a = document.createElement('a')
     a.href = url
     a.download = `ryazha-ai-chat-${date}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 100)
+  }
+
+  const exportChatMarkdown = () => {
+    const date = new Date().toISOString().slice(0, 10)
+    const lines = [
+      `# RYAZHA AI — Экспорт чата`,
+      `**Дата:** ${date} · **Модель:** ${selectedModel}`,
+      '',
+    ]
+    messages.forEach((m) => {
+      const author = m.role === 'user' ? '**Вы**' : '**RYAZHA AI**'
+      lines.push(`${author}:`)
+      lines.push(m.content)
+      lines.push('')
+    })
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ryazha-ai-chat-${date}.md`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -354,10 +398,20 @@ function ChatInterface() {
               <button
                 onClick={exportChat}
                 className="flex items-center gap-1 text-xs text-gray-500 hover:text-green-400 transition-colors px-2 py-1 rounded-lg hover:bg-green-500/10"
-                title="Экспортировать чат"
-                aria-label="Экспортировать чат"
+                title="Экспортировать чат (JSON)"
+                aria-label="Экспортировать чат в JSON"
               >
                 <Download size={13} />
+                <span>JSON</span>
+              </button>
+              <button
+                onClick={exportChatMarkdown}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-purple-400 transition-colors px-2 py-1 rounded-lg hover:bg-purple-500/10"
+                title="Экспортировать чат (Markdown)"
+                aria-label="Экспортировать чат в Markdown"
+              >
+                <Download size={13} />
+                <span>MD</span>
               </button>
               <button
                 onClick={clearHistory}
