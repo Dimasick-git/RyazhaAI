@@ -1,17 +1,49 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { checkAPIStatus } from '../../services/api'
 
 const POLL_INTERVAL = 60_000
 
 function ProviderStatus() {
   const [status, setStatus] = useState(null)
+  const intervalRef = useRef(null)
+  const cancelledRef = useRef(false)
 
   useEffect(() => {
-    let cancelled = false
-    const check = () => checkAPIStatus().then((s) => { if (!cancelled) setStatus(s) })
-    check()
-    const id = setInterval(check, POLL_INTERVAL)
-    return () => { cancelled = true; clearInterval(id) }
+    cancelledRef.current = false
+
+    const check = () =>
+      checkAPIStatus().then((s) => {
+        if (!cancelledRef.current) setStatus(s)
+      })
+
+    const startPolling = () => {
+      check()
+      intervalRef.current = setInterval(check, POLL_INTERVAL)
+    }
+
+    const stopPolling = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopPolling()
+      } else {
+        startPolling()
+      }
+    }
+
+    startPolling()
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      cancelledRef.current = true
+      stopPolling()
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
   }, [])
 
   if (!status) return null
