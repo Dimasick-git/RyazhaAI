@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bot, Trash2, Download, RefreshCw, Sparkles, Share2, Check, Square } from 'lucide-react'
+import { Bot, Trash2, Download, FileText, RefreshCw, Sparkles, Share2, Check, Square } from 'lucide-react'
 import { sendMessage as sendAIMessage } from '../services/aiClient'
 import MessageList from './chat/MessageList'
 import MessageInput from './chat/MessageInput'
@@ -90,6 +90,7 @@ const MAX_MSG_LENGTH = 2000
 const MAX_HISTORY_FOR_AI = 20
 const STORAGE_KEY = 'ryazha_chat_history'
 const REACTIONS_KEY = 'ryazha-ai-reactions'
+const SELECTED_MODEL_KEY = 'ryazha_selected_model'
 
 function loadMessages() {
   try {
@@ -153,6 +154,10 @@ const MODEL_OPTIONS = [
   { id: 'claude-sonnet-4-6',        label: 'Claude Sonnet 4.6',   group: 'Anthropic' },
   { id: 'claude-opus-4-8',          label: 'Claude Opus 4.8',     group: 'Anthropic' },
   { id: 'claude-fable-5',           label: 'Claude Fable 5',      group: 'Anthropic' },
+  { id: 'grok-3',                   label: 'Grok 3',              group: 'xAI' },
+  { id: 'grok-3-mini',              label: 'Grok 3 Mini',         group: 'xAI' },
+  { id: 'meta-llama/Llama-3.3-70B-Instruct', label: 'Llama 3.3 70B', group: 'Meta' },
+  { id: 'mistral-large-latest',     label: 'Mistral Large',       group: 'Mistral' },
 ]
 
 function ChatInterface() {
@@ -163,7 +168,13 @@ function ChatInterface() {
   const [showQuickQ, setShowQuickQ] = useState(true)
   const [reactions, setReactions] = useState(loadReactions)
   const [followups, setFollowups] = useState([])
-  const [selectedModel, setSelectedModel] = useState(MODEL_OPTIONS[0].id)
+  const [selectedModel, setSelectedModel] = useState(() => {
+    try {
+      const saved = localStorage.getItem(SELECTED_MODEL_KEY)
+      if (saved && MODEL_OPTIONS.some((m) => m.id === saved)) return saved
+    } catch {}
+    return MODEL_OPTIONS[0].id
+  })
 
   const inputRef = useRef(null)
   const messagesRef = useRef(messages)
@@ -181,6 +192,12 @@ function ChatInterface() {
       localStorage.setItem(REACTIONS_KEY, JSON.stringify(reactions))
     } catch {}
   }, [reactions])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SELECTED_MODEL_KEY, selectedModel)
+    } catch {}
+  }, [selectedModel])
 
   const handleReact = useCallback((msgId, type) => {
     setReactions((prev) => {
@@ -220,6 +237,24 @@ function ChatInterface() {
     const a = document.createElement('a')
     a.href = url
     a.download = `ryazha-ai-chat-${date}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    setTimeout(() => URL.revokeObjectURL(url), 100)
+  }
+  const exportChatMD = () => {
+    const date = new Date().toISOString().slice(0, 10)
+    const lines = [`# RYAZHA AI Chat Export`, `**Date:** ${date}  `, `**Model:** ${selectedModel}`, ``]
+    messages.forEach((m) => {
+      const role = m.role === 'user' ? '**You**' : '**RYAZHA AI**'
+      const ts = m.ts ? `_${new Date(m.ts).toLocaleTimeString()}_  ` : ''
+      lines.push(`### ${role}`, ts, m.content, ``)
+    })
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ryazha-ai-chat-${date}.md`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -358,6 +393,15 @@ function ChatInterface() {
                 aria-label="Экспортировать чат"
               >
                 <Download size={13} />
+              </button>
+              <button
+                onClick={exportChatMD}
+                className="flex items-center gap-1 text-xs text-gray-500 hover:text-blue-400 transition-colors px-2 py-1 rounded-lg hover:bg-blue-500/10"
+                title="Экспортировать чат как Markdown"
+                aria-label="Экспортировать чат как Markdown"
+              >
+                <FileText size={13} />
+                <span>MD</span>
               </button>
               <button
                 onClick={clearHistory}
