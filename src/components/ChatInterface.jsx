@@ -498,6 +498,7 @@ function ChatInterface() {
       </div>
 
       <MessageInput
+        ref={inputRef}
         input={input}
         setInput={setInput}
         isLoading={isLoading}

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, forwardRef } from 'react'
 import { Send, Loader2, Mic, MicOff } from 'lucide-react'
 
 function VoiceButton({ onResult, disabled }) {
@@ -57,8 +57,15 @@ function VoiceButton({ onResult, disabled }) {
   )
 }
 
-function MessageInput({ input, setInput, isLoading, onSubmit }) {
+const MessageInput = forwardRef(function MessageInput({ input, setInput, isLoading, onSubmit }, ref) {
   const inputRef = useRef(null)
+
+  // Merge internal ref with forwarded ref so the parent can call .focus()
+  useEffect(() => {
+    if (!ref) return
+    if (typeof ref === 'function') ref(inputRef.current)
+    else ref.current = inputRef.current
+  })
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && (e.ctrlKey || !e.shiftKey)) {
@@ -98,7 +105,7 @@ function MessageInput({ input, setInput, isLoading, onSubmit }) {
               input.length > 1800 ? 'text-red-400 font-semibold' : 'text-yellow-500'
             }`}>{input.length}/2000</span>
           )}
-          <p className="mt-1 text-xs text-gray-600 select-none">Ctrl+Enter для отправки</p>
+          <p className="mt-1 text-xs text-gray-600 select-none">Enter — отправить · Shift+Enter — новая строка</p>
         </div>
         <VoiceButton onResult={handleVoiceResult} disabled={isLoading} />
         <button
@@ -116,6 +123,6 @@ function MessageInput({ input, setInput, isLoading, onSubmit }) {
       </div>
     </form>
   )
-}
+})
 
 export default MessageInput
