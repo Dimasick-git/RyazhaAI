@@ -143,6 +143,10 @@ function ShareButton({ messages }) {
 }
 
 const MODEL_OPTIONS = [
+  { id: 'claude-haiku-4-5-20251001',label: 'Claude Haiku 4.5',    group: 'Anthropic' },
+  { id: 'claude-sonnet-4-6',        label: 'Claude Sonnet 4.6',   group: 'Anthropic' },
+  { id: 'claude-opus-4-8',          label: 'Claude Opus 4.8',     group: 'Anthropic' },
+  { id: 'claude-fable-5',           label: 'Claude Fable 5',      group: 'Anthropic' },
   { id: 'gpt-4o-mini',              label: 'GPT-4o Mini',         group: 'OpenAI' },
   { id: 'gpt-4o',                   label: 'GPT-4o',              group: 'OpenAI' },
   { id: 'o4-mini',                  label: 'o4-mini (reasoning)', group: 'OpenAI' },
@@ -150,10 +154,6 @@ const MODEL_OPTIONS = [
   { id: 'deepseek-r1',              label: 'DeepSeek R1',         group: 'DeepSeek' },
   { id: 'gemini-2.0-flash',         label: 'Gemini 2.0 Flash',    group: 'Google' },
   { id: 'gemini-2.5-pro',           label: 'Gemini 2.5 Pro',      group: 'Google' },
-  { id: 'claude-haiku-4-5-20251001',label: 'Claude Haiku 4.5',    group: 'Anthropic' },
-  { id: 'claude-sonnet-4-6',        label: 'Claude Sonnet 4.6',   group: 'Anthropic' },
-  { id: 'claude-opus-4-8',          label: 'Claude Opus 4.8',     group: 'Anthropic' },
-  { id: 'claude-fable-5',           label: 'Claude Fable 5',      group: 'Anthropic' },
   { id: 'grok-3',                   label: 'Grok 3',              group: 'xAI' },
   { id: 'grok-3-mini',              label: 'Grok 3 Mini',         group: 'xAI' },
   { id: 'meta-llama/Llama-3.3-70B-Instruct', label: 'Llama 3.3 70B', group: 'Meta' },
