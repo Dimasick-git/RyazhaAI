@@ -11,10 +11,6 @@ function DataUpload() {
   });
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    loadKnowledge();
-  }, []);
-
   const loadKnowledge = async () => {
     try {
       const response = await axios.get('/api/knowledge');
@@ -23,6 +19,10 @@ function DataUpload() {
       console.error('Error loading knowledge:', error);
     }
   };
+
+  useEffect(() => {
+    loadKnowledge();
+  }, []);
 
   const addEntry = async (e) => {
     e.preventDefault();
