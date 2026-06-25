@@ -34,13 +34,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Run ESLint (if available)
-        run: |
-          if [ -f .eslintrc.js ] || [ -f .eslintrc.json ]; then
-            npm run lint || echo "No lint script found"
-          else
-            echo "No ESLint config found"
-          fi
+      - name: Run ESLint
+        run: npm run lint
           
       - name: Build application
         run: npm run build
