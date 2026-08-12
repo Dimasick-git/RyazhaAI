@@ -151,8 +151,13 @@ app.post('/api/chat/stream', async (req, res) => {
  res.setHeader('X-Accel-Buffering', 'no');
  res.flushHeaders();
 
- const abortController = new AbortController();
- req.on('close', () => abortController.abort());
+  const abortController = new AbortController();
+  // `req.close` may fire after request-body parsing while the SSE response is still valid.
+  // Abort only when the client actually aborts the request or closes an unfinished response.
+  req.on('aborted', () => abortController.abort());
+  res.on('close', () => {
+   if (!res.writableEnded) abortController.abort();
+  });
 
  const send = (data) => {
    if (!res.writableEnded) res.write(`data: ${JSON.stringify(data)}\n\n`);

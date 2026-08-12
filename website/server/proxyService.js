@@ -4,7 +4,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const OPENROUTER_BASE_URL = (process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
+const OPENROUTER_URL = `${OPENROUTER_BASE_URL}/chat/completions`;
 const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || 'openrouter/free';
 const FALLBACK_MODEL = 'openrouter/free';
 const ALLOWED_MODELS = new Set([
